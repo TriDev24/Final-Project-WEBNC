@@ -5,8 +5,10 @@ const router = Router();
 
 router.get('/', BankAccountController.getAll);
 
+router.get('/:id', BankAccountController.getById);
+
 router.post('/', BankAccountController.create);
 
-router.patch('/:id', () => {});
+router.put('/:id', BankAccountController.update);
 
 export default router;
