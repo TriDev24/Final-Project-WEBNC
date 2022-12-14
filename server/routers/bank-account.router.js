@@ -1,14 +1,17 @@
 import { Router } from 'express';
-import { BankAccountController } from '../controllers/bank-account.controller.js';
+import auth from '../middlewares/auth.middleware.js';
+import controller from '../controllers/bank-account.controller.js';
 
 const router = Router();
 
-router.get('/', BankAccountController.getAll);
+router.use(auth)
 
-router.get('/:id', BankAccountController.getById);
+router.get('/', controller.getAll);
 
-router.post('/', BankAccountController.create);
+router.get('/:id', controller.getById);
 
-router.put('/:id', BankAccountController.update);
+router.post('/', controller.create);
+
+router.put('/:id', controller.update);
 
 export default router;

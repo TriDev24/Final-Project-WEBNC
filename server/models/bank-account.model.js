@@ -1,11 +1,12 @@
-import { generateModel } from './generate-model.js';
+import generate from './generic.model.js';
+import mongoose from 'mongoose';
 
-const bankAccountSchema = {
+const schema = {
     accountNumber: String,
     overBalance: String,
     isPayment: Boolean,
-    identityId: String,
-    bankTypeId: String,
+    identityId: {type: mongoose.Types.ObjectId, ref: "Identity"},
+    bankTypeId: {type: mongoose.Types.ObjectId, ref: "Bank-Type"},
 };
 
-export const BankAccount = generateModel('bank-accounts', bankAccountSchema);
+export default generate('Bank-Accounts', schema);
