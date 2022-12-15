@@ -5,6 +5,8 @@ const router = Router();
 
 router.get('/', BankAccountController.getAll);
 
+router.get('/payment-account', BankAccountController.getPaymentBankAccount);
+
 router.get('/:id', BankAccountController.getById);
 
 router.post('/', BankAccountController.create);

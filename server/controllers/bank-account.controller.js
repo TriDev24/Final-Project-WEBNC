@@ -1,8 +1,13 @@
 import { BankAccount } from '../models/bank-account.model.js';
+import { TokenService } from '../services/token.service.js';
 
 export class BankAccountController {
     static async getAll(req, res) {
-        const records = await BankAccount.find();
+        const { userId } = TokenService.getPayloadFromCurrentToken(req);
+
+        const records = await BankAccount.find({
+            identityId: userId,
+        });
 
         res.status(200).json(records);
     }
@@ -10,10 +15,7 @@ export class BankAccountController {
     static async getById(req, res) {
         const { id } = req.params;
 
-        console.log('id', id);
         const record = await BankAccount.findById(id);
-
-        console.log('record', record);
 
         res.status(200).json(record);
     }
@@ -32,12 +34,27 @@ export class BankAccountController {
         res.status(200).json(insertedData);
     }
 
+    static async getPaymentBankAccount(req, res) {
+        const { userId } = TokenService.getPayloadFromCurrentToken(req);
+
+        const records = await BankAccount.find({
+            identityId: userId,
+            isPayment: true,
+        });
+
+        res.status(200).json(records);
+    }
+
     static async update(req, res) {
         const { id } = req.params;
         const { bankTypeId } = req.body;
 
-        console.log('id: ', id);
-        console.log('bankTypeId: ', bankTypeId);
+        const foundedBankAccount = await BankAccount.findById(id);
+        if (!foundedBankAccount) {
+            res.status(404).json({
+                message: 'Cannot find Bank account with id',
+            });
+        }
 
         const effected = await BankAccount.updateOne(
             {
@@ -47,6 +64,23 @@ export class BankAccountController {
                 bankTypeId,
             }
         );
+
+        res.status(200).json(effected);
+    }
+
+    static async delete(req, res) {
+        const { id } = req.params;
+
+        const foundedBankAccount = await BankAccount.findById(id);
+        if (!foundedBankAccount) {
+            res.status(404).json({
+                message: 'Cannot find Bank account with id',
+            });
+        }
+
+        const effected = await BankAccount.deleteOne({
+            id,
+        });
 
         res.status(200).json(effected);
     }
