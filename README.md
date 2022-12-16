@@ -25,11 +25,11 @@
 -   Start Server
 
 ```
-    npm run dev
+    npm start
 ```
 
 ## API URL:
 
 ```
-    http://localhost:8080/v1.0.0/<resource>
+    http://localhost:8080/api/<resource>
 ```
