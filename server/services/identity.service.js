@@ -4,6 +4,7 @@ import Identity from '../models/identity.model.js';
 import BankAccount from '../models/bank-account.model.js';
 import Permission from '../models/permission.model.js';
 import BankType from '../models/bank-type.model.js';
+import fetch from 'node-fetch';
 
 export default {
     async login({ email, password, g_token }) {

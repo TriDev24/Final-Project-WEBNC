@@ -8,8 +8,8 @@ const schema = {
     lastName: String,
     phoneNumber: String,
     refreshToken: String,
-    permissionId: {type: mongoose.Types.ObjectId, ref: "Permission"},
-    aliasName: String
+    permissionId: { type: mongoose.Types.ObjectId, ref: 'Permissions' },
+    aliasName: String,
 };
 
-export default generate('Identity', schema);
+export default generate('Identities', schema);

@@ -1,7 +1,7 @@
 import generate from './generic.model.js';
 
 const schema = {
-    name: String
+    name: String,
 };
 
-export default generate('Permission', schema);
+export default generate('Permissions', schema);

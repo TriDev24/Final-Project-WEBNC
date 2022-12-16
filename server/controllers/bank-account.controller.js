@@ -1,12 +1,10 @@
 import BankAccount from '../models/bank-account.model.js';
-import TokenService from '../services/token.service.js';
 
 export default {
     async getAll(req, res) {
-        const { userId } = TokenService.getPayloadFromCurrentToken(req);
         const { isPayment } = req.query;
 
-        const where = { identityId: userId };
+        const where = { identityId: req.userId };
 
         if (isPayment !== null && isPayment !== undefined) {
             where['isPayment'] = isPayment;
@@ -19,42 +17,74 @@ export default {
 
     async getById(req, res) {
         const { id } = req.params;
-
-        console.log('id', id);
         const record = await BankAccount.findById(id);
-
-        console.log('record', record);
 
         res.status(200).json(record);
     },
 
     async create(req, res) {
-        const mockData = {
-            accountNumber: '12312412',
+        const { identityId, bankTypeId } = req.body;
+
+        const defaultBankAccount = {
+            accountNumber: Math.floor(Math.random() * 1000000),
             overBalance: 0,
             isPayment: false,
-            identityId: '12314',
-            bankTypeId: '1',
+            identityId: identityId,
+            bankTypeId: bankTypeId,
         };
 
-        const insertedData = await BankAccount.create(mockData);
+        const insertedData = await BankAccount.create(defaultBankAccount);
 
         res.status(200).json(insertedData);
     },
 
     async update(req, res) {
         const { id } = req.params;
-        const { bankTypeId } = req.body;
+        const { isPayment, deposit } = req.body;
 
-        const effected = await BankAccount.updateOne(
-            {
-                id,
-            },
-            {
-                bankTypeId,
+        if (isPayment) {
+            const records = await BankAccount.find({ identityId: req.userId });
+
+            const processedRecords = records.map((r) => {
+                if (r._id === id) {
+                    r.isPayment = true;
+                    return r;
+                }
+
+                r.isPayment = false;
+                return r;
+            });
+
+            console.log('processed record');
+
+            const effected = await BankAccount.updateMany(processedRecords);
+
+            return res.status(200).json(effected);
+        }
+
+        if (deposit) {
+            const record = await BankAccount.findById(id);
+
+            if (record.overBalance > deposit) {
+                return res
+                    .status(401)
+                    .json('Cannot Transfer because not enough money');
             }
-        );
 
-        res.status(200).json(effected);
+            record.overBalance = record.overBalance - deposit;
+
+            const effected = await BankAccount.updateOne(
+                {
+                    _id: id,
+                },
+                {
+                    overBalance: record.overBalance,
+                }
+            );
+
+            return res.status(200).json(effected);
+        }
+
+        return;
     },
 };
