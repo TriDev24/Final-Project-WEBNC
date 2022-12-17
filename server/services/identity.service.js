@@ -4,7 +4,7 @@ import Identity from '../models/identity.model.js';
 import BankAccount from '../models/bank-account.model.js';
 import Permission from '../models/permission.model.js';
 import BankType from '../models/bank-type.model.js';
-import fetch from 'node-fetch';
+import fetch from 'node-fetch'
 
 export default {
     async login({ email, password, g_token }) {
@@ -80,7 +80,7 @@ export default {
                 };
                 const identityInserted = await Identity.create(newIdentity);
                 const bankType = await BankType.findOne({ name: 'My Bank' });
-                const bankAccount = {
+                const newBankAccount = {
                     accountNumber: Math.floor(Math.random() * 1000000),
                     overBalance: 0,
                     isPayment: true,
@@ -88,7 +88,7 @@ export default {
                     bankTypeId: bankType._id,
                 };
                 const bankAccountInserted = await BankAccount.create(
-                    bankAccount
+                    newBankAccount
                 );
                 return bankAccountInserted;
             } else {
@@ -128,5 +128,5 @@ export default {
                 return -1;
             }
         }
-    },
+    }
 };

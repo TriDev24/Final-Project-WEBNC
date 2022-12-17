@@ -6,8 +6,10 @@ const router = Router();
 
 router.post('/login', controller.login);
 
-router.post('/', controller.create)
-
 router.post('/refresh_token', controller.generateRefreshToken);
+
+router.use(auth)
+
+router.post('/', controller.create)
 
 export default router;

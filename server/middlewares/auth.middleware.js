@@ -5,12 +5,7 @@ export default (req, res, next) => {
 
     if (accessToken) {
         try {
-            console.log('access token: ', accessToken);
-
             const decode = jwt.verify(accessToken, process.env.JWT_SECRET_KEY);
-
-            console.log('decode: ', decode);
-
             req.userId = decode.data;
             next();
         } catch (err) {
