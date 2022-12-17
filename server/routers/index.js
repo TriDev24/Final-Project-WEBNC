@@ -4,6 +4,7 @@ import IdentityRouter from "./identity.router.js";
 import ReceiverRouter from "./receiver.router.js";
 import DebitRouter from "./debit.router.js";
 import DebtorRouter from "./debtor.router.js"
+import UserRouter from "./users.router.js"
 import { Router } from "express";
 
 const router = Router();
@@ -14,5 +15,6 @@ router.use("/bank-types", BankTypeRouter);
 router.use("/identity", IdentityRouter);
 router.use("/debit", DebitRouter);
 router.use("/debtor", DebtorRouter);
+router.use("/users", UserRouter);
 
 export default router;
