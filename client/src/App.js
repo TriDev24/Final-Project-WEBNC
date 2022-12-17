@@ -6,8 +6,9 @@ export const App = () => {
     return (
         <>
             <Routes>
-                {/* <Route path="/" element={<Navigate to="/login" replace />}>
-        </Route> */}
+                <Route
+                    path='/'
+                    element={<Navigate to='/login' replace />}></Route>
                 <Route path='/login' element={<LoginPage />}></Route>
                 <Route path='/dashboard' element={<DashBoardPage />}></Route>
             </Routes>

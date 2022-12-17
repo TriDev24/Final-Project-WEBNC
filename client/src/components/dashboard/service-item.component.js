@@ -7,6 +7,9 @@ const Container = styled.div`
     width: 60px;
     margin-right: 30px;
     cursor: pointer;
+    &:hover {
+        opacity: 0.6;
+    }
 `;
 
 const Icon = styled.div`

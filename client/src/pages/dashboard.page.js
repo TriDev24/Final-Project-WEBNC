@@ -7,6 +7,7 @@ import { ContactsOutlined, SwapOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import { getProfileFromLocalStorage } from '../utils/local-storage.util.js';
 import { BankAccountList } from '../components/dashboard/bank-account-list.component.js';
+import { MoneyTransferForm } from '../components/money-transfer/money-transfer-form.component.js';
 
 const GeneralInformationSection = styled.div`
     display: flex;
@@ -145,10 +146,7 @@ export const DashBoardPage = () => {
                 title='Money Transfer'
                 open={moneyTransferModalVisibility}
                 onCancel={toggleMoneyTransferModalVisible}>
-                <Tabs defaultActiveKey='1' type='card' size='middle'>
-                    <Tabs.TabPane tab='Internal' key='1'></Tabs.TabPane>
-                    <Tabs.TabPane tab='External' key='2'></Tabs.TabPane>
-                </Tabs>
+                <MoneyTransferForm />
             </Modal>
 
             <GeneralInformationSection>

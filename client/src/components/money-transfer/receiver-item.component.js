@@ -1,57 +1,41 @@
 import { styled } from '@xstyled/styled-components';
-import { Button } from 'antd';
+import { Avatar } from 'antd';
+import { UserOutlined } from '@ant-design/icons';
 
 const Container = styled.div`
     display: flex;
-    justify-content: space-between;
     align-items: center;
     height: 60px;
     width: 100%;
-    border: 1px solid black;
     padding: 0 10px;
     border-radius: 4px;
+    &:hover {
+        background: lightgray;
+        cursor: pointer;
+        transition: background 0.25s;
+    }
 `;
 
-const AccountInformation = styled.div``;
+const UserInformation = styled.div`
+    padding: 0 10px;
+`;
 
 const StyledParagraph = styled.p`
     margin: 0;
 `;
 
-export const BankAccountItem = ({ bankAccount }) => {
-    const isNotPaymentAccount = bankAccount.isPayment === false;
+const UserName = styled.strong`
+    font-size: 16px;
+`;
 
-    const onChangeToPaymentAccountClick = async () => {
-        const url = `${process.env.REACT_APP_BANK_ACCOUNT_API_URL_PATH}/${bankAccount._id}`;
-        const data = {
-            isPayment: true,
-        };
-
-        await fetch(url, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: localStorage.getItem('accessToken'),
-            },
-            body: data,
-        });
-    };
-
+export const ReceiverItem = ({ receiver }) => {
     return (
         <Container>
-            <AccountInformation>
-                <StyledParagraph>
-                    Account Number: {bankAccount.accountNumber}
-                </StyledParagraph>
-                <StyledParagraph>
-                    Over Balance: {bankAccount.overBalance}
-                </StyledParagraph>
-            </AccountInformation>
-            {isNotPaymentAccount && (
-                <Button onChange={onChangeToPaymentAccountClick}>
-                    Set Is Payment
-                </Button>
-            )}
+            <Avatar size='large' icon={<UserOutlined />} />
+            <UserInformation>
+                <UserName>{receiver.aliasName}</UserName>
+                <StyledParagraph>{receiver.bankName}</StyledParagraph>
+            </UserInformation>
         </Container>
     );
 };
