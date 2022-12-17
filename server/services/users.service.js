@@ -1,46 +1,23 @@
 import Identity from '../models/identity.model.js';
+import Permission from '../models/permission.model.js';
 
 export default {
 
   async getAllUser() {
     let users = [];
-    users = await Identity.find();
+    const permission = await Permission.findOne({ name: 'user' });
+    users = await Identity.find({permissionId: permission._id});
     return users;
   },
 
-//   async getAllUser(data) {
-//     const { accountNumber, debtAccountNumber, amountToPay, content } = data;
-//     if (accountNumber === debtAccountNumber) {
-//       return -1;
-//     }
-//     const account = await BankAccount.findOne({ accountNumber });
-//     const debtAccount = await BankAccount.findOne({
-//       accountNumber: debtAccountNumber,
-//     });
-//     const status = await Status.findOne({ name: "unpaid" });
-//     const newDebit = {
-//       accountId: account._id,
-//       debtAccountId: debtAccount._id,
-//       amountToPay,
-//       content,
-//       statusId: status._id,
-//     };
-//     const debitInserted = await Debit.create(newDebit);
-//     const debtor = await Debtor.findOne({
-//       accountId: account._id,
-//       debtAccountId: debtAccount._id,
-//     });
-//     if (!debtor) {
-//       const debtorInserted = await Debtor.create({
-//         accountId: account._id,
-//         debtAccountId: debtAccount._id,
-//       });
-//     }
-//     return 1;
-//   },
+  async getUserDetail(userId) {
+    if (userId.match(/^[0-9a-fA-F]{24}$/)) {
+      const user = await Identity.findById(userId);
+      return user;
+    }
+    console.log("-1");
+    return -1;
+  },
 
-//   async deleteDebit(id) {
-//     const result = await Debit.findByIdAndDelete(id);
-//     return result;
-//   },
+
 };
