@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import { Button, Form, Input, Avatar, message } from 'antd';
 import ReCAPTCHA from 'react-google-recaptcha';
-import CreateIdentityModal from './create-identity.component';
 
 const LoginForm = () => {
     const navigate = useNavigate();
@@ -118,8 +117,6 @@ const LoginForm = () => {
                         loading={loading}>
                         Log in
                     </Button>
-                    <p>Not have an account yet</p>
-                    <CreateIdentityModal />
                 </Form.Item>
             </Form>
         </>
