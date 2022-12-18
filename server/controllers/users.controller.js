@@ -7,36 +7,12 @@ export default {
     return res.json(users).status(200);
   },
 
-//   async getUserDetail(req, res) {
-//     const accountNumber = req.query["accountNumber"];
-//     const side = req.query["side"];
-//     if (accountNumber && side) {
-//       const debits = await service.getAllDebit(side, accountNumber);
-//       return res.json(debits);
-//     }
-//     return res.status(204).end();
-//   },
-
-//   async updateUser(req, res) {
-//     const id = req.params["id"];
-//     if (id) {
-//       const result = await service.deleteDebit(id);
-//       if (result) return res.json(result);
-//       return res.json({
-//         message: "Debit does not exist",
-//       });
-//     }
-//     return res.status(204).end();
-//   },
-//   async changePassword(req, res) {
-//     const id = req.params["id"];
-//     if (id) {
-//       const result = await service.deleteDebit(id);
-//       if (result) return res.json(result);
-//       return res.json({
-//         message: "Debit does not exist",
-//       });
-//     }
-//     return res.status(204).end();
-//   }
+  async getUserDetail(req, res) {
+    const idUser = req.params["id"];
+    const user = await service.getUserDetail(idUser);
+    if (user===-1){
+      return res.json("NOT FOUND").status(404);
+    }
+    return res.json(user).status(200);
+  },
 };

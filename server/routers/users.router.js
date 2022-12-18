@@ -7,7 +7,7 @@ const router = Router();
 // router.use(auth)
 
 router.get('/',controller.getAllUser)
-// router.get('/:id',controller.getUserDetail)
+router.get('/:id',controller.getUserDetail)
 // router.post('/:id',controller.updateUser)
 // router.post('/:id/change-password',controller.changePassword)
 
