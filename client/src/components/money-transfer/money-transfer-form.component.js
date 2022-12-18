@@ -12,8 +12,7 @@ const Container = styled.div`
     margin: 20px 10px;
 `;
 
-export const MoneyTransferForm = () => {
-    const [form] = Form.useForm();
+export const MoneyTransferForm = ({ form, onConfirmTransfer }) => {
     const [receivers, setReceivers] = useState(null);
     const [bankTypes, setBankTypes] = useState(null);
 
@@ -46,10 +45,6 @@ export const MoneyTransferForm = () => {
         getBankTypes();
     }, []);
 
-    const onConfirmTransfer = () => {
-        console.log(form.getFieldsValue());
-    };
-
     const renderReceiverOptions = () =>
         receivers === null ? (
             <Skeleton />
@@ -68,7 +63,7 @@ export const MoneyTransferForm = () => {
         <Container>
             <Form form={form} layout='vertical'>
                 <Form.Item
-                    name='accountNumber'
+                    name='receiverAccountNumber'
                     label='Account Number'
                     rules={[
                         {
@@ -79,7 +74,7 @@ export const MoneyTransferForm = () => {
                     <Input placeholder='Example: 012345678910' />
                 </Form.Item>
                 <Form.Item
-                    name='bankType'
+                    name='bankTypeId'
                     label='Bank Type'
                     rules={[
                         {

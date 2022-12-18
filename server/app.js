@@ -1,7 +1,6 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
-
 import db from './utils/index.js';
 import routers from './routers/index.js';
 
@@ -21,8 +20,7 @@ app.use(
     })
 );
 
-
-app.use("/api", routers);
+app.use('/api', routers);
 
 app.listen(port, async () => {
     try {

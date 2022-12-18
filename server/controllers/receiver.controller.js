@@ -7,11 +7,16 @@ export default {
     async getAll(req, res) {
         const where = { senderId: req.userId };
 
+        console.log('req.userId', req.userId);
         const records = await Receiver.find(where);
+
+        console.log('records', records);
 
         const responses = [];
         for (const r of records) {
             const bankAccount = await BankAccount.findById(r.receiverId);
+            console.log('bankAccount', bankAccount);
+
             const bankType = await BankType.findById(bankAccount.bankTypeId);
             const identity = await Identity.findById(bankAccount.identityId);
 

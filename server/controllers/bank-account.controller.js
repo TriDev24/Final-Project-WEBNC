@@ -40,7 +40,7 @@ export default {
 
     async update(req, res) {
         const { id } = req.params;
-        const { isPayment, deposit } = req.body;
+        const { isPayment } = req.body;
 
         if (isPayment) {
             const records = await BankAccount.find({ identityId: req.userId });
@@ -58,29 +58,6 @@ export default {
             console.log('processed record');
 
             const effected = await BankAccount.updateMany(processedRecords);
-
-            return res.status(200).json(effected);
-        }
-
-        if (deposit) {
-            const record = await BankAccount.findById(id);
-
-            if (record.overBalance > deposit) {
-                return res
-                    .status(401)
-                    .json('Cannot Transfer because not enough money');
-            }
-
-            record.overBalance = record.overBalance - deposit;
-
-            const effected = await BankAccount.updateOne(
-                {
-                    _id: id,
-                },
-                {
-                    overBalance: record.overBalance,
-                }
-            );
 
             return res.status(200).json(effected);
         }

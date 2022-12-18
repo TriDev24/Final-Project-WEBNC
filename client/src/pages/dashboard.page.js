@@ -1,13 +1,14 @@
 import Title from 'antd/es/typography/Title.js';
 import { AppLayout } from '../components/common/index.js';
 import styled from '@xstyled/styled-components';
-import { Button, Modal, Skeleton, Table, Tabs } from 'antd';
+import { Button, message, Modal, notification, Skeleton, Table } from 'antd';
 import { ServiceList } from '../components/dashboard/index.js';
 import { ContactsOutlined, SwapOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import { getProfileFromLocalStorage } from '../utils/local-storage.util.js';
 import { BankAccountList } from '../components/dashboard/bank-account-list.component.js';
 import { MoneyTransferForm } from '../components/money-transfer/money-transfer-form.component.js';
+import { Form } from 'antd';
 
 const GeneralInformationSection = styled.div`
     display: flex;
@@ -21,6 +22,7 @@ const ServiceSection = styled.div`
 const HistorySection = styled.div``;
 
 export const DashBoardPage = () => {
+    const [moneyTransferForm] = Form.useForm();
     const [paymentAccountInfo, setPaymentAccount] = useState(null);
     const [bankAccounts, setBankAccountList] = useState([]);
     const [changeAccountModalVisibility, setChangeAccountModalVisibility] =
@@ -42,6 +44,10 @@ export const DashBoardPage = () => {
                 .then((response) => response.json())
                 .then((data) => {
                     setPaymentAccount(data[0]);
+                    localStorage.setItem(
+                        'payment-account-number',
+                        data[0].accountNumber
+                    );
                 });
         };
 
@@ -131,13 +137,52 @@ export const DashBoardPage = () => {
             </>
         );
 
+    const handleConfirmTransfer = () => {
+        console.log(
+            "localStorage.getItem('payment-account-number')",
+            localStorage.getItem('payment-account-number')
+        );
+
+        const { receiverAccountNumber, bankTypeId, deposit, description } =
+            moneyTransferForm.getFieldsValue();
+
+        const payload = {
+            senderAccountNumber: localStorage.getItem('payment-account-number'),
+            receiverAccountNumber,
+            bankTypeId,
+            deposit,
+            description: description ?? '',
+            transferTime: Date.now(),
+        };
+
+        console.log('hello', payload);
+
+        fetch(process.env.REACT_APP_BILLING_API_URL_PATH, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: localStorage.getItem('accessToken'),
+            },
+            body: payload,
+        })
+            .then(() => {
+                message.success('Successfully!!!');
+            })
+            .catch((error) => message.error(error));
+    };
+
+    const handleMoneyTransferModalCancel = () => {
+        toggleChangeAccountModalVisible();
+        moneyTransferForm.resetFields();
+    };
+
     return (
         <AppLayout>
             <Modal
                 footer={null}
                 title='Bank Accounts'
                 open={changeAccountModalVisibility}
-                onCancel={toggleChangeAccountModalVisible}>
+                onCancel={handleMoneyTransferModalCancel}>
                 <BankAccountList bankAccounts={bankAccounts} />
             </Modal>
 
@@ -146,7 +191,10 @@ export const DashBoardPage = () => {
                 title='Money Transfer'
                 open={moneyTransferModalVisibility}
                 onCancel={toggleMoneyTransferModalVisible}>
-                <MoneyTransferForm />
+                <MoneyTransferForm
+                    form={moneyTransferForm}
+                    onConfirmTransfer={handleConfirmTransfer}
+                />
             </Modal>
 
             <GeneralInformationSection>
