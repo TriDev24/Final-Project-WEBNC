@@ -11,6 +11,7 @@ export default {
             senderAccountNumber,
             receiverAccountNumber,
             deposit,
+            description,
             bankTypeId,
             transferTime,
         } = req.body;
@@ -33,13 +34,18 @@ export default {
         const senderBankAccount = await BankAccount.findOne({
             accountNumber: senderAccountNumber,
         });
+        if (!senderBankAccount) {
+            return res.status(404).json('Sender Account Number not Found');
+        }
 
         const receiverBankAccount = await BankAccount.findOne({
             accountNumber: receiverAccountNumber,
         });
+        if (!receiverBankAccount) {
+            return res.status(404).json('Receiver Account Number not Found');
+        }
 
         const totalAmount = deposit + transferFee;
-
         const isNotEnoughMoney = senderBankAccount.overBalance < totalAmount;
         if (isNotEnoughMoney) {
             return res.status(403).json('Not enough money to transfer');
@@ -70,6 +76,7 @@ export default {
             senderId: senderBankAccount._id,
             receiverId: receiverBankAccount._id,
             deposit,
+            description,
             transferType: TransferType.MoneyTransfer,
             transferMethod,
             transferFee,

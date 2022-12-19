@@ -1,7 +1,7 @@
 import Title from 'antd/es/typography/Title.js';
 import { AppLayout } from '../components/common/index.js';
 import styled from '@xstyled/styled-components';
-import { Button, message, Modal, notification, Skeleton, Table } from 'antd';
+import { Button, Checkbox, message, Modal, Skeleton, Table } from 'antd';
 import { ServiceList } from '../components/dashboard/index.js';
 import { ContactsOutlined, SwapOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
@@ -22,6 +22,8 @@ const ServiceSection = styled.div`
 const HistorySection = styled.div``;
 
 export const DashBoardPage = () => {
+    const [receivers, setReceivers] = useState(null);
+    const [bankTypes, setBankTypes] = useState(null);
     const [moneyTransferForm] = Form.useForm();
     const [paymentAccountInfo, setPaymentAccount] = useState(null);
     const [bankAccounts, setBankAccountList] = useState([]);
@@ -30,8 +32,10 @@ export const DashBoardPage = () => {
     const [moneyTransferModalVisibility, setMoneyTransferModalVisibility] =
         useState(false);
 
+    useEffect(() => {}, [bankAccounts, paymentAccountInfo]);
+
     useEffect(() => {
-        const fetchApi = async () => {
+        const getPaymentBankAccount = async () => {
             const apiUrl = `${process.env.REACT_APP_BANK_ACCOUNT_API_URL_PATH}?isPayment=true`;
 
             await fetch(apiUrl, {
@@ -51,8 +55,64 @@ export const DashBoardPage = () => {
                 });
         };
 
-        fetchApi();
+        const getReceivers = async () => {
+            const url = `${
+                process.env.REACT_APP_RECEIVER_API_URL_PATH
+            }?accountNumber=${localStorage.getItem('payment-account-number')}`;
+
+            fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: localStorage.getItem('accessToken'),
+                },
+            })
+                .then((response) => response.json())
+                .then((data) => setReceivers(data));
+        };
+
+        const getBankTypes = async () => {
+            fetch(process.env.REACT_APP_BANK_TYPE_API_URL_PATH, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: localStorage.getItem('accessToken'),
+                },
+            })
+                .then((response) => response.json())
+                .then((data) => setBankTypes(data));
+        };
+
+        getReceivers();
+        getBankTypes();
+        getPaymentBankAccount();
     }, []);
+
+    const handleSelectPaymentAccountClick = (bankAccount) => {
+        const url = `${process.env.REACT_APP_BANK_ACCOUNT_API_URL_PATH}/${bankAccount._id}`;
+        const data = {
+            isPayment: true,
+        };
+
+        console.log('aloo');
+        fetch(url, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: localStorage.getItem('accessToken'),
+            },
+            body: JSON.stringify(data),
+        })
+            .then((response) => {
+                localStorage.setItem(
+                    'payment-account-number',
+                    bankAccount.accountNumber
+                );
+                message.success('Success');
+                setPaymentAccount(bankAccount);
+            })
+            .catch((error) => message.error(error));
+    };
 
     const toggleChangeAccountModalVisible = () =>
         setChangeAccountModalVisibility(!changeAccountModalVisibility);
@@ -99,7 +159,7 @@ export const DashBoardPage = () => {
     ];
 
     const onChangeAccountClick = () => {
-        const fetchApi = async () => {
+        const getBankAccounts = async () => {
             await fetch(process.env.REACT_APP_BANK_ACCOUNT_API_URL_PATH, {
                 method: 'GET',
                 headers: {
@@ -113,8 +173,7 @@ export const DashBoardPage = () => {
                 });
         };
 
-        fetchApi();
-
+        getBankAccounts();
         toggleChangeAccountModalVisible();
     };
 
@@ -129,7 +188,7 @@ export const DashBoardPage = () => {
                     <p>
                         Account Name: {getProfileFromLocalStorage().aliasName}
                     </p>
-                    <p>Over Balance: {paymentAccountInfo.overBalance}</p>
+                    <p>Over Balance: {paymentAccountInfo.overBalance} (VND)</p>
                 </div>
                 <Button type='primary' onClick={onChangeAccountClick}>
                     Change Account
@@ -138,14 +197,10 @@ export const DashBoardPage = () => {
         );
 
     const handleConfirmTransfer = () => {
-        console.log(
-            "localStorage.getItem('payment-account-number')",
-            localStorage.getItem('payment-account-number')
-        );
-
         const { receiverAccountNumber, bankTypeId, deposit, description } =
             moneyTransferForm.getFieldsValue();
 
+        // validate.
         const payload = {
             senderAccountNumber: localStorage.getItem('payment-account-number'),
             receiverAccountNumber,
@@ -155,18 +210,96 @@ export const DashBoardPage = () => {
             transferTime: Date.now(),
         };
 
-        console.log('hello', payload);
-
         fetch(process.env.REACT_APP_BILLING_API_URL_PATH, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 Authorization: localStorage.getItem('accessToken'),
             },
-            body: payload,
+            body: JSON.stringify(payload),
         })
             .then(() => {
                 message.success('Successfully!!!');
+
+                const isNotSavedReceiverBefore =
+                    receivers &&
+                    !receivers.some(
+                        (value) => value.accountNumber === receiverAccountNumber
+                    );
+                console.log(
+                    'isNotSavedReceiverBefore',
+                    isNotSavedReceiverBefore
+                );
+
+                const savedReceiverCheckbox = isNotSavedReceiverBefore && (
+                    <Checkbox id='saveReceiverCheckBox' defaultChecked={false}>
+                        Lưu nguời nhận
+                    </Checkbox>
+                );
+
+                console.log(
+                    'isNotSavedReceiverBefore',
+                    isNotSavedReceiverBefore
+                );
+                Modal.info({
+                    title: 'Chuyển tiền thành công',
+                    content: (
+                        <div>
+                            <p>
+                                <strong>Số tài khoản: </strong>
+                                {receiverAccountNumber}
+                            </p>
+                            <p>
+                                <strong>Số tiền: </strong>
+                                {deposit}
+                            </p>
+                            {savedReceiverCheckbox}
+                        </div>
+                    ),
+                    onOk: () => {
+                        if (isNotSavedReceiverBefore) {
+                            let savedReceiverCheckbox = document.querySelector(
+                                '#saveReceiverCheckBox'
+                            );
+                            var isSaveReceiverChecked =
+                                savedReceiverCheckbox.checked === true;
+
+                            if (isSaveReceiverChecked) {
+                                const payload = {
+                                    senderAccountNumber: localStorage.getItem(
+                                        'payment-account-number'
+                                    ),
+                                    receiverAccountNumber,
+                                };
+
+                                fetch(
+                                    process.env.REACT_APP_RECEIVER_API_URL_PATH,
+                                    {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            Authorization:
+                                                localStorage.getItem(
+                                                    'accessToken'
+                                                ),
+                                        },
+                                        body: JSON.stringify(payload),
+                                    }
+                                )
+                                    .then((response) =>
+                                        message.success(
+                                            'Lưu người nhận thành công'
+                                        )
+                                    )
+                                    .catch((error) =>
+                                        message.error('Lưu người nhận thất bại')
+                                    );
+
+                                savedReceiverCheckbox.checked = false;
+                            }
+                        }
+                    },
+                });
             })
             .catch((error) => message.error(error));
     };
@@ -183,7 +316,13 @@ export const DashBoardPage = () => {
                 title='Bank Accounts'
                 open={changeAccountModalVisibility}
                 onCancel={handleMoneyTransferModalCancel}>
-                <BankAccountList bankAccounts={bankAccounts} />
+                <BankAccountList
+                    paymentAccount={paymentAccountInfo}
+                    onSelectPaymentAccountClick={
+                        handleSelectPaymentAccountClick
+                    }
+                    bankAccounts={bankAccounts}
+                />
             </Modal>
 
             <Modal
@@ -193,6 +332,8 @@ export const DashBoardPage = () => {
                 onCancel={toggleMoneyTransferModalVisible}>
                 <MoneyTransferForm
                     form={moneyTransferForm}
+                    receivers={receivers}
+                    bankTypes={bankTypes}
                     onConfirmTransfer={handleConfirmTransfer}
                 />
             </Modal>

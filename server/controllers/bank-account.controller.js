@@ -42,26 +42,43 @@ export default {
         const { id } = req.params;
         const { isPayment } = req.body;
 
-        if (isPayment) {
-            const records = await BankAccount.find({ identityId: req.userId });
+        const session = await BankAccount.startSession();
+        session.startTransaction();
+        try {
+            if (isPayment) {
+                const records = await BankAccount.find({
+                    identityId: req.userId,
+                });
 
-            const processedRecords = records.map((r) => {
-                if (r._id === id) {
-                    r.isPayment = true;
+                const processedRecords = records.map((r) => {
+                    if (r._id.toString() === id) {
+                        r.isPayment = true;
+                        return r;
+                    }
+
+                    r.isPayment = false;
                     return r;
+                });
+
+                const bulk = BankAccount.collection.initializeOrderedBulkOp();
+
+                if (processedRecords.length > 0) {
+                    processedRecords.forEach((r) =>
+                        bulk
+                            .find({
+                                _id: r._id,
+                            })
+                            .updateOne({ $set: r })
+                    );
+                    await bulk.execute();
+                    await session.commitTransaction();
                 }
+            }
 
-                r.isPayment = false;
-                return r;
-            });
-
-            console.log('processed record');
-
-            const effected = await BankAccount.updateMany(processedRecords);
-
-            return res.status(200).json(effected);
+            return res.status(200).json('Update Bank Account Successfully');
+        } catch (error) {
+            await session.abortTransaction();
+            return res.status(500).json('Something went wrong on server');
         }
-
-        return;
     },
 };

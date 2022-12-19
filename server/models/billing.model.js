@@ -7,6 +7,7 @@ const schema = {
     transferMethod: String,
     transferType: String,
     deposit: Number,
+    description: String,
     transferFee: Number,
     transferTime: String,
     totalAmount: Number,

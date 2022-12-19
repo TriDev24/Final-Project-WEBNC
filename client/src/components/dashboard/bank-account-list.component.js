@@ -6,11 +6,19 @@ const Container = styled.div`
     border-radius: 4px;
 `;
 
-export const BankAccountList = ({ bankAccounts }) => {
+export const BankAccountList = ({
+    paymentAccount,
+    onSelectPaymentAccountClick,
+    bankAccounts,
+}) => {
     return (
         <Container>
             {bankAccounts.map((b) => (
-                <BankAccountItem bankAccount={b} />
+                <BankAccountItem
+                    paymentAccount={paymentAccount}
+                    onSelectPaymentAccountClick={onSelectPaymentAccountClick}
+                    bankAccount={b}
+                />
             ))}
         </Container>
     );

@@ -5,23 +5,26 @@ import Receiver from '../models/receiver.model.js';
 
 export default {
     async getAll(req, res) {
-        const where = { senderId: req.userId };
+        const { accountNumber } = req.query;
 
-        console.log('req.userId', req.userId);
+        const where = { senderAccountNumber: accountNumber };
+
         const records = await Receiver.find(where);
-
-        console.log('records', records);
 
         const responses = [];
         for (const r of records) {
-            const bankAccount = await BankAccount.findById(r.receiverId);
-            console.log('bankAccount', bankAccount);
-
-            const bankType = await BankType.findById(bankAccount.bankTypeId);
-            const identity = await Identity.findById(bankAccount.identityId);
+            const receiverBankAccount = await BankAccount.findOne({
+                accountNumber: r.receiverAccountNumber,
+            });
+            const bankType = await BankType.findById(
+                receiverBankAccount.bankTypeId
+            );
+            const identity = await Identity.findById(
+                receiverBankAccount.identityId
+            );
 
             responses.push({
-                accountNumber: bankAccount.accountNumber,
+                accountNumber: receiverBankAccount.accountNumber,
                 aliasName: identity.aliasName,
                 bankName: bankType.name,
             });
@@ -30,10 +33,10 @@ export default {
         res.status(200).json(responses);
     },
     async create(req, res) {
-        const { receiverId } = req.body;
+        const { senderAccountNumber, receiverAccountNumber } = req.body;
         const document = {
-            senderId: req.userId,
-            receiverId,
+            senderAccountNumber,
+            receiverAccountNumber,
         };
 
         const insertedData = await Receiver.create(document);

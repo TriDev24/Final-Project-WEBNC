@@ -1,6 +1,5 @@
 import { styled } from '@xstyled/styled-components';
-import { Button, Form, Input, Select, Skeleton } from 'antd';
-import { useEffect, useState } from 'react';
+import { Button, Form, Input, InputNumber, Select, Skeleton } from 'antd';
 import { Collapse } from 'antd';
 import { ReceiverItem } from './receiver-item.component.js';
 
@@ -12,39 +11,16 @@ const Container = styled.div`
     margin: 20px 10px;
 `;
 
-export const MoneyTransferForm = ({ form, onConfirmTransfer }) => {
-    const [receivers, setReceivers] = useState(null);
-    const [bankTypes, setBankTypes] = useState(null);
+const StyledDepositInput = styled(InputNumber)`
+    width: 100%;
+`;
 
-    useEffect(() => {
-        const getReceivers = async () => {
-            fetch(process.env.REACT_APP_RECEIVER_API_URL_PATH, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: localStorage.getItem('accessToken'),
-                },
-            })
-                .then((response) => response.json())
-                .then((data) => setReceivers(data));
-        };
-
-        const getBankTypes = async () => {
-            fetch(process.env.REACT_APP_BANK_TYPE_API_URL_PATH, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: localStorage.getItem('accessToken'),
-                },
-            })
-                .then((response) => response.json())
-                .then((data) => setBankTypes(data));
-        };
-
-        getReceivers();
-        getBankTypes();
-    }, []);
-
+export const MoneyTransferForm = ({
+    form,
+    receivers,
+    bankTypes,
+    onConfirmTransfer,
+}) => {
     const renderReceiverOptions = () =>
         receivers === null ? (
             <Skeleton />
@@ -101,7 +77,10 @@ export const MoneyTransferForm = ({ form, onConfirmTransfer }) => {
                             message: 'Please input deposits',
                         },
                     ]}>
-                    <Input placeholder='Example: 200000' />
+                    <StyledDepositInput
+                        addonAfter='VNĐ'
+                        placeholder='Example: 200000'
+                    />
                 </Form.Item>
                 <Form.Item name='description' label='Description'>
                     <Input placeholder='Example: Pay for coffee' />

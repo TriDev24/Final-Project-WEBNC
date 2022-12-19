@@ -1,5 +1,5 @@
 import { styled } from '@xstyled/styled-components';
-import { Button } from 'antd';
+import { Button, message } from 'antd';
 
 const Container = styled.div`
     display: flex;
@@ -10,6 +10,7 @@ const Container = styled.div`
     border: 1px solid black;
     padding: 0 10px;
     border-radius: 4px;
+    margin-bottom: 8px;
 `;
 
 const AccountInformation = styled.div``;
@@ -18,37 +19,29 @@ const StyledParagraph = styled.p`
     margin: 0;
 `;
 
-export const BankAccountItem = ({ bankAccount }) => {
-    const isNotPaymentAccount = bankAccount.isPayment === false;
+export const BankAccountItem = ({
+    paymentAccount,
+    onSelectPaymentAccountClick,
+    bankAccount,
+}) => {
+    const isNotPaymentAccount = bankAccount._id !== paymentAccount._id;
 
-    const onChangeToPaymentAccountClick = async () => {
-        const url = `${process.env.REACT_APP_BANK_ACCOUNT_API_URL_PATH}/${bankAccount._id}`;
-        const data = {
-            isPayment: true,
-        };
-
-        await fetch(url, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: localStorage.getItem('accessToken'),
-            },
-            body: data,
-        });
+    const onChangeToPaymentAccountClick = () => {
+        onSelectPaymentAccountClick(bankAccount);
     };
 
     return (
         <Container>
             <AccountInformation>
                 <StyledParagraph>
-                    Account Number: {bankAccount.accountNumber}
+                    <strong>Account Number:</strong> {bankAccount.accountNumber}
                 </StyledParagraph>
                 <StyledParagraph>
-                    Over Balance: {bankAccount.overBalance}
+                    <strong>Over Balance:</strong> {bankAccount.overBalance}
                 </StyledParagraph>
             </AccountInformation>
             {isNotPaymentAccount && (
-                <Button onChange={onChangeToPaymentAccountClick}>
+                <Button onClick={onChangeToPaymentAccountClick}>
                     Set Is Payment
                 </Button>
             )}
