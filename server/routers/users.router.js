@@ -8,7 +8,7 @@ const router = Router();
 
 router.get('/',controller.getAllUser)
 router.get('/:id',controller.getUserDetail)
-// router.post('/:id',controller.updateUser)
+router.patch('/:id',controller.updateUser)
 // router.post('/:id/change-password',controller.changePassword)
 
 export default router

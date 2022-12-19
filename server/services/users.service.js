@@ -19,5 +19,12 @@ export default {
     return -1;
   },
 
+  async updateUser(id, firstName, lastName, phoneNumber, aliasName) {
+    const result = await Identity.findByIdAndUpdate(id, 
+            {"firstName": firstName, "lastName": lastName, 
+            "phoneNumber": phoneNumber, "aliasName": aliasName} );
+    return result;
+  },
+
 
 };
