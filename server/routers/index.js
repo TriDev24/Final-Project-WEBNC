@@ -6,6 +6,8 @@ import ReceiverRouter from './receiver.router.js';
 import DebitRouter from './debit.router.js';
 import UserRouter from './users.router.js';
 import DebtorRouter from './debtor.router.js';
+import TransferMethodRouter from './transfer-method.router.js';
+
 import { Router } from 'express';
 
 const router = Router();
@@ -18,6 +20,7 @@ router.use('/bank-types', BankTypeRouter);
 router.use('/identities', IdentityRouter);
 router.use('/debits', DebitRouter);
 router.use('/debtors', DebtorRouter);
+router.use('/transfer-methods', TransferMethodRouter);
 router.use('/users', UserRouter);
 
 export default router;

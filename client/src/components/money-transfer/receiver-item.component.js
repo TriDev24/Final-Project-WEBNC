@@ -28,9 +28,13 @@ const UserName = styled.strong`
     font-size: 16px;
 `;
 
-export const ReceiverItem = ({ receiver }) => {
+export const ReceiverItem = ({ receiver, onSelectItemClick }) => {
+    const handleClick = () => {
+        onSelectItemClick(receiver);
+    };
+
     return (
-        <Container>
+        <Container onClick={handleClick}>
             <Avatar size='large' icon={<UserOutlined />} />
             <UserInformation>
                 <UserName>{receiver.aliasName}</UserName>

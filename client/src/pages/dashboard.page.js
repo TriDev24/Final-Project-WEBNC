@@ -24,6 +24,7 @@ const HistorySection = styled.div``;
 export const DashBoardPage = () => {
     const [receivers, setReceivers] = useState(null);
     const [bankTypes, setBankTypes] = useState(null);
+    const [transferMethods, setTransferMethods] = useState(null);
     const [moneyTransferForm] = Form.useForm();
     const [paymentAccountInfo, setPaymentAccount] = useState(null);
     const [bankAccounts, setBankAccountList] = useState([]);
@@ -31,8 +32,8 @@ export const DashBoardPage = () => {
         useState(false);
     const [moneyTransferModalVisibility, setMoneyTransferModalVisibility] =
         useState(false);
-
-    useEffect(() => {}, [bankAccounts, paymentAccountInfo]);
+    const [isTriggerMoneyTransfer, setMoneyTransferTriggerStatus] =
+        useState(false);
 
     useEffect(() => {
         const getPaymentBankAccount = async () => {
@@ -55,6 +56,10 @@ export const DashBoardPage = () => {
                 });
         };
 
+        getPaymentBankAccount();
+    }, [bankAccounts]);
+
+    useEffect(() => {
         const getReceivers = async () => {
             const url = `${
                 process.env.REACT_APP_RECEIVER_API_URL_PATH
@@ -71,6 +76,10 @@ export const DashBoardPage = () => {
                 .then((data) => setReceivers(data));
         };
 
+        getReceivers();
+    }, [isTriggerMoneyTransfer, paymentAccountInfo]);
+
+    useEffect(() => {
         const getBankTypes = async () => {
             fetch(process.env.REACT_APP_BANK_TYPE_API_URL_PATH, {
                 method: 'GET',
@@ -83,9 +92,20 @@ export const DashBoardPage = () => {
                 .then((data) => setBankTypes(data));
         };
 
-        getReceivers();
+        const getTransferMethods = async () => {
+            fetch(process.env.REACT_APP_TRANSFER_METHOD_API_URL_PATH, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: localStorage.getItem('accessToken'),
+                },
+            })
+                .then((response) => response.json())
+                .then((data) => setTransferMethods(data));
+        };
+
         getBankTypes();
-        getPaymentBankAccount();
+        getTransferMethods();
     }, []);
 
     const handleSelectPaymentAccountClick = (bankAccount) => {
@@ -94,7 +114,6 @@ export const DashBoardPage = () => {
             isPayment: true,
         };
 
-        console.log('aloo');
         fetch(url, {
             method: 'PATCH',
             headers: {
@@ -108,7 +127,7 @@ export const DashBoardPage = () => {
                     'payment-account-number',
                     bankAccount.accountNumber
                 );
-                message.success('Success');
+                message.success('Change Account Success');
                 setPaymentAccount(bankAccount);
             })
             .catch((error) => message.error(error));
@@ -197,8 +216,13 @@ export const DashBoardPage = () => {
         );
 
     const handleConfirmTransfer = () => {
-        const { receiverAccountNumber, bankTypeId, deposit, description } =
-            moneyTransferForm.getFieldsValue();
+        const {
+            receiverAccountNumber,
+            bankTypeId,
+            deposit,
+            transferMethodId,
+            description,
+        } = moneyTransferForm.getFieldsValue();
 
         // validate.
         const payload = {
@@ -206,6 +230,7 @@ export const DashBoardPage = () => {
             receiverAccountNumber,
             bankTypeId,
             deposit,
+            transferMethodId,
             description: description ?? '',
             transferTime: Date.now(),
         };
@@ -226,10 +251,6 @@ export const DashBoardPage = () => {
                     !receivers.some(
                         (value) => value.accountNumber === receiverAccountNumber
                     );
-                console.log(
-                    'isNotSavedReceiverBefore',
-                    isNotSavedReceiverBefore
-                );
 
                 const savedReceiverCheckbox = isNotSavedReceiverBefore && (
                     <Checkbox id='saveReceiverCheckBox' defaultChecked={false}>
@@ -237,21 +258,40 @@ export const DashBoardPage = () => {
                     </Checkbox>
                 );
 
-                console.log(
-                    'isNotSavedReceiverBefore',
-                    isNotSavedReceiverBefore
-                );
                 Modal.info({
-                    title: 'Chuyển tiền thành công',
+                    title: 'Hoá đơn thanh toán',
                     content: (
                         <div>
                             <p>
-                                <strong>Số tài khoản: </strong>
+                                <strong>Số tài khoản gửi: </strong>
+                                {localStorage.getItem('payment-account-number')}
+                            </p>
+                            <p>
+                                <strong>Số tài khoản nhận: </strong>
                                 {receiverAccountNumber}
                             </p>
                             <p>
-                                <strong>Số tiền: </strong>
-                                {deposit}
+                                <strong>Số tiền gửi: </strong>
+                                {deposit} VND
+                            </p>
+                            <p>
+                                <strong>Phương thức thanh toán: </strong>
+                                {
+                                    transferMethods.find(
+                                        (t) => t._id === transferMethodId
+                                    ).name
+                                }
+                                VND
+                            </p>
+                            <p>
+                                <strong>Thời điểm giao dịch: </strong>
+                                {new Date(1671526838622)
+                                    .toLocaleDateString('en-GB', {
+                                        day: 'numeric',
+                                        month: 'long',
+                                        year: 'numeric',
+                                    })
+                                    .replace(/ /g, ' ')}
                             </p>
                             {savedReceiverCheckbox}
                         </div>
@@ -298,6 +338,9 @@ export const DashBoardPage = () => {
                                 savedReceiverCheckbox.checked = false;
                             }
                         }
+
+                        moneyTransferForm.resetFields();
+                        setMoneyTransferTriggerStatus(!isTriggerMoneyTransfer);
                     },
                 });
             })
@@ -305,7 +348,7 @@ export const DashBoardPage = () => {
     };
 
     const handleMoneyTransferModalCancel = () => {
-        toggleChangeAccountModalVisible();
+        toggleMoneyTransferModalVisible();
         moneyTransferForm.resetFields();
     };
 
@@ -315,7 +358,7 @@ export const DashBoardPage = () => {
                 footer={null}
                 title='Bank Accounts'
                 open={changeAccountModalVisibility}
-                onCancel={handleMoneyTransferModalCancel}>
+                onCancel={toggleChangeAccountModalVisible}>
                 <BankAccountList
                     paymentAccount={paymentAccountInfo}
                     onSelectPaymentAccountClick={
@@ -329,11 +372,12 @@ export const DashBoardPage = () => {
                 footer={null}
                 title='Money Transfer'
                 open={moneyTransferModalVisibility}
-                onCancel={toggleMoneyTransferModalVisible}>
+                onCancel={handleMoneyTransferModalCancel}>
                 <MoneyTransferForm
                     form={moneyTransferForm}
                     receivers={receivers}
                     bankTypes={bankTypes}
+                    transferMethods={transferMethods}
                     onConfirmTransfer={handleConfirmTransfer}
                 />
             </Modal>

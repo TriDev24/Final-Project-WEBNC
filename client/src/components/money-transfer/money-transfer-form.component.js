@@ -1,5 +1,13 @@
 import { styled } from '@xstyled/styled-components';
-import { Button, Form, Input, InputNumber, Select, Skeleton } from 'antd';
+import {
+    Button,
+    Form,
+    Input,
+    InputNumber,
+    Radio,
+    Select,
+    Skeleton,
+} from 'antd';
 import { Collapse } from 'antd';
 import { ReceiverItem } from './receiver-item.component.js';
 
@@ -19,13 +27,26 @@ export const MoneyTransferForm = ({
     form,
     receivers,
     bankTypes,
+    transferMethods,
     onConfirmTransfer,
 }) => {
+    const handleReceiverItemClick = (receiver) => {
+        form.setFieldsValue({
+            receiverAccountNumber: receiver.accountNumber,
+            bankTypeId: receiver.bankTypeId,
+        });
+    };
+
     const renderReceiverOptions = () =>
         receivers === null ? (
             <Skeleton />
         ) : (
-            receivers.map((r) => <ReceiverItem receiver={r} />)
+            receivers.map((r) => (
+                <ReceiverItem
+                    onSelectItemClick={handleReceiverItemClick}
+                    receiver={r}
+                />
+            ))
         );
 
     const renderBankTypeOptions = () =>
@@ -33,6 +54,12 @@ export const MoneyTransferForm = ({
             <Skeleton />
         ) : (
             bankTypes.map((b) => <Option key={b._id}>{b.name}</Option>)
+        );
+    const renderTransferMethodOptions = () =>
+        transferMethods === null ? (
+            <Skeleton />
+        ) : (
+            transferMethods.map((t) => <Radio value={t._id}>{t.name}</Radio>)
         );
 
     return (
@@ -81,6 +108,17 @@ export const MoneyTransferForm = ({
                         addonAfter='VNĐ'
                         placeholder='Example: 200000'
                     />
+                </Form.Item>
+                <Form.Item
+                    name='transferMethodId'
+                    label='Transfer Method'
+                    rules={[
+                        {
+                            required: true,
+                            message: 'Please select transfer method',
+                        },
+                    ]}>
+                    <Radio.Group>{renderTransferMethodOptions()}</Radio.Group>
                 </Form.Item>
                 <Form.Item name='description' label='Description'>
                     <Input placeholder='Example: Pay for coffee' />
