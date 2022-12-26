@@ -3,11 +3,12 @@ import { AppLayout } from '../components/common/index.js';
 import styled from '@xstyled/styled-components';
 import { Button, Checkbox, message, Modal, Skeleton, Table } from 'antd';
 import { ServiceList } from '../components/dashboard/index.js';
-import { ContactsOutlined, SwapOutlined } from '@ant-design/icons';
+import { ContactsOutlined, SwapOutlined, SecurityScanOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import { getProfileFromLocalStorage } from '../utils/local-storage.util.js';
 import { BankAccountList } from '../components/dashboard/bank-account-list.component.js';
 import { MoneyTransferForm } from '../components/money-transfer/money-transfer-form.component.js';
+import { ChangePasswordForm } from '../components/change-password-form.component';
 import { Form } from 'antd';
 
 const GeneralInformationSection = styled.div`
@@ -31,6 +32,8 @@ export const DashBoardPage = () => {
     const [changeAccountModalVisibility, setChangeAccountModalVisibility] =
         useState(false);
     const [moneyTransferModalVisibility, setMoneyTransferModalVisibility] =
+        useState(false);
+    const [changePasswordModalVisibility, setChangePasswordModalVisibility] =
         useState(false);
     const [isTriggerMoneyTransfer, setMoneyTransferTriggerStatus] =
         useState(false);
@@ -139,6 +142,9 @@ export const DashBoardPage = () => {
     const toggleMoneyTransferModalVisible = () =>
         setMoneyTransferModalVisibility(!moneyTransferModalVisibility);
 
+    const changePasswordModalVisible = () =>
+        setChangePasswordModalVisibility(!changePasswordModalVisibility);
+
     const services = [
         {
             icon: <SwapOutlined />,
@@ -149,6 +155,11 @@ export const DashBoardPage = () => {
             icon: <ContactsOutlined />,
             name: 'Ghi nợ',
             onClick: () => {},
+        },
+        {
+            icon: <SecurityScanOutlined />,
+            name: 'Thay đổi mật khẩu',
+            onClick: changePasswordModalVisible,
         },
     ];
 
@@ -379,6 +390,20 @@ export const DashBoardPage = () => {
                     bankTypes={bankTypes}
                     transferMethods={transferMethods}
                     onConfirmTransfer={handleConfirmTransfer}
+                />
+            </Modal>
+
+            <Modal
+                footer={null}
+                title='Change Password'
+                open={changePasswordModalVisibility}
+                onCancel={changePasswordModalVisible}>
+                <ChangePasswordForm
+                    form={moneyTransferForm}
+                    receivers={receivers}
+                    bankTypes={bankTypes}
+                    transferMethods={transferMethods}
+                    // onConfirmTransfer={handleConfirmTransfer}
                 />
             </Modal>
 
