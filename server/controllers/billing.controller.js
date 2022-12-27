@@ -4,6 +4,10 @@ import { TransferFee } from '../models/transfer-fee.model.js';
 import BankAccount from '../models/bank-account.model.js';
 import { TransferType } from '../models/transfer-type.model.js';
 import TransferMethod from '../models/transfer-method.model.js';
+import { generateOtp } from '../utils/otp.service.js';
+import { sendVerifyOtpEmail } from '../utils/email.service.js';
+import Identity from '../models/identity.model.js';
+import { generateSignature } from '../utils/rsa.util.js';
 
 export default {
     async create(req, res) {
@@ -16,17 +20,8 @@ export default {
             transferMethodId,
             transferTime,
         } = req.body;
+        const generatedOtp = generateOtp();
 
-        const internalBank = await BankType.findOne({ name: 'My Bank' });
-
-        // Transfer ObjectId -> string using toString() method.
-        const isInternalBank = internalBank._id.toString() === bankTypeId;
-
-        const transferFee = isInternalBank
-            ? TransferFee.Internal
-            : TransferFee.External;
-
-        // Update Bank Account OverBalance
         const senderBankAccount = await BankAccount.findOne({
             accountNumber: senderAccountNumber,
         });
@@ -48,100 +43,193 @@ export default {
         const isReceiverPayForTransferFee =
             transferMethod.name === 'Receiver Pay Transfer Fee';
 
-        if (isReceiverPayForTransferFee) {
-            const isSenderNotEnoughMoney =
-                senderBankAccount.overBalance < deposit;
-            if (isSenderNotEnoughMoney) {
-                return res.status(403).json('Not enough money to transfer');
-            }
+        // Transfer ObjectId -> string using toString() method.
+        const internalBank = await BankType.findOne({ name: 'My Bank' });
+        const isInternalBank = internalBank._id.toString() === bankTypeId;
 
-            // Decrease over balance of sender bank account
-            const updatedSenderOverBalance = await BankAccount.updateOne(
-                {
-                    _id: senderBankAccount._id,
-                },
-                {
-                    overBalance: senderBankAccount.overBalance - deposit,
+        if (isInternalBank) {
+            let insertedData;
+
+            // Update Bank Account OverBalance
+            if (isReceiverPayForTransferFee) {
+                const isSenderNotEnoughMoney =
+                    senderBankAccount.overBalance < deposit;
+                if (isSenderNotEnoughMoney) {
+                    return res.status(403).json('Not enough money to transfer');
                 }
-            );
 
-            // Increase over balance of receiver bank account
-            const isReceiverNotEnoughMoneyToPayTransferFee =
-                receiverBankAccount.overBalance + deposit < transferFee;
-            if (isReceiverNotEnoughMoneyToPayTransferFee) {
-                res.status(401).json(
-                    'Receiver Not Enough Money To Pay Transfer Fee'
+                // Decrease over balance of sender bank account
+                const updatedSenderOverBalance = await BankAccount.updateOne(
+                    {
+                        _id: senderBankAccount._id,
+                    },
+                    {
+                        overBalance: senderBankAccount.overBalance - deposit,
+                    }
                 );
+                if (!updatedSenderOverBalance) {
+                    return res.status(500).json('Something error');
+                }
+
+                // Increase over balance of receiver bank account
+                const isReceiverNotEnoughMoneyToPayTransferFee =
+                    receiverBankAccount.overBalance + deposit < transferFee;
+                if (isReceiverNotEnoughMoneyToPayTransferFee) {
+                    res.status(401).json(
+                        'Receiver Not Enough Money To Pay Transfer Fee'
+                    );
+                }
+
+                const updatedReceiverOverBalance = await BankAccount.updateOne(
+                    {
+                        _id: receiverBankAccount._id,
+                    },
+                    {
+                        overBalance:
+                            receiverBankAccount.overBalance +
+                            deposit -
+                            transferFee,
+                    }
+                );
+                if (!updatedReceiverOverBalance) {
+                    return res.status(500).json('Something error');
+                }
+
+                // Create Billing
+                const document = {
+                    senderId: senderBankAccount._id,
+                    receiverId: receiverBankAccount._id,
+                    deposit,
+                    description,
+                    transferType: TransferType.MoneyTransfer,
+                    transferMethodId,
+                    transferFee: TransferFee.Internal,
+                    transferTime,
+                    otpCode: generatedOtp,
+                };
+
+                insertedData = await Billing.create(document);
+                if (!insertedData) {
+                    return res.status(500).json('Something error');
+                }
+            } else {
+                const totalAmount = deposit + TransferFee.Internal;
+                const isSenderNotEnoughMoney =
+                    senderBankAccount.overBalance < totalAmount;
+                if (isSenderNotEnoughMoney) {
+                    return res.status(403).json('Not enough money to transfer');
+                }
+
+                // Decrease over balance of sender bank account
+                const updatedSenderOverBalance = await BankAccount.updateOne(
+                    {
+                        _id: senderBankAccount._id,
+                    },
+                    {
+                        overBalance:
+                            senderBankAccount.overBalance - totalAmount,
+                    }
+                );
+                if (!updatedSenderOverBalance) {
+                    return res.status(500).json('Something error');
+                }
+
+                // Increase over balance of receiver bank account
+                const updatedReceiverOverBalance = await BankAccount.updateOne(
+                    {
+                        _id: receiverBankAccount._id,
+                    },
+                    {
+                        overBalance:
+                            receiverBankAccount.overBalance + totalAmount,
+                    }
+                );
+                if (!updatedReceiverOverBalance) {
+                    return res.status(500).json('Something error');
+                }
+
+                // Create Billing
+                const document = {
+                    senderId: senderBankAccount._id,
+                    receiverId: receiverBankAccount._id,
+                    deposit,
+                    description,
+                    transferType: TransferType.MoneyTransfer,
+                    transferMethodId,
+                    transferFee: TransferFee.Internal,
+                    transferTime,
+                    otpCode: generatedOtp,
+                };
+
+                insertedData = await Billing.create(document);
+
+                if (!insertedData) {
+                    return res.status(500).json('Something error');
+                }
             }
 
-            const updatedReceiverOverBalance = await BankAccount.updateOne(
-                {
-                    _id: receiverBankAccount._id,
-                },
-                {
-                    overBalance:
-                        receiverBankAccount.overBalance + deposit - transferFee,
-                }
+            const identity = await Identity.findById(
+                receiverBankAccount.identityId
             );
+            sendVerifyOtpEmail(identity.email);
 
-            // Create Billing
-            const document = {
-                senderId: senderBankAccount._id,
-                receiverId: receiverBankAccount._id,
-                deposit,
-                description,
-                transferType: TransferType.MoneyTransfer,
-                transferMethodId,
-                transferFee,
-                transferTime,
-            };
-
-            const insertedData = await Billing.create(document);
-
-            res.status(200).json(insertedData);
-        } else {
-            const totalAmount = deposit + transferFee;
-            const isSenderNotEnoughMoney =
-                senderBankAccount.overBalance < totalAmount;
-            if (isSenderNotEnoughMoney) {
-                return res.status(403).json('Not enough money to transfer');
-            }
-
-            // Decrease over balance of sender bank account
-            const updatedSenderOverBalance = await BankAccount.updateOne(
-                {
-                    _id: senderBankAccount._id,
-                },
-                {
-                    overBalance: senderBankAccount.overBalance - totalAmount,
-                }
-            );
-
-            // Increase over balance of receiver bank account
-            const updatedReceiverOverBalance = await BankAccount.updateOne(
-                {
-                    _id: receiverBankAccount._id,
-                },
-                {
-                    overBalance: receiverBankAccount.overBalance + totalAmount,
-                }
-            );
-
-            // Create Billing
-            const document = {
-                senderId: senderBankAccount._id,
-                receiverId: receiverBankAccount._id,
-                deposit,
-                description,
-                transferType: TransferType.MoneyTransfer,
-                transferMethodId,
-                transferFee,
-                transferTime,
-            };
-
-            const insertedData = await Billing.create(document);
-
-            res.status(200).json(insertedData);
+            return res.status(200).json({
+                _id: insertedData._id,
+            });
         }
+
+        // Cross external bank.
+        const url = `${process.env.EXTERNAL_BANK_API_URL}`;
+        const payload = {
+            signature: generateSignature(),
+        };
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+        })
+            .then(() => {
+                console.log('Ok');
+            })
+            .catch((error) =>
+                res.status(500).json(
+                    `Something error on transfer money to external bank:
+                        ${error}`
+                )
+            );
+    },
+
+    async verifyOtp(req, res) {
+        const { id } = req.params;
+        const { otp } = req.body;
+
+        const billing = await Billing.findById(id);
+        if (!billing) {
+            return res
+                .status(404)
+                .json(`Cannot find this billing with id: ${id}`);
+        }
+
+        const isNotMatchOtp = billing.otpCode !== otp;
+        if (isNotMatchOtp) {
+            return res.status(401).json('The Otp is Not correct');
+        }
+
+        const updatedBilling = await Billing.updateOne(
+            {
+                _id: id,
+            },
+            {
+                isVerified: true,
+            }
+        );
+        if (!updatedBilling) {
+            return res.status(500).json('Something error');
+        }
+
+        return res.status(200).json(updatedBilling);
     },
 };

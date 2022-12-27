@@ -33,7 +33,7 @@ export const MoneyTransferForm = ({
     const handleReceiverItemClick = (receiver) => {
         form.setFieldsValue({
             receiverAccountNumber: receiver.accountNumber,
-            bankTypeId: receiver.bankTypeId,
+            bankTypeId: receiver.bankType.id,
         });
     };
 

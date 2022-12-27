@@ -4,7 +4,7 @@ import Identity from '../models/identity.model.js';
 import BankAccount from '../models/bank-account.model.js';
 import Permission from '../models/permission.model.js';
 import BankType from '../models/bank-type.model.js';
-import fetch from 'node-fetch'
+import fetch from 'node-fetch';
 
 export default {
     async login({ email, password, g_token }) {
@@ -13,7 +13,26 @@ export default {
             .then((response) => response.json())
             .then((data) => data.success);
         if (result) {
-            const identity = await Identity.findOne({ email });
+            const getUserMatchedWithEmail = {
+                $match: {
+                    email: 'tientai@gmail.com',
+                },
+            };
+            const joinWithPermissionTable = {
+                $lookup: {
+                    from: 'permissions',
+                    localField: 'permissionId',
+                    foreignField: '_id',
+                    as: 'permission',
+                },
+            };
+            const pipelines = [
+                getUserMatchedWithEmail,
+                joinWithPermissionTable,
+            ];
+            const records = await Identity.aggregate(pipelines);
+
+            const identity = Array.from(records.values()).at(0);
             if (identity) {
                 const hash = identity.password;
                 const result = bcrypt.compareSync(password, hash);
@@ -44,6 +63,7 @@ export default {
                         lastName: identity.lastName,
                         phoneNumber: identity.phoneNumber,
                         aliasName: identity.aliasName,
+                        role: identity.permission[0].name,
                     };
                     await Identity.updateOne({ email }, { refreshToken });
                     return { accessToken, refreshToken, profile };
@@ -128,5 +148,5 @@ export default {
                 return -1;
             }
         }
-    }
+    },
 };

@@ -1,4 +1,5 @@
 import BankAccount from '../models/bank-account.model.js';
+import BankType from '../models/bank-type.model.js';
 import Identity from '../models/identity.model.js';
 import Receiver from '../models/receiver.model.js';
 
@@ -15,6 +16,9 @@ export default {
             const receiverBankAccount = await BankAccount.findOne({
                 accountNumber: r.receiverAccountNumber,
             });
+            const bankType = await BankType.findById(
+                receiverBankAccount.bankTypeId
+            );
             const identity = await Identity.findById(
                 receiverBankAccount.identityId
             );
@@ -22,7 +26,10 @@ export default {
             responses.push({
                 accountNumber: receiverBankAccount.accountNumber,
                 aliasName: identity.aliasName,
-                bankTypeId: receiverBankAccount.bankTypeId,
+                bankType: {
+                    id: receiverBankAccount.bankTypeId,
+                    name: bankType.name,
+                },
             });
         }
 

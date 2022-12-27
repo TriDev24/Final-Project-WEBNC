@@ -14,4 +14,6 @@ router.post('/', controller.create);
 
 router.patch('/:id', controller.update);
 
+router.put('/:id/recharge', controller.rechargeMoney);
+
 export default router;

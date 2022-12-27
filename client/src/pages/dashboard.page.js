@@ -4,11 +4,12 @@ import styled from '@xstyled/styled-components';
 import { Button, Checkbox, message, Modal, Skeleton, Table } from 'antd';
 import { ServiceList } from '../components/dashboard/index.js';
 import { ContactsOutlined, SwapOutlined } from '@ant-design/icons';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { getProfileFromLocalStorage } from '../utils/local-storage.util.js';
 import { BankAccountList } from '../components/dashboard/bank-account-list.component.js';
 import { MoneyTransferForm } from '../components/money-transfer/money-transfer-form.component.js';
 import { Form } from 'antd';
+import OtpInput from 'react-otp-input';
 
 const GeneralInformationSection = styled.div`
     display: flex;
@@ -35,47 +36,47 @@ export const DashBoardPage = () => {
     const [isTriggerMoneyTransfer, setMoneyTransferTriggerStatus] =
         useState(false);
 
+    const getPaymentBankAccount = useCallback(() => {
+        const apiUrl = `${process.env.REACT_APP_BANK_ACCOUNT_API_URL_PATH}?isPayment=true`;
+
+        fetch(apiUrl, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: localStorage.getItem('accessToken'),
+            },
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                setPaymentAccount(data[0]);
+                localStorage.setItem(
+                    'payment-account-number',
+                    data[0].accountNumber
+                );
+            });
+    }, []);
+
+    const getReceivers = useCallback(() => {
+        const url = `${
+            process.env.REACT_APP_RECEIVER_API_URL_PATH
+        }?accountNumber=${localStorage.getItem('payment-account-number')}`;
+
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: localStorage.getItem('accessToken'),
+            },
+        })
+            .then((response) => response.json())
+            .then((data) => setReceivers(data));
+    }, []);
+
     useEffect(() => {
-        const getPaymentBankAccount = async () => {
-            const apiUrl = `${process.env.REACT_APP_BANK_ACCOUNT_API_URL_PATH}?isPayment=true`;
-
-            await fetch(apiUrl, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: localStorage.getItem('accessToken'),
-                },
-            })
-                .then((response) => response.json())
-                .then((data) => {
-                    setPaymentAccount(data[0]);
-                    localStorage.setItem(
-                        'payment-account-number',
-                        data[0].accountNumber
-                    );
-                });
-        };
-
         getPaymentBankAccount();
     }, [bankAccounts]);
 
     useEffect(() => {
-        const getReceivers = async () => {
-            const url = `${
-                process.env.REACT_APP_RECEIVER_API_URL_PATH
-            }?accountNumber=${localStorage.getItem('payment-account-number')}`;
-
-            fetch(url, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: localStorage.getItem('accessToken'),
-                },
-            })
-                .then((response) => response.json())
-                .then((data) => setReceivers(data));
-        };
-
         getReceivers();
     }, [isTriggerMoneyTransfer, paymentAccountInfo]);
 
@@ -177,23 +178,25 @@ export const DashBoardPage = () => {
         },
     ];
 
-    const onChangeAccountClick = () => {
-        const getBankAccounts = async () => {
-            await fetch(process.env.REACT_APP_BANK_ACCOUNT_API_URL_PATH, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: localStorage.getItem('accessToken'),
-                },
-            })
-                .then((response) => response.json())
-                .then((data) => {
-                    setBankAccountList(data);
-                });
-        };
+    const getBankAccounts = useCallback(() => {
+        fetch(process.env.REACT_APP_BANK_ACCOUNT_API_URL_PATH, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: localStorage.getItem('accessToken'),
+            },
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                setBankAccountList(data);
+            });
+    }, []);
 
+    const onChangeAccountClick = () => {
         getBankAccounts();
         toggleChangeAccountModalVisible();
+
+        getPaymentBankAccount();
     };
 
     const renderGeneralInformation = () =>
@@ -243,7 +246,8 @@ export const DashBoardPage = () => {
             },
             body: JSON.stringify(payload),
         })
-            .then(() => {
+            .then((response) => response.json())
+            .then((data) => {
                 message.success('Successfully!!!');
 
                 const isNotSavedReceiverBefore =
@@ -258,90 +262,102 @@ export const DashBoardPage = () => {
                     </Checkbox>
                 );
 
-                Modal.info({
-                    title: 'Hoá đơn thanh toán',
+                // Modal.info({
+                //     title: 'Hoá đơn thanh toán',
+                //     content: (
+                //         <div>
+                //             <p>
+                //                 <strong>Số tài khoản gửi: </strong>
+                //                 {localStorage.getItem('payment-account-number')}
+                //             </p>
+                //             <p>
+                //                 <strong>Số tài khoản nhận: </strong>
+                //                 {receiverAccountNumber}
+                //             </p>
+                //             <p>
+                //                 <strong>Số tiền gửi: </strong>
+                //                 {deposit} VND
+                //             </p>
+                //             <p>
+                //                 <strong>Phương thức thanh toán: </strong>
+                //                 {
+                //                     transferMethods.find(
+                //                         (t) => t._id === transferMethodId
+                //                     ).name
+                //                 }
+                //                 VND
+                //             </p>
+                //             <p>
+                //                 <strong>Thời điểm giao dịch: </strong>
+                //                 {new Date(1671526838622)
+                //                     .toLocaleDateString('en-GB', {
+                //                         day: 'numeric',
+                //                         month: 'long',
+                //                         year: 'numeric',
+                //                     })
+                //                     .replace(/ /g, ' ')}
+                //             </p>
+                //             {savedReceiverCheckbox}
+                //         </div>
+                //     ),
+                //     onOk: () => {
+                //         // if (isNotSavedReceiverBefore) {
+                //         //     let savedReceiverCheckbox = document.querySelector(
+                //         //         '#saveReceiverCheckBox'
+                //         //     );
+                //         //     var isSaveReceiverChecked =
+                //         //         savedReceiverCheckbox.checked === true;
+
+                //         //     if (isSaveReceiverChecked) {
+                //         //         const payload = {
+                //         //             senderAccountNumber: localStorage.getItem(
+                //         //                 'payment-account-number'
+                //         //             ),
+                //         //             receiverAccountNumber,
+                //         //         };
+
+                //         //         fetch(
+                //         //             process.env.REACT_APP_RECEIVER_API_URL_PATH,
+                //         //             {
+                //         //                 method: 'POST',
+                //         //                 headers: {
+                //         //                     'Content-Type': 'application/json',
+                //         //                     Authorization:
+                //         //                         localStorage.getItem(
+                //         //                             'accessToken'
+                //         //                         ),
+                //         //                 },
+                //         //                 body: JSON.stringify(payload),
+                //         //             }
+                //         //         )
+                //         //             .then((response) =>
+                //         //                 message.success(
+                //         //                     'Lưu người nhận thành công'
+                //         //                 )
+                //         //             )
+                //         //             .catch((error) =>
+                //         //                 message.error('Lưu người nhận thất bại')
+                //         //             );
+
+                //         //         savedReceiverCheckbox.checked = false;
+                //         //     }
+                //         // }
+
+                //         moneyTransferForm.resetFields();
+                //         setMoneyTransferTriggerStatus(!isTriggerMoneyTransfer);
+                //     },
+                // });
+
+                Modal.confirm({
+                    title: 'Xác nhận giao dịch',
                     content: (
-                        <div>
-                            <p>
-                                <strong>Số tài khoản gửi: </strong>
-                                {localStorage.getItem('payment-account-number')}
-                            </p>
-                            <p>
-                                <strong>Số tài khoản nhận: </strong>
-                                {receiverAccountNumber}
-                            </p>
-                            <p>
-                                <strong>Số tiền gửi: </strong>
-                                {deposit} VND
-                            </p>
-                            <p>
-                                <strong>Phương thức thanh toán: </strong>
-                                {
-                                    transferMethods.find(
-                                        (t) => t._id === transferMethodId
-                                    ).name
-                                }
-                                VND
-                            </p>
-                            <p>
-                                <strong>Thời điểm giao dịch: </strong>
-                                {new Date(1671526838622)
-                                    .toLocaleDateString('en-GB', {
-                                        day: 'numeric',
-                                        month: 'long',
-                                        year: 'numeric',
-                                    })
-                                    .replace(/ /g, ' ')}
-                            </p>
-                            {savedReceiverCheckbox}
-                        </div>
+                        <>
+                            <OtpInput
+                                numInputs={4}
+                                separator={<span>-</span>}
+                            />
+                        </>
                     ),
-                    onOk: () => {
-                        if (isNotSavedReceiverBefore) {
-                            let savedReceiverCheckbox = document.querySelector(
-                                '#saveReceiverCheckBox'
-                            );
-                            var isSaveReceiverChecked =
-                                savedReceiverCheckbox.checked === true;
-
-                            if (isSaveReceiverChecked) {
-                                const payload = {
-                                    senderAccountNumber: localStorage.getItem(
-                                        'payment-account-number'
-                                    ),
-                                    receiverAccountNumber,
-                                };
-
-                                fetch(
-                                    process.env.REACT_APP_RECEIVER_API_URL_PATH,
-                                    {
-                                        method: 'POST',
-                                        headers: {
-                                            'Content-Type': 'application/json',
-                                            Authorization:
-                                                localStorage.getItem(
-                                                    'accessToken'
-                                                ),
-                                        },
-                                        body: JSON.stringify(payload),
-                                    }
-                                )
-                                    .then((response) =>
-                                        message.success(
-                                            'Lưu người nhận thành công'
-                                        )
-                                    )
-                                    .catch((error) =>
-                                        message.error('Lưu người nhận thất bại')
-                                    );
-
-                                savedReceiverCheckbox.checked = false;
-                            }
-                        }
-
-                        moneyTransferForm.resetFields();
-                        setMoneyTransferTriggerStatus(!isTriggerMoneyTransfer);
-                    },
                 });
             })
             .catch((error) => message.error(error));
