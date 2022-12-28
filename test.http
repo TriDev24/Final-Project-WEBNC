@@ -3,12 +3,12 @@ Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjoiNjM5OWI2OWM2OGQ4
 Content-Type: application/json
 
 {
-    "accountNumber":"186672",
-    "debtAccountNumber":"899604",
+    "accountNumber":"899604",
+    "debtAccountNumber":"186672",
     "amountToPay":800000,
     "content":"Chuyển tiền gấp, đang thiếu"
 }
 
 ###
-DELETE http://localhost:8080/api/debit/639d4bd100318d8a7b662638
+DELETE  http://localhost:8080/api/debits/639d2f0bd6e5b3eb1372e5ec
 Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjoiNjM5OWI2OWM2OGQ4Zjc5MmVkM2JkZThjIiwiaWF0IjoxNjcxMjQ0ODgzLCJleHAiOjE2NzM4MzY4ODN9.A_EVVlVGojCfOxD4vuBWRZAtnb07PEna_B4NXN3_zeQ

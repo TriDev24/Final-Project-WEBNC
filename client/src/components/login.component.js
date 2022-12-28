@@ -20,7 +20,7 @@ const LoginForm = () => {
         if (!g_token) {
             messageApi.open({
                 type: 'error',
-                content: 'Captcha is not correct',
+                content: 'Captcha không chính xác!',
             });
             setLoading(false);
         } else {
@@ -41,7 +41,7 @@ const LoginForm = () => {
             if (result.accessToken) {
                 messageApi.open({
                     type: 'success',
-                    content: 'Login successfully!',
+                    content: 'Đăng nhập thành công!',
                 });
                 localStorage.setItem('accessToken', result.accessToken);
                 localStorage.setItem('refreshToken', result.refreshToken);
@@ -75,8 +75,8 @@ const LoginForm = () => {
                 <Form.Item
                     name='email'
                     rules={[
-                        { required: true, message: 'Please input your Email!' },
-                        { type: 'email', message: 'Email invalidate' },
+                        { required: true, message: 'Mời bạn nhập email!' },
+                        { type: 'email', message: 'Email không đúng định dạng' },
                     ]}>
                     <Input
                         prefix={
@@ -90,7 +90,7 @@ const LoginForm = () => {
                     rules={[
                         {
                             required: true,
-                            message: 'Please input your Password!',
+                            message: 'Mời bạn nhập mật khẩu!',
                         },
                     ]}>
                     <Input
@@ -115,7 +115,7 @@ const LoginForm = () => {
                         htmlType='submit'
                         className='login-form-button'
                         loading={loading}>
-                        Log in
+                        Đăng nhập
                     </Button>
                 </Form.Item>
             </Form>

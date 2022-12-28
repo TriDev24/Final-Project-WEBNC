@@ -34,15 +34,15 @@ export const BankAccountItem = ({
         <Container>
             <AccountInformation>
                 <StyledParagraph>
-                    <strong>Account Number:</strong> {bankAccount.accountNumber}
+                    <strong>Số tài khoản:</strong> {bankAccount.accountNumber}
                 </StyledParagraph>
                 <StyledParagraph>
-                    <strong>Over Balance:</strong> {bankAccount.overBalance}
+                    <strong>Số dư:</strong> {bankAccount.overBalance}
                 </StyledParagraph>
             </AccountInformation>
             {isNotPaymentAccount && (
                 <Button onClick={onChangeToPaymentAccountClick}>
-                    Set Is Payment
+                    Đặt tài khoản thanh toán
                 </Button>
             )}
         </Container>

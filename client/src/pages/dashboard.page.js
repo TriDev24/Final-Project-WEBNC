@@ -153,7 +153,7 @@ export const DashBoardPage = () => {
         },
         {
             icon: <ContactsOutlined />,
-            name: 'Ghi nợ',
+            name: 'Tạo nhắc nợ',
             onClick: () => {},
         },
         {
@@ -177,7 +177,7 @@ export const DashBoardPage = () => {
             key: 'money',
         },
         {
-            title: 'Hình thức',
+            title: 'Hình thức thanh toán',
             dataIndex: 'method',
             key: 'method',
         },
@@ -213,15 +213,15 @@ export const DashBoardPage = () => {
         ) : (
             <>
                 <div>
-                    <Title level={2}>General Information</Title>
-                    <p>Account Number: {paymentAccountInfo.accountNumber}</p>
+                    <Title level={2}>Thông tin chung</Title>
+                    <p>Số tài khoản: {paymentAccountInfo.accountNumber}</p>
                     <p>
-                        Account Name: {getProfileFromLocalStorage().aliasName}
+                        Chủ tài khoản: {getProfileFromLocalStorage().aliasName}
                     </p>
-                    <p>Over Balance: {paymentAccountInfo.overBalance} (VND)</p>
+                    <p>Số dư: {paymentAccountInfo.overBalance} (VND)</p>
                 </div>
                 <Button type='primary' onClick={onChangeAccountClick}>
-                    Change Account
+                    Thay đổi tài khoản
                 </Button>
             </>
         );
@@ -286,7 +286,7 @@ export const DashBoardPage = () => {
                                 {deposit} VND
                             </p>
                             <p>
-                                <strong>Phương thức thanh toán: </strong>
+                                <strong>Hình thức thanh toán phí: </strong>
                                 {
                                     transferMethods.find(
                                         (t) => t._id === transferMethodId
@@ -367,7 +367,7 @@ export const DashBoardPage = () => {
         <AppLayout>
             <Modal
                 footer={null}
-                title='Bank Accounts'
+                title='Tài khoản ngân hàng'
                 open={changeAccountModalVisibility}
                 onCancel={toggleChangeAccountModalVisible}>
                 <BankAccountList
@@ -381,7 +381,7 @@ export const DashBoardPage = () => {
 
             <Modal
                 footer={null}
-                title='Money Transfer'
+                title='Chuyển khoản'
                 open={moneyTransferModalVisibility}
                 onCancel={handleMoneyTransferModalCancel}>
                 <MoneyTransferForm
@@ -395,7 +395,7 @@ export const DashBoardPage = () => {
 
             <Modal
                 footer={null}
-                title='Change Password'
+                title='Thay đổi mật khẩu'
                 open={changePasswordModalVisibility}
                 onCancel={changePasswordModalVisible}>
                 <ChangePasswordForm
@@ -416,7 +416,7 @@ export const DashBoardPage = () => {
             </ServiceSection>
 
             <HistorySection>
-                <Title level={2}>History</Title>
+                <Title level={2}>Lịch sử giao dịch</Title>
                 <Table dataSource={dataSource} columns={columns} />
             </HistorySection>
         </AppLayout>

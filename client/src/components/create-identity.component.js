@@ -27,7 +27,7 @@ const CreateIdentityModal = () => {
         if (confirm !== password) {
             messageApi.open({
                 type: 'error',
-                content: 'Confirm password is not same as password',
+                content: 'Nhập lại mật khẩu không trùng khớp với mật khẩu',
             });
             setLoading(false);
         } else {
@@ -55,7 +55,7 @@ const CreateIdentityModal = () => {
             if (!result.message) {
                 messageApi.open({
                     type: 'success',
-                    content: 'Create successfully!',
+                    content: 'Tạo tài khoản thanh toán!',
                 });
                 form.resetFields();
                 setLoading(false);
@@ -84,7 +84,7 @@ const CreateIdentityModal = () => {
             </Button>
             <Modal
                 footer={null}
-                title='Create Identity'
+                title='Tạo tài khoản khách hàng'
                 open={isModalOpen}
                 onCancel={handleCancel}>
                 <div
@@ -111,9 +111,9 @@ const CreateIdentityModal = () => {
                             rules={[
                                 {
                                     required: true,
-                                    message: 'Please input your Email!',
+                                    message: 'Mời bạn nhập email!',
                                 },
-                                { type: 'email', message: 'Email invalidate' },
+                                { type: 'email', message: 'Email không đúng định dạng!' },
                             ]}>
                             <Input
                                 prefix={
@@ -127,11 +127,11 @@ const CreateIdentityModal = () => {
                             rules={[
                                 {
                                     required: true,
-                                    message: 'Please input your Password!',
+                                    message: 'Mời bạn nhập mật khẩu!',
                                 },
                                 {
                                     min: 8,
-                                    message: 'Password at least 8 characters',
+                                    message: 'Mật khẩu phải ít nhất 8 ký tự!',
                                 },
                             ]}>
                             <Input
@@ -139,7 +139,7 @@ const CreateIdentityModal = () => {
                                     <LockOutlined className='site-form-item-icon' />
                                 }
                                 type='password'
-                                placeholder='Password'
+                                placeholder='Mật khẩu'
                             />
                         </Form.Item>
 
@@ -149,12 +149,12 @@ const CreateIdentityModal = () => {
                                 {
                                     required: true,
                                     message:
-                                        'Please input your Confirm Password!',
+                                        'Mời bạn xác nhận lại mật khẩu!',
                                 },
                                 {
                                     min: 8,
                                     message:
-                                        'Confirm Password at least 8 characters',
+                                        'Mật khẩu xác nhận phải ít nhất 8 ký tự',
                                 },
                             ]}>
                             <Input
@@ -162,7 +162,7 @@ const CreateIdentityModal = () => {
                                     <LockOutlined className='site-form-item-icon' />
                                 }
                                 type='password'
-                                placeholder='Confirm Password'
+                                placeholder='Xác nhận mật khẩu'
                             />
                         </Form.Item>
 
@@ -171,14 +171,14 @@ const CreateIdentityModal = () => {
                             rules={[
                                 {
                                     required: true,
-                                    message: 'Please input your First Name!',
+                                    message: 'Mời bạn nhập tên!',
                                 },
                             ]}>
                             <Input
                                 prefix={
                                     <ProfileOutlined className='site-form-item-icon' />
                                 }
-                                placeholder='First Name'
+                                placeholder='Tên'
                             />
                         </Form.Item>
 
@@ -187,14 +187,14 @@ const CreateIdentityModal = () => {
                             rules={[
                                 {
                                     required: true,
-                                    message: 'Please input your Last Name!',
+                                    message: 'Mời bạn nhập họ!',
                                 },
                             ]}>
                             <Input
                                 prefix={
                                     <ProfileOutlined className='site-form-item-icon' />
                                 }
-                                placeholder='Last Name'
+                                placeholder='Họ'
                             />
                         </Form.Item>
 
@@ -203,20 +203,20 @@ const CreateIdentityModal = () => {
                             rules={[
                                 {
                                     required: true,
-                                    message: 'Please input your Phone Number!',
+                                    message: 'Mời bạn nhập số điện thoại!',
                                 },
                                 {
                                     pattern: new RegExp(
                                         /(84|0[3|5|7|8|9])+([0-9]{8})\b/g
                                     ),
-                                    message: 'Phone number wrong format',
+                                    message: 'Số điện thoại không đúng định dạng',
                                 },
                             ]}>
                             <Input
                                 prefix={
                                     <PhoneOutlined className='site-form-item-icon' />
                                 }
-                                placeholder='Phone Number'
+                                placeholder='Số điện thoại'
                             />
                         </Form.Item>
 
@@ -225,14 +225,14 @@ const CreateIdentityModal = () => {
                             rules={[
                                 {
                                     required: true,
-                                    message: 'Please input your Alias Name!',
+                                    message: 'Mời bạn nhập tên gợi nhớ!',
                                 },
                             ]}>
                             <Input
                                 prefix={
                                     <ProfileOutlined className='site-form-item-icon' />
                                 }
-                                placeholder='Alias Name'
+                                placeholder='Tên gợi nhớ'
                             />
                         </Form.Item>
 
@@ -244,7 +244,7 @@ const CreateIdentityModal = () => {
                                 htmlType='submit'
                                 className='login-form-button'
                                 loading={loading}>
-                                Create
+                                Tạo tài khoản
                             </Button>
                         </Form.Item>
                     </Form>

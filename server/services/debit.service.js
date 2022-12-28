@@ -61,7 +61,8 @@ export default {
   },
 
   async deleteDebit(id) {
-    const result = await Debit.findByIdAndDelete(id);
+    const cancelled = await Status.create({name:"cancelled"})
+    const result = await Debit.findByIdAndUpdate(id, {statusId:cancelled._id});
     return result;
   },
 };
