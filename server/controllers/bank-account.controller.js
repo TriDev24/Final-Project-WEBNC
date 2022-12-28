@@ -1,4 +1,5 @@
 import BankAccount from '../models/bank-account.model.js';
+import { verifySignature } from '../utils/rsa.util.js';
 
 export default {
     async getAll(req, res) {
@@ -23,14 +24,16 @@ export default {
     },
 
     async create(req, res) {
-        const { identityId, bankTypeId } = req.body;
+        const { identityId } = req.body;
+
+        const defaultBank = await BankType.findOne({ name: 'My Bank' });
 
         const defaultBankAccount = {
             accountNumber: Math.floor(Math.random() * 1000000),
             overBalance: 0,
             isPayment: false,
             identityId: identityId,
-            bankTypeId: bankTypeId,
+            bankTypeId: defaultBank._id,
         };
 
         const insertedData = await BankAccount.create(defaultBankAccount);
@@ -80,5 +83,34 @@ export default {
             await session.abortTransaction();
             return res.status(500).json('Something went wrong on server');
         }
+    },
+
+    async rechargeMoney(req, res) {
+        const { id } = req.params;
+        const { deposit, signature } = req.body;
+
+        const isNotValidSignature = verifySignature(signature);
+        if (isNotValidSignature) {
+            return res.status(403).json('Not valid signature');
+        }
+
+        const bankAccount = await BankAccount.findById(id);
+        if (!bankAccount) {
+            return res.status(404).json('Cannot find this Bank Account');
+        }
+
+        const updatedBankAccount = await BankAccount.updateOne(
+            {
+                _id: id,
+            },
+            {
+                overBalance: bankAccount.overBalance + deposit,
+            }
+        );
+        if (!updatedBankAccount) {
+            return res.status(500).json('Something error');
+        }
+
+        return res.status(200).json('Recharge successfully');
     },
 };

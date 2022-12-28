@@ -38,7 +38,7 @@ export const ReceiverItem = ({ receiver, onSelectItemClick }) => {
             <Avatar size='large' icon={<UserOutlined />} />
             <UserInformation>
                 <UserName>{receiver.aliasName}</UserName>
-                <StyledParagraph>{receiver.bankName}</StyledParagraph>
+                <StyledParagraph>{receiver.bankType.name}</StyledParagraph>
             </UserInformation>
         </Container>
     );

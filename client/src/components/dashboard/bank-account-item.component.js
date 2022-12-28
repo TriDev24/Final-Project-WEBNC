@@ -24,11 +24,20 @@ export const BankAccountItem = ({
     onSelectPaymentAccountClick,
     bankAccount,
 }) => {
-    const isNotPaymentAccount = bankAccount._id !== paymentAccount._id;
+    const isPaymentAccount = bankAccount._id === paymentAccount._id;
 
     const onChangeToPaymentAccountClick = () => {
         onSelectPaymentAccountClick(bankAccount);
     };
+
+    const renderSignIfIsPaymentAccountOrButtonIfContrast = () =>
+        isPaymentAccount == true ? (
+            <i>Mặc định</i>
+        ) : (
+            <Button onClick={onChangeToPaymentAccountClick}>
+                Đặt làm mặc định
+            </Button>
+        );
 
     return (
         <Container>
@@ -40,11 +49,7 @@ export const BankAccountItem = ({
                     <strong>Số dư:</strong> {bankAccount.overBalance}
                 </StyledParagraph>
             </AccountInformation>
-            {isNotPaymentAccount && (
-                <Button onClick={onChangeToPaymentAccountClick}>
-                    Đặt tài khoản thanh toán
-                </Button>
-            )}
+            {renderSignIfIsPaymentAccountOrButtonIfContrast()}
         </Container>
     );
 };

@@ -1,15 +1,16 @@
 import Title from 'antd/es/typography/Title.js';
 import { AppLayout } from '../components/common/index.js';
 import styled from '@xstyled/styled-components';
-import { Button, Checkbox, message, Modal, Skeleton, Table } from 'antd';
+import { Button, Checkbox, message, Modal, Skeleton, Space, Table } from 'antd';
 import { ServiceList } from '../components/dashboard/index.js';
 import { SwapOutlined, SecurityScanOutlined } from '@ant-design/icons';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { getProfileFromLocalStorage } from '../utils/local-storage.util.js';
 import { BankAccountList } from '../components/dashboard/bank-account-list.component.js';
 import { MoneyTransferForm } from '../components/money-transfer/money-transfer-form.component.js';
 import { ChangePasswordForm } from '../components/change-password-form.component';
 import { Form } from 'antd';
+import OTPInput from '../components/common/otp-input/index.js';
 
 const GeneralInformationSection = styled.div`
     display: flex;
@@ -31,53 +32,62 @@ export const DashBoardPage = () => {
     const [bankAccounts, setBankAccountList] = useState([]);
     const [changeAccountModalVisibility, setChangeAccountModalVisibility] =
         useState(false);
+    const [confirmOtpModalVisibility, setConfirmOtpModalVisibility] =
+        useState(false);
     const [moneyTransferModalVisibility, setMoneyTransferModalVisibility] =
         useState(false);
     const [changePasswordModalVisibility, setChangePasswordModalVisibility] =
         useState(false);
+    const [currentReceiver, setCurrentReceiver] = useState(null);
+    const [otp, setOtp] = useState('');
     const [isTriggerMoneyTransfer, setMoneyTransferTriggerStatus] =
         useState(false);
 
-    useEffect(() => {
-        const getPaymentBankAccount = async () => {
-            const apiUrl = `${process.env.REACT_APP_BANK_ACCOUNT_API_URL_PATH}?isPayment=true`;
-            await fetch(apiUrl, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: localStorage.getItem('accessToken'),
-                },
-            })
-                .then((response) => response.json())
-                .then((data) => {
-                    setPaymentAccount(data[0]);
-                    localStorage.setItem(
-                        'payment-account-number',
-                        data[0].accountNumber
-                    );
-                });
-        };
+    const toggleConfirmOtpModalVisibility = () => {
+        setConfirmOtpModalVisibility(!confirmOtpModalVisibility);
+    };
 
+    const getPaymentBankAccount = useCallback(() => {
+        const apiUrl = `${process.env.REACT_APP_BANK_ACCOUNT_API_URL_PATH}?isPayment=true`;
+
+        fetch(apiUrl, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: localStorage.getItem('accessToken'),
+            },
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                setPaymentAccount(data[0]);
+                localStorage.setItem(
+                    'payment-account-number',
+                    data[0].accountNumber
+                );
+            });
+    }, []);
+
+    const getReceivers = useCallback(() => {
+        const url = `${
+            process.env.REACT_APP_RECEIVER_API_URL_PATH
+        }?accountNumber=${localStorage.getItem('payment-account-number')}`;
+
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: localStorage.getItem('accessToken'),
+            },
+        })
+            .then((response) => response.json())
+            .then((data) => setReceivers(data));
+    }, []);
+
+    useEffect(() => {
         getPaymentBankAccount();
     }, [bankAccounts]);
 
     useEffect(() => {
-        const getReceivers = async () => {
-            const url = `${
-                process.env.REACT_APP_RECEIVER_API_URL_PATH
-            }?accountNumber=${localStorage.getItem('payment-account-number')}`;
-
-            fetch(url, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: localStorage.getItem('accessToken'),
-                },
-            })
-                .then((response) => response.json())
-                .then((data) => setReceivers(data));
-        };
-
         getReceivers();
     }, [isTriggerMoneyTransfer, paymentAccountInfo]);
 
@@ -182,23 +192,25 @@ export const DashBoardPage = () => {
         },
     ];
 
-    const onChangeAccountClick = () => {
-        const getBankAccounts = async () => {
-            await fetch(process.env.REACT_APP_BANK_ACCOUNT_API_URL_PATH, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: localStorage.getItem('accessToken'),
-                },
-            })
-                .then((response) => response.json())
-                .then((data) => {
-                    setBankAccountList(data);
-                });
-        };
+    const getBankAccounts = useCallback(() => {
+        fetch(process.env.REACT_APP_BANK_ACCOUNT_API_URL_PATH, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: localStorage.getItem('accessToken'),
+            },
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                setBankAccountList(data);
+            });
+    }, []);
 
+    const handleChangeAccountClick = () => {
         getBankAccounts();
         toggleChangeAccountModalVisible();
+
+        getPaymentBankAccount();
     };
 
     const renderGeneralInformation = () =>
@@ -212,9 +224,9 @@ export const DashBoardPage = () => {
                     <p>
                         Chủ tài khoản: {getProfileFromLocalStorage().aliasName}
                     </p>
-                    <p>Số dư: {paymentAccountInfo.overBalance} (VND)</p>
+                    <p>Số dư: {paymentAccountInfo.overBalance} (VNĐ)</p>
                 </div>
-                <Button type='primary' onClick={onChangeAccountClick}>
+                <Button type='primary' onClick={handleChangeAccountClick}>
                     Thay đổi tài khoản
                 </Button>
             </>
@@ -248,58 +260,70 @@ export const DashBoardPage = () => {
             },
             body: JSON.stringify(payload),
         })
-            .then(() => {
+            .then((response) => response.json())
+            .then((data) => {
                 message.success('Successfully!!!');
 
-                const isNotSavedReceiverBefore =
-                    receivers &&
-                    !receivers.some(
-                        (value) => value.accountNumber === receiverAccountNumber
-                    );
+                const isNotSavedReceiverBefore = receivers.every((value) => {
+                    return value.accountNumber !== receiverAccountNumber;
+                });
 
-                const savedReceiverCheckbox = isNotSavedReceiverBefore && (
-                    <Checkbox id='saveReceiverCheckBox' defaultChecked={false}>
-                        Lưu nguời nhận
-                    </Checkbox>
+                localStorage.setItem(
+                    'is-not-saved-receiver-before',
+                    isNotSavedReceiverBefore
+                );
+                localStorage.setItem(
+                    'current-receiver-account-number',
+                    receiverAccountNumber
                 );
 
-                Modal.info({
-                    title: 'Hoá đơn thanh toán',
+                toggleConfirmOtpModalVisibility();
+                localStorage.setItem('billing-id', data._id);
+            })
+            .catch((error) => message.error(error));
+    };
+
+    const handleConfirmOtp = () => {
+        const url = `${
+            process.env.REACT_APP_BILLING_API_URL_PATH
+        }/${localStorage.getItem('billing-id')}/verify-otp`;
+        const payload = {
+            otp,
+        };
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: localStorage.getItem('accessToken'),
+            },
+            body: JSON.stringify(payload),
+        })
+            .then(() => {
+                message.success('Successfully');
+                toggleConfirmOtpModalVisibility();
+
+                // Show Success Modal.
+                const isNotSavedReceiverBefore = JSON.parse(
+                    localStorage.getItem('is-not-saved-receiver-before')
+                );
+                console.log(
+                    'isNotSavedReceiverBefore',
+                    isNotSavedReceiverBefore
+                );
+
+                Modal.success({
+                    title: 'Thành công',
                     content: (
-                        <div>
-                            <p>
-                                <strong>Số tài khoản gửi: </strong>
-                                {localStorage.getItem('payment-account-number')}
-                            </p>
-                            <p>
-                                <strong>Số tài khoản nhận: </strong>
-                                {receiverAccountNumber}
-                            </p>
-                            <p>
-                                <strong>Số tiền gửi: </strong>
-                                {deposit} VND
-                            </p>
-                            <p>
-                                <strong>Hình thức thanh toán phí: </strong>
-                                {
-                                    transferMethods.find(
-                                        (t) => t._id === transferMethodId
-                                    ).name
-                                }
-                                VND
-                            </p>
-                            <p>
-                                <strong>Thời điểm giao dịch: </strong>
-                                {new Date(1671526838622)
-                                    .toLocaleDateString('en-GB', {
-                                        day: 'numeric',
-                                        month: 'long',
-                                        year: 'numeric',
-                                    })
-                                    .replace(/ /g, ' ')}
-                            </p>
-                            {savedReceiverCheckbox}
-                        </div>
+                        <>
+                            {isNotSavedReceiverBefore && (
+                                <Checkbox
+                                    id='saveReceiverCheckBox'
+                                    defaultChecked={false}>
+                                    Lưu nguời nhận
+                                </Checkbox>
+                            )}
+                        </>
                     ),
                     onOk: () => {
                         if (isNotSavedReceiverBefore) {
@@ -314,8 +338,11 @@ export const DashBoardPage = () => {
                                     senderAccountNumber: localStorage.getItem(
                                         'payment-account-number'
                                     ),
-                                    receiverAccountNumber,
+                                    receiverAccountNumber: localStorage.getItem(
+                                        'current-receiver-account-number'
+                                    ),
                                 };
+                                console.log('payload nene: ', payload);
 
                                 fetch(
                                     process.env.REACT_APP_RECEIVER_API_URL_PATH,
@@ -331,11 +358,12 @@ export const DashBoardPage = () => {
                                         body: JSON.stringify(payload),
                                     }
                                 )
-                                    .then((response) =>
+                                    .then((response) => {
                                         message.success(
                                             'Lưu người nhận thành công'
-                                        )
-                                    )
+                                        );
+                                        getReceivers();
+                                    })
                                     .catch((error) =>
                                         message.error('Lưu người nhận thất bại')
                                     );
@@ -345,11 +373,13 @@ export const DashBoardPage = () => {
                         }
 
                         moneyTransferForm.resetFields();
-                        setMoneyTransferTriggerStatus(!isTriggerMoneyTransfer);
+                        setOtp('');
                     },
                 });
             })
-            .catch((error) => message.error(error));
+            .catch((error) => {
+                message.error(error);
+            });
     };
 
     const handleMoneyTransferModalCancel = () => {
@@ -359,6 +389,22 @@ export const DashBoardPage = () => {
 
     return (
         <AppLayout>
+            <Modal
+                title='Xác nhận giao dịch'
+                centered
+                okText='Confirm'
+                onOk={handleConfirmOtp}
+                onCancel={toggleConfirmOtpModalVisibility}
+                open={confirmOtpModalVisibility}>
+                <OTPInput
+                    autoFocus
+                    length={4}
+                    onChangeOTP={(value) => {
+                        setOtp(value);
+                    }}
+                />
+            </Modal>
+
             <Modal
                 footer={null}
                 title='Tài khoản ngân hàng'
@@ -397,7 +443,6 @@ export const DashBoardPage = () => {
                     receivers={receivers}
                     bankTypes={bankTypes}
                     transferMethods={transferMethods}
-                    // onConfirmTransfer={handleConfirmTransfer}
                 />
             </Modal>
 

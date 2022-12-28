@@ -8,4 +8,6 @@ router.use(auth);
 
 router.post('/', controller.create);
 
+router.post('/:id/verify-otp', controller.verifyOtp);
+
 export default router;

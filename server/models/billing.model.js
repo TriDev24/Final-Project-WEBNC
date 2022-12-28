@@ -13,6 +13,8 @@ const schema = {
     description: String,
     transferFee: Number,
     transferTime: String,
+    otpCode: String,
+    isVerified: { type: Boolean, default: false },
 };
 
 export default generate('Billings', schema);
