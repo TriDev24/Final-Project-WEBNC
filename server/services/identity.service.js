@@ -15,7 +15,7 @@ export default {
         if (result) {
             const getUserMatchedWithEmail = {
                 $match: {
-                    email: 'tientai@gmail.com',
+                    email,
                 },
             };
             const joinWithPermissionTable = {

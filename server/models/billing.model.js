@@ -15,6 +15,7 @@ const schema = {
     transferTime: String,
     otpCode: String,
     isVerified: { type: Boolean, default: false },
+    signature: { type: String, default: null },
 };
 
 export default generate('Billings', schema);

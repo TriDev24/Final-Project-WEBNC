@@ -4,10 +4,10 @@ import { TransferFee } from '../models/transfer-fee.model.js';
 import BankAccount from '../models/bank-account.model.js';
 import { TransferType } from '../models/transfer-type.model.js';
 import TransferMethod from '../models/transfer-method.model.js';
-import { generateOtp } from '../utils/otp.service.js';
-import { sendVerifyOtpEmail } from '../utils/email.service.js';
+import { generateOtp } from '../utils/otp.util.js';
+import { sendVerifyOtpEmail } from '../utils/email.util.js';
 import Identity from '../models/identity.model.js';
-import { generateSignature } from '../utils/rsa.util.js';
+import { generateSignature, verifySignature } from '../utils/rsa.util.js';
 
 export default {
     async create(req, res) {
@@ -29,13 +29,6 @@ export default {
             return res.status(404).json('Sender Account Number not Found');
         }
 
-        const receiverBankAccount = await BankAccount.findOne({
-            accountNumber: receiverAccountNumber,
-        });
-        if (!receiverBankAccount) {
-            return res.status(404).json('Receiver Account Number not Found');
-        }
-
         const transferMethod = await TransferMethod.findById(transferMethodId);
         if (!transferMethod) {
             return res.status(404).json('Transfer Method was not Found');
@@ -48,6 +41,16 @@ export default {
         const isInternalBank = internalBank._id.toString() === bankTypeId;
 
         if (isInternalBank) {
+            // check if receiver existed
+            const receiverBankAccount = await BankAccount.findOne({
+                accountNumber: receiverAccountNumber,
+            });
+            if (!receiverBankAccount) {
+                return res
+                    .status(404)
+                    .json('Receiver Account Number not Found');
+            }
+
             let insertedData;
 
             // Update Bank Account OverBalance
@@ -179,28 +182,43 @@ export default {
             });
         }
 
+        // Verify that receiver bank account existed by receiver bank account number
+        // fetch(url, {
+        //     method: 'GET',
+        //     headers: {
+        //         'Content-Type': 'application/json',
+        //     },
+        // });
+
         // Cross external bank.
+        const generatedSignature = generateSignature();
+        console.log('generatedSignature', generatedSignature.toJSON());
+
+        const decodedSignature = verifySignature(generatedSignature);
+        console.log('decodedSignature', decodedSignature);
+
         const url = `${process.env.EXTERNAL_BANK_API_URL}`;
         const payload = {
-            signature: generateSignature(),
+            signature: generatedSignature,
         };
 
-        fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(payload),
-        })
-            .then(() => {
-                console.log('Ok');
-            })
-            .catch((error) =>
-                res.status(500).json(
-                    `Something error on transfer money to external bank:
-                        ${error}`
-                )
-            );
+        // Goi API cap nhat so du cua API lien ket
+        // fetch(url, {
+        //     method: 'POST',
+        //     headers: {
+        //         'Content-Type': 'application/json',
+        //     },
+        //     body: JSON.stringify(payload),
+        // })
+        //     .then(() => {
+        //         console.log('Ok');
+        //     })
+        //     .catch((error) =>
+        //         res.status(500).json(
+        //             `Something error on transfer money to external bank:
+        //                 ${error}`
+        //         )
+        //     );
     },
 
     async verifyOtp(req, res) {
