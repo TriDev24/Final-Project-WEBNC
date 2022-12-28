@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { CreditCardOutlined } from '@ant-design/icons';
 import { Avatar, Layout, Menu, theme } from 'antd';
+import { getProfileFromLocalStorage } from '../../utils/local-storage.util.js';
 
 const { Header, Content, Footer, Sider } = Layout;
 
@@ -13,10 +14,14 @@ const getItem = (label, key, icon, children) => {
     };
 };
 
-const items = [getItem('Account', '1', <CreditCardOutlined />)];
+const items = [getItem('Tài khoản', '1', <CreditCardOutlined />)];
 
 export const AppLayout = ({ children }) => {
     const [collapsed, setCollapsed] = useState(false);
+
+    const { firstName, lastName } = getProfileFromLocalStorage();
+    const avatarPlaceholder =
+        firstName[0].toUpperCase() + lastName[0].toUpperCase();
 
     const {
         token: { colorBgContainer },
@@ -61,7 +66,7 @@ export const AppLayout = ({ children }) => {
                             verticalAlign: 'middle',
                         }}
                         size='large'>
-                        TT
+                        {avatarPlaceholder}
                     </Avatar>
                 </Header>
                 <Content

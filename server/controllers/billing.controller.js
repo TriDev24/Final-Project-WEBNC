@@ -73,9 +73,10 @@ export default {
 
                 // Increase over balance of receiver bank account
                 const isReceiverNotEnoughMoneyToPayTransferFee =
-                    receiverBankAccount.overBalance + deposit < transferFee;
+                    receiverBankAccount.overBalance + deposit <
+                    TransferFee.Internal;
                 if (isReceiverNotEnoughMoneyToPayTransferFee) {
-                    res.status(401).json(
+                    res.status(403).json(
                         'Receiver Not Enough Money To Pay Transfer Fee'
                     );
                 }
@@ -88,7 +89,7 @@ export default {
                         overBalance:
                             receiverBankAccount.overBalance +
                             deposit -
-                            transferFee,
+                            TransferFee.Internal,
                     }
                 );
                 if (!updatedReceiverOverBalance) {
@@ -171,7 +172,7 @@ export default {
             const identity = await Identity.findById(
                 receiverBankAccount.identityId
             );
-            sendVerifyOtpEmail(identity.email);
+            sendVerifyOtpEmail(identity.email, generatedOtp);
 
             return res.status(200).json({
                 _id: insertedData._id,
@@ -206,6 +207,9 @@ export default {
         const { id } = req.params;
         const { otp } = req.body;
 
+        console.log('id: ', id);
+        console.log('otp', otp);
+
         const billing = await Billing.findById(id);
         if (!billing) {
             return res
@@ -215,7 +219,7 @@ export default {
 
         const isNotMatchOtp = billing.otpCode !== otp;
         if (isNotMatchOtp) {
-            return res.status(401).json('The Otp is Not correct');
+            return res.status(403).json('The Otp is Not correct');
         }
 
         const updatedBilling = await Billing.updateOne(

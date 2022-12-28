@@ -1,15 +1,20 @@
 import Title from 'antd/es/typography/Title.js';
 import { AppLayout } from '../components/common/index.js';
 import styled from '@xstyled/styled-components';
-import { Button, Checkbox, message, Modal, Skeleton, Table } from 'antd';
+import { Button, Checkbox, message, Modal, Skeleton, Space, Table } from 'antd';
 import { ServiceList } from '../components/dashboard/index.js';
-import { ContactsOutlined, SwapOutlined } from '@ant-design/icons';
-import { useCallback, useEffect, useState } from 'react';
+import {
+    ContactsOutlined,
+    SwapOutlined,
+    SecurityScanOutlined,
+} from '@ant-design/icons';
+import { useEffect, useState, useCallback } from 'react';
 import { getProfileFromLocalStorage } from '../utils/local-storage.util.js';
 import { BankAccountList } from '../components/dashboard/bank-account-list.component.js';
 import { MoneyTransferForm } from '../components/money-transfer/money-transfer-form.component.js';
+import { ChangePasswordForm } from '../components/change-password-form.component';
 import { Form } from 'antd';
-import OtpInput from 'react-otp-input';
+import OTPInput from '../components/common/otp-input/index.js';
 
 const GeneralInformationSection = styled.div`
     display: flex;
@@ -31,10 +36,20 @@ export const DashBoardPage = () => {
     const [bankAccounts, setBankAccountList] = useState([]);
     const [changeAccountModalVisibility, setChangeAccountModalVisibility] =
         useState(false);
+    const [confirmOtpModalVisibility, setConfirmOtpModalVisibility] =
+        useState(false);
     const [moneyTransferModalVisibility, setMoneyTransferModalVisibility] =
         useState(false);
+    const [changePasswordModalVisibility, setChangePasswordModalVisibility] =
+        useState(false);
+    const [currentReceiver, setCurrentReceiver] = useState(null);
+    const [otp, setOtp] = useState('');
     const [isTriggerMoneyTransfer, setMoneyTransferTriggerStatus] =
         useState(false);
+
+    const toggleConfirmOtpModalVisibility = () => {
+        setConfirmOtpModalVisibility(!confirmOtpModalVisibility);
+    };
 
     const getPaymentBankAccount = useCallback(() => {
         const apiUrl = `${process.env.REACT_APP_BANK_ACCOUNT_API_URL_PATH}?isPayment=true`;
@@ -140,6 +155,9 @@ export const DashBoardPage = () => {
     const toggleMoneyTransferModalVisible = () =>
         setMoneyTransferModalVisibility(!moneyTransferModalVisibility);
 
+    const changePasswordModalVisible = () =>
+        setChangePasswordModalVisibility(!changePasswordModalVisibility);
+
     const services = [
         {
             icon: <SwapOutlined />,
@@ -150,6 +168,11 @@ export const DashBoardPage = () => {
             icon: <ContactsOutlined />,
             name: 'Ghi nợ',
             onClick: () => {},
+        },
+        {
+            icon: <SecurityScanOutlined />,
+            name: 'Thay đổi mật khẩu',
+            onClick: changePasswordModalVisible,
         },
     ];
 
@@ -192,7 +215,7 @@ export const DashBoardPage = () => {
             });
     }, []);
 
-    const onChangeAccountClick = () => {
+    const handleChangeAccountClick = () => {
         getBankAccounts();
         toggleChangeAccountModalVisible();
 
@@ -205,15 +228,16 @@ export const DashBoardPage = () => {
         ) : (
             <>
                 <div>
-                    <Title level={2}>General Information</Title>
-                    <p>Account Number: {paymentAccountInfo.accountNumber}</p>
+                    <Title level={2}>Thông tin chung</Title>
+                    <p>Số tài khoản: {paymentAccountInfo.accountNumber}</p>
                     <p>
-                        Account Name: {getProfileFromLocalStorage().aliasName}
+                        Tên chủ tài khoản:{' '}
+                        {getProfileFromLocalStorage().aliasName}
                     </p>
-                    <p>Over Balance: {paymentAccountInfo.overBalance} (VND)</p>
+                    <p>Số dư: {paymentAccountInfo.overBalance} (VNĐ)</p>
                 </div>
-                <Button type='primary' onClick={onChangeAccountClick}>
-                    Change Account
+                <Button type='primary' onClick={handleChangeAccountClick}>
+                    Đổi tài khoản
                 </Button>
             </>
         );
@@ -250,117 +274,122 @@ export const DashBoardPage = () => {
             .then((data) => {
                 message.success('Successfully!!!');
 
-                const isNotSavedReceiverBefore =
-                    receivers &&
-                    !receivers.some(
-                        (value) => value.accountNumber === receiverAccountNumber
-                    );
+                const isNotSavedReceiverBefore = receivers.every((value) => {
+                    return value.accountNumber !== receiverAccountNumber;
+                });
 
-                const savedReceiverCheckbox = isNotSavedReceiverBefore && (
-                    <Checkbox id='saveReceiverCheckBox' defaultChecked={false}>
-                        Lưu nguời nhận
-                    </Checkbox>
+                localStorage.setItem(
+                    'is-not-saved-receiver-before',
+                    isNotSavedReceiverBefore
+                );
+                localStorage.setItem(
+                    'current-receiver-account-number',
+                    receiverAccountNumber
                 );
 
-                // Modal.info({
-                //     title: 'Hoá đơn thanh toán',
-                //     content: (
-                //         <div>
-                //             <p>
-                //                 <strong>Số tài khoản gửi: </strong>
-                //                 {localStorage.getItem('payment-account-number')}
-                //             </p>
-                //             <p>
-                //                 <strong>Số tài khoản nhận: </strong>
-                //                 {receiverAccountNumber}
-                //             </p>
-                //             <p>
-                //                 <strong>Số tiền gửi: </strong>
-                //                 {deposit} VND
-                //             </p>
-                //             <p>
-                //                 <strong>Phương thức thanh toán: </strong>
-                //                 {
-                //                     transferMethods.find(
-                //                         (t) => t._id === transferMethodId
-                //                     ).name
-                //                 }
-                //                 VND
-                //             </p>
-                //             <p>
-                //                 <strong>Thời điểm giao dịch: </strong>
-                //                 {new Date(1671526838622)
-                //                     .toLocaleDateString('en-GB', {
-                //                         day: 'numeric',
-                //                         month: 'long',
-                //                         year: 'numeric',
-                //                     })
-                //                     .replace(/ /g, ' ')}
-                //             </p>
-                //             {savedReceiverCheckbox}
-                //         </div>
-                //     ),
-                //     onOk: () => {
-                //         // if (isNotSavedReceiverBefore) {
-                //         //     let savedReceiverCheckbox = document.querySelector(
-                //         //         '#saveReceiverCheckBox'
-                //         //     );
-                //         //     var isSaveReceiverChecked =
-                //         //         savedReceiverCheckbox.checked === true;
-
-                //         //     if (isSaveReceiverChecked) {
-                //         //         const payload = {
-                //         //             senderAccountNumber: localStorage.getItem(
-                //         //                 'payment-account-number'
-                //         //             ),
-                //         //             receiverAccountNumber,
-                //         //         };
-
-                //         //         fetch(
-                //         //             process.env.REACT_APP_RECEIVER_API_URL_PATH,
-                //         //             {
-                //         //                 method: 'POST',
-                //         //                 headers: {
-                //         //                     'Content-Type': 'application/json',
-                //         //                     Authorization:
-                //         //                         localStorage.getItem(
-                //         //                             'accessToken'
-                //         //                         ),
-                //         //                 },
-                //         //                 body: JSON.stringify(payload),
-                //         //             }
-                //         //         )
-                //         //             .then((response) =>
-                //         //                 message.success(
-                //         //                     'Lưu người nhận thành công'
-                //         //                 )
-                //         //             )
-                //         //             .catch((error) =>
-                //         //                 message.error('Lưu người nhận thất bại')
-                //         //             );
-
-                //         //         savedReceiverCheckbox.checked = false;
-                //         //     }
-                //         // }
-
-                //         moneyTransferForm.resetFields();
-                //         setMoneyTransferTriggerStatus(!isTriggerMoneyTransfer);
-                //     },
-                // });
-
-                Modal.confirm({
-                    title: 'Xác nhận giao dịch',
-                    content: (
-                        <>
-                            <OtpInput
-                                numInputs={4}
-                                separator={<span>-</span>}
-                            />
-                        </>
-                    ),
-                });
+                toggleConfirmOtpModalVisibility();
+                localStorage.setItem('billing-id', data._id);
             })
             .catch((error) => message.error(error));
+    };
+
+    const handleConfirmOtp = () => {
+        const url = `${
+            process.env.REACT_APP_BILLING_API_URL_PATH
+        }/${localStorage.getItem('billing-id')}/verify-otp`;
+        const payload = {
+            otp,
+        };
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: localStorage.getItem('accessToken'),
+            },
+            body: JSON.stringify(payload),
+        })
+            .then(() => {
+                message.success('Successfully');
+                toggleConfirmOtpModalVisibility();
+
+                // Show Success Modal.
+                const isNotSavedReceiverBefore = JSON.parse(
+                    localStorage.getItem('is-not-saved-receiver-before')
+                );
+                console.log(
+                    'isNotSavedReceiverBefore',
+                    isNotSavedReceiverBefore
+                );
+
+                Modal.success({
+                    title: 'Thành công',
+                    content: (
+                        <>
+                            {isNotSavedReceiverBefore && (
+                                <Checkbox
+                                    id='saveReceiverCheckBox'
+                                    defaultChecked={false}>
+                                    Lưu nguời nhận
+                                </Checkbox>
+                            )}
+                        </>
+                    ),
+                    onOk: () => {
+                        if (isNotSavedReceiverBefore) {
+                            let savedReceiverCheckbox = document.querySelector(
+                                '#saveReceiverCheckBox'
+                            );
+                            var isSaveReceiverChecked =
+                                savedReceiverCheckbox.checked === true;
+
+                            if (isSaveReceiverChecked) {
+                                const payload = {
+                                    senderAccountNumber: localStorage.getItem(
+                                        'payment-account-number'
+                                    ),
+                                    receiverAccountNumber: localStorage.getItem(
+                                        'current-receiver-account-number'
+                                    ),
+                                };
+                                console.log('payload nene: ', payload);
+
+                                fetch(
+                                    process.env.REACT_APP_RECEIVER_API_URL_PATH,
+                                    {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            Authorization:
+                                                localStorage.getItem(
+                                                    'accessToken'
+                                                ),
+                                        },
+                                        body: JSON.stringify(payload),
+                                    }
+                                )
+                                    .then((response) => {
+                                        message.success(
+                                            'Lưu người nhận thành công'
+                                        );
+                                        getReceivers();
+                                    })
+                                    .catch((error) =>
+                                        message.error('Lưu người nhận thất bại')
+                                    );
+
+                                savedReceiverCheckbox.checked = false;
+                            }
+                        }
+
+                        moneyTransferForm.resetFields();
+                        setOtp('');
+                    },
+                });
+            })
+            .catch((error) => {
+                message.error(error);
+            });
     };
 
     const handleMoneyTransferModalCancel = () => {
@@ -370,6 +399,22 @@ export const DashBoardPage = () => {
 
     return (
         <AppLayout>
+            <Modal
+                title='Xác nhận giao dịch'
+                centered
+                okText='Confirm'
+                onOk={handleConfirmOtp}
+                onCancel={toggleConfirmOtpModalVisibility}
+                open={confirmOtpModalVisibility}>
+                <OTPInput
+                    autoFocus
+                    length={4}
+                    onChangeOTP={(value) => {
+                        setOtp(value);
+                    }}
+                />
+            </Modal>
+
             <Modal
                 footer={null}
                 title='Bank Accounts'
@@ -398,6 +443,19 @@ export const DashBoardPage = () => {
                 />
             </Modal>
 
+            <Modal
+                footer={null}
+                title='Change Password'
+                open={changePasswordModalVisibility}
+                onCancel={changePasswordModalVisible}>
+                <ChangePasswordForm
+                    form={moneyTransferForm}
+                    receivers={receivers}
+                    bankTypes={bankTypes}
+                    transferMethods={transferMethods}
+                />
+            </Modal>
+
             <GeneralInformationSection>
                 {renderGeneralInformation()}
             </GeneralInformationSection>
@@ -407,7 +465,7 @@ export const DashBoardPage = () => {
             </ServiceSection>
 
             <HistorySection>
-                <Title level={2}>History</Title>
+                <Title level={2}>Lịch sử giao dịch</Title>
                 <Table dataSource={dataSource} columns={columns} />
             </HistorySection>
         </AppLayout>

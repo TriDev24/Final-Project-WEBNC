@@ -91,7 +91,7 @@ export default {
 
         const isNotValidSignature = verifySignature(signature);
         if (isNotValidSignature) {
-            return res.status(401).json('Not valid signature');
+            return res.status(403).json('Not valid signature');
         }
 
         const bankAccount = await BankAccount.findById(id);
