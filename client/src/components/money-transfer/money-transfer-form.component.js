@@ -59,7 +59,13 @@ export const MoneyTransferForm = ({
         transferMethods === null ? (
             <Skeleton />
         ) : (
-            transferMethods.map((t) => <Radio value={t._id}>{t.name}</Radio>)
+            transferMethods.map((t) => (
+                <Radio value={t._id}>
+                    {t.name === 'Sender Pay Transfer Fee'
+                        ? 'Người gửi thanh toán'
+                        : 'Người nhận thanh toán'}
+                </Radio>
+            ))
         );
 
     return (
@@ -67,29 +73,31 @@ export const MoneyTransferForm = ({
             <Form form={form} layout='vertical'>
                 <Form.Item
                     name='receiverAccountNumber'
-                    label='Account Number'
+                    label='Số tài khoản người nhận'
                     rules={[
                         {
                             required: true,
-                            message: 'Please input account number',
+                            message: 'Mời bạn nhập số tài khoản của người nhận',
                         },
                     ]}>
-                    <Input placeholder='Example: 012345678910' />
+                    <Input placeholder='Ví dụ: 012345678910' />
                 </Form.Item>
                 <Form.Item
                     name='bankTypeId'
-                    label='Bank Type'
+                    label='Loại ngân hàng'
                     rules={[
                         {
                             required: true,
-                            message: 'Please select bank type',
+                            message: 'Mời bạn chọn loại ngân hàng',
                         },
                     ]}>
                     <Select>{renderBankTypeOptions()}</Select>
                 </Form.Item>
                 <Form.Item>
                     <Collapse defaultActiveKey={['1']}>
-                        <Panel header='Or select saved receivers' key='1'>
+                        <Panel
+                            header='Hoặc chọn người nhận từ danh sách đã lưu'
+                            key='1'>
                             {renderReceiverOptions()}
                         </Panel>
                     </Collapse>
@@ -97,31 +105,31 @@ export const MoneyTransferForm = ({
 
                 <Form.Item
                     name='deposit'
-                    label='Deposit'
+                    label='Số tiền chuyển'
                     rules={[
                         {
                             required: true,
-                            message: 'Please input deposits',
+                            message: 'Mời bạn nhập số tiền cần chuyển',
                         },
                     ]}>
                     <StyledDepositInput
                         addonAfter='VNĐ'
-                        placeholder='Example: 200000'
+                        placeholder='Ví dụ: 200000'
                     />
                 </Form.Item>
                 <Form.Item
                     name='transferMethodId'
-                    label='Transfer Method'
+                    label='Hình thức thanh toán phí'
                     rules={[
                         {
                             required: true,
-                            message: 'Please select transfer method',
+                            message: 'Mời bạn chọn hình thức thanh toán phí',
                         },
                     ]}>
                     <Radio.Group>{renderTransferMethodOptions()}</Radio.Group>
                 </Form.Item>
-                <Form.Item name='description' label='Description'>
-                    <Input placeholder='Example: Pay for coffee' />
+                <Form.Item name='description' label='Nội dung chuyển khoản'>
+                    <Input placeholder='Ví dụ: Tiền cà phê hôm trước' />
                 </Form.Item>
 
                 <Button type='primary' block onClick={onConfirmTransfer}>

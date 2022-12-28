@@ -6,11 +6,13 @@ export default {
     const result = await service.createDebit(data);
     if (result === 1) {
       return res.json({
-        message: "Create success!",
+        status:"success",
+        message: "Tạo nhắc nợ thành công!",
       });
     }
     return res.json({
-      message: "Can't create debt reminder for yourself!",
+      status:"error",
+      message: "Không thể tạo nhắc nợ cho chính mình!",
     });
   },
 
@@ -30,7 +32,7 @@ export default {
       const result = await service.deleteDebit(id);
       if (result) return res.json(result);
       return res.json({
-        message: "Debit does not exist",
+        message: "Nhắc nợ không tồn tại!",
       });
     }
     return res.status(204).end();

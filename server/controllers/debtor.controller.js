@@ -16,7 +16,7 @@ export default {
       const result = await service.deleteDebtor(id);
       if (result) return res.json(result);
       return res.json({
-        message: "Debtor does not exist",
+        message: "Người nợ không tồn tại",
       });
     }
     return res.status(204).end();

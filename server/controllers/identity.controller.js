@@ -5,15 +5,15 @@ export default {
     const result = await service.login(req.body);
     if (result == -1) {
       return res.json({
-        message: "Login failed!",
+        message: "Đăng nhập thất bại!",
       });
     } else if (result == -2) {
       return res.json({
-        message: "Cannot find user!",
+        message: "Tài khoản không tồn tại!",
       });
     } else if (result == -3) {
       return res.json({
-        message: "Captcha is not correct!",
+        message: "Captcha không chính xác!",
       });
     }
     return res.json(result);
@@ -23,11 +23,11 @@ export default {
     const result = await service.create(req.body);
     if (result === -1) {
       return res.json({
-        message: "Phone number is exist",
+        message: "Số điện thoại đã tồn tại!",
       });
     } else if (result === -2) {
       return res.json({
-        message: "Email is exist",
+        message: "Email đã tồn tại!",
       });
     }
     return res.json(result);
@@ -37,11 +37,11 @@ export default {
     const result = await service.generateAccessToken(req.body);
     if (result === -1) {
       res.json({
-        message: "Token has expired",
+        message: "Token đã hết hạn!",
       });
     } else if (result === -2) {
       res.json({
-        message: "Token is not exist",
+        message: "Token không tồn tại!",
       });
     }
     res.json({

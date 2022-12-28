@@ -1,7 +1,12 @@
 import React, { useState } from 'react';
-import { CreditCardOutlined } from '@ant-design/icons';
-import { Avatar, Layout, Menu, theme } from 'antd';
-import { getProfileFromLocalStorage } from '../../utils/local-storage.util.js';
+import {
+    CreditCardOutlined,
+    BankOutlined,
+    UserOutlined,
+} from '@ant-design/icons';
+import { Avatar, Layout, Menu, theme, Image } from 'antd';
+import DebitTable from '../dashboard/debit.component.js';
+import DebtorTable from '../dashboard/debtor.component.js';
 
 const { Header, Content, Footer, Sider } = Layout;
 
@@ -14,18 +19,37 @@ const getItem = (label, key, icon, children) => {
     };
 };
 
-const items = [getItem('Tài khoản', '1', <CreditCardOutlined />)];
+const items = [
+    getItem('Tài khoản', '1', <CreditCardOutlined />),
+    getItem('Nhắc nợ', '2', <BankOutlined />, [
+        getItem('Cá nhân', '3', <UserOutlined />),
+        getItem('Người khác', '4', <UserOutlined />),
+        getItem('Danh sách người nợ', '5', <UserOutlined />),
+    ]),
+];
 
 export const AppLayout = ({ children }) => {
     const [collapsed, setCollapsed] = useState(false);
-
-    const { firstName, lastName } = getProfileFromLocalStorage();
-    const avatarPlaceholder =
-        firstName[0].toUpperCase() + lastName[0].toUpperCase();
+    const [selectedMenuItem, setSelectedMenuItem] = useState('1');
 
     const {
         token: { colorBgContainer },
     } = theme.useToken();
+
+    const componentsSwitch = (key) => {
+        switch (key) {
+            case '1':
+                return children;
+            case '3':
+                return <DebitTable side={'personal'} />;
+            case '4':
+                return <DebitTable side={'other'} />;
+            case '5':
+                return <DebtorTable />;
+            default:
+                break;
+        }
+    };
 
     return (
         <Layout
@@ -36,19 +60,18 @@ export const AppLayout = ({ children }) => {
                 collapsible
                 collapsed={collapsed}
                 onCollapse={(value) => setCollapsed(value)}>
-                <img
-                    style={{
-                        height: 40,
-                        margin: 30,
-                    }}
-                    src='./images/logo.png'
-                    alt='Logo'
-                />
+                <div style={{ textAlign: 'center', margin: '20px' }}>
+                    <Image
+                        height={40}
+                        width={40}
+                        src='./images/logo.png'></Image>
+                </div>
                 <Menu
                     theme='dark'
                     defaultSelectedKeys={['1']}
                     mode='inline'
                     items={items}
+                    onClick={(e) => setSelectedMenuItem(e.key)}
                 />
             </Sider>
             <Layout className='site-layout'>
@@ -60,14 +83,7 @@ export const AppLayout = ({ children }) => {
                         justifyContent: 'flex-end',
                         background: colorBgContainer,
                     }}>
-                    <Avatar
-                        style={{
-                            backgroundColor: '#f56a00',
-                            verticalAlign: 'middle',
-                        }}
-                        size='large'>
-                        {avatarPlaceholder}
-                    </Avatar>
+                    <Avatar size='large' src='/images/avatar.png'></Avatar>
                 </Header>
                 <Content
                     style={{
@@ -75,20 +91,26 @@ export const AppLayout = ({ children }) => {
                     }}>
                     <div
                         style={{
-                            margin: '16px 0',
-                            padding: 24,
-                            minHeight: 360,
-                            background: colorBgContainer,
+                            minHeight: '100vh',
                         }}>
-                        {children}
+                        <div
+                            style={{
+                                margin: '16px 0',
+                                padding: 24,
+                                minHeight: 360,
+                                background: colorBgContainer,
+                            }}>
+                            {componentsSwitch(selectedMenuItem)}
+                        </div>
+
+                        <Footer
+                            style={{
+                                textAlign: 'center',
+                            }}>
+                            Internet Banking Footer
+                        </Footer>
                     </div>
                 </Content>
-                <Footer
-                    style={{
-                        textAlign: 'center',
-                    }}>
-                    Internet Banking Footer
-                </Footer>
             </Layout>
         </Layout>
     );

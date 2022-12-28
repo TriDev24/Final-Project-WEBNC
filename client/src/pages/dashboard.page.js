@@ -3,11 +3,7 @@ import { AppLayout } from '../components/common/index.js';
 import styled from '@xstyled/styled-components';
 import { Button, Checkbox, message, Modal, Skeleton, Space, Table } from 'antd';
 import { ServiceList } from '../components/dashboard/index.js';
-import {
-    ContactsOutlined,
-    SwapOutlined,
-    SecurityScanOutlined,
-} from '@ant-design/icons';
+import { SwapOutlined, SecurityScanOutlined } from '@ant-design/icons';
 import { useEffect, useState, useCallback } from 'react';
 import { getProfileFromLocalStorage } from '../utils/local-storage.util.js';
 import { BankAccountList } from '../components/dashboard/bank-account-list.component.js';
@@ -165,11 +161,6 @@ export const DashBoardPage = () => {
             onClick: toggleMoneyTransferModalVisible,
         },
         {
-            icon: <ContactsOutlined />,
-            name: 'Ghi nợ',
-            onClick: () => {},
-        },
-        {
             icon: <SecurityScanOutlined />,
             name: 'Thay đổi mật khẩu',
             onClick: changePasswordModalVisible,
@@ -190,7 +181,7 @@ export const DashBoardPage = () => {
             key: 'money',
         },
         {
-            title: 'Hình thức',
+            title: 'Hình thức thanh toán',
             dataIndex: 'method',
             key: 'method',
         },
@@ -231,13 +222,12 @@ export const DashBoardPage = () => {
                     <Title level={2}>Thông tin chung</Title>
                     <p>Số tài khoản: {paymentAccountInfo.accountNumber}</p>
                     <p>
-                        Tên chủ tài khoản:{' '}
-                        {getProfileFromLocalStorage().aliasName}
+                        Chủ tài khoản: {getProfileFromLocalStorage().aliasName}
                     </p>
                     <p>Số dư: {paymentAccountInfo.overBalance} (VNĐ)</p>
                 </div>
                 <Button type='primary' onClick={handleChangeAccountClick}>
-                    Đổi tài khoản
+                    Thay đổi tài khoản
                 </Button>
             </>
         );
@@ -417,7 +407,7 @@ export const DashBoardPage = () => {
 
             <Modal
                 footer={null}
-                title='Bank Accounts'
+                title='Tài khoản ngân hàng'
                 open={changeAccountModalVisibility}
                 onCancel={toggleChangeAccountModalVisible}>
                 <BankAccountList
@@ -431,7 +421,7 @@ export const DashBoardPage = () => {
 
             <Modal
                 footer={null}
-                title='Money Transfer'
+                title='Chuyển khoản'
                 open={moneyTransferModalVisibility}
                 onCancel={handleMoneyTransferModalCancel}>
                 <MoneyTransferForm
@@ -445,7 +435,7 @@ export const DashBoardPage = () => {
 
             <Modal
                 footer={null}
-                title='Change Password'
+                title='Thay đổi mật khẩu'
                 open={changePasswordModalVisibility}
                 onCancel={changePasswordModalVisible}>
                 <ChangePasswordForm

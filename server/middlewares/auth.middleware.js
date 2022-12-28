@@ -11,7 +11,7 @@ export default (req, res, next) => {
         } catch (err) {
             if (err.message === 'jwt expired')
                 return res.status(401).json({
-                    message: 'Token has expired',
+                    message: 'Token đã hết hạn!',
                 });
             return res.status(401).json({
                 message: 'Unauthorized',
