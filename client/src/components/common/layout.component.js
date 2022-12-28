@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import WebSocket from "ws";
 import {
   CreditCardOutlined,
   BankOutlined,
@@ -48,14 +47,6 @@ export const AppLayout = ({ children }) => {
   const [dropItems, setDropItems] = useState([]);
 
   useEffect(() => {
-    const ws = new WebSocket(process.env.REACT_APP_WS);
-    console.log(process.env.REACT_APP_WS)
-    ws.onopen = function () {
-      console.log("connected");
-    };
-    ws.onmessage = function (e) {
-      console.log(e.data);
-    };
     const fetchApi = async () => {
       const url = `${
         process.env.REACT_APP_DEBIT_URL_PATH
