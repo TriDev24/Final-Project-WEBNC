@@ -6,10 +6,12 @@ export default {
     const result = await service.createDebit(data);
     if (result === 1) {
       return res.json({
+        status:"success",
         message: "Tạo nhắc nợ thành công!",
       });
     }
     return res.json({
+      status:"error",
       message: "Không thể tạo nhắc nợ cho chính mình!",
     });
   },

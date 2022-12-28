@@ -10,5 +10,5 @@ Content-Type: application/json
 }
 
 ###
-DELETE  http://localhost:8080/api/debits/639d2f0bd6e5b3eb1372e5ec
+GET  http://localhost:8080/api/debits?accountNumber=186672&side=personal
 Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjoiNjM5OWI2OWM2OGQ4Zjc5MmVkM2JkZThjIiwiaWF0IjoxNjcxMjQ0ODgzLCJleHAiOjE2NzM4MzY4ODN9.A_EVVlVGojCfOxD4vuBWRZAtnb07PEna_B4NXN3_zeQ

@@ -8,8 +8,8 @@ const Container = styled.div`
 export const ServiceList = ({ sources }) => {
     return (
         <Container>
-            {sources.map((s) => (
-                <ServiceItem icon={s.icon} name={s.name} onClick={s.onClick} />
+            {sources.map((s, index) => (
+                <ServiceItem key={index} icon={s.icon} name={s.name} onClick={s.onClick} />
             ))}
         </Container>
     );

@@ -3,7 +3,7 @@ import { AppLayout } from '../components/common/index.js';
 import styled from '@xstyled/styled-components';
 import { Button, Checkbox, message, Modal, Skeleton, Table } from 'antd';
 import { ServiceList } from '../components/dashboard/index.js';
-import { ContactsOutlined, SwapOutlined, SecurityScanOutlined } from '@ant-design/icons';
+import { SwapOutlined, SecurityScanOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import { getProfileFromLocalStorage } from '../utils/local-storage.util.js';
 import { BankAccountList } from '../components/dashboard/bank-account-list.component.js';
@@ -41,7 +41,6 @@ export const DashBoardPage = () => {
     useEffect(() => {
         const getPaymentBankAccount = async () => {
             const apiUrl = `${process.env.REACT_APP_BANK_ACCOUNT_API_URL_PATH}?isPayment=true`;
-
             await fetch(apiUrl, {
                 method: 'GET',
                 headers: {
@@ -150,11 +149,6 @@ export const DashBoardPage = () => {
             icon: <SwapOutlined />,
             name: 'Chuyển tiền',
             onClick: toggleMoneyTransferModalVisible,
-        },
-        {
-            icon: <ContactsOutlined />,
-            name: 'Tạo nhắc nợ',
-            onClick: () => {},
         },
         {
             icon: <SecurityScanOutlined />,

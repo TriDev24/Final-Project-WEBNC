@@ -98,7 +98,7 @@ const LoginForm = () => {
                             <LockOutlined className='site-form-item-icon' />
                         }
                         type='password'
-                        placeholder='Password'
+                        placeholder='Mật khẩu'
                     />
                 </Form.Item>
                 <ReCAPTCHA
