@@ -8,6 +8,7 @@ router.use(auth)
 
 router.post('/',controller.createDebit)
 router.get('/',controller.getAllDebit)
+router.get('/notify/:accountNumber',controller.getDebitNotRead)
 router.delete('/:id',controller.deleteDebit)
 
 export default router

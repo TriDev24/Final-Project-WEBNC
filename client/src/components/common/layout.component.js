@@ -1,10 +1,23 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import WebSocket from "ws";
 import {
   CreditCardOutlined,
   BankOutlined,
   UserOutlined,
+  BellOutlined,
 } from "@ant-design/icons";
-import { Avatar, Layout, Menu, theme, Image } from "antd";
+import {
+  Avatar,
+  Layout,
+  Menu,
+  theme,
+  Image,
+  Dropdown,
+  Space,
+  Button,
+  Badge,
+  Alert,
+} from "antd";
 import DebitTable from "../dashboard/debit.component.js";
 import DebtorTable from "../dashboard/debtor.component.js";
 
@@ -29,8 +42,48 @@ const items = [
 ];
 
 export const AppLayout = ({ children }) => {
+  const [count, setCount] = useState(0);
   const [collapsed, setCollapsed] = useState(false);
   const [selectedMenuItem, setSelectedMenuItem] = useState("1");
+  const [dropItems, setDropItems] = useState([]);
+
+  useEffect(() => {
+    const ws = new WebSocket(process.env.REACT_APP_WS);
+    console.log(process.env.REACT_APP_WS)
+    ws.onopen = function () {
+      console.log("connected");
+    };
+    ws.onmessage = function (e) {
+      console.log(e.data);
+    };
+    const fetchApi = async () => {
+      const url = `${
+        process.env.REACT_APP_DEBIT_URL_PATH
+      }/notify/${localStorage.getItem("payment-account-number")}`;
+
+      const result = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          authorization: localStorage.getItem("accessToken"),
+        },
+      })
+        .then((response) => response.json())
+        .then((data) => data);
+      const items = result.debits.map((debit, index) => {
+        let message = `Tài khoản ${debit.accountId.accountNumber} đã gửi cho bạn một nhắc nợ`;
+        if (debit.statusId.name === "paid") {
+          message = `Tài khoản ${debit.accountId.accountNumber} đã thanh toán nhắc nợ của bạn`;
+        } else if (debit.statusId.name === "cancelled") {
+          message = `Nhắc nợ của tài khoản ${debit.accountId.accountNumber} đã được hủy`;
+        }
+        return getItem(<Alert message={message} type="info" />, index);
+      });
+      setDropItems(items);
+      setCount(result.count);
+    };
+    fetchApi();
+  }, []);
 
   const componentsSwtich = (key) => {
     switch (key) {
@@ -83,7 +136,26 @@ export const AppLayout = ({ children }) => {
             background: colorBgContainer,
           }}
         >
-          <Avatar size="large" src="/images/avatar.png"></Avatar>
+          <Space>
+            <Dropdown
+              menu={{
+                items: dropItems,
+              }}
+              placement="bottomLeft"
+              arrow={{
+                pointAtCenter: true,
+              }}
+            >
+              <Badge size="small" count={count}>
+                <Button icon={<BellOutlined />}></Button>
+              </Badge>
+            </Dropdown>
+            <Avatar
+              size="large"
+              src="/images/avatar.png"
+              style={{ marginBottom: "5px", marginLeft: "5px" }}
+            ></Avatar>
+          </Space>
         </Header>
         <Content
           style={{

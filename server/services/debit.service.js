@@ -39,30 +39,61 @@ export default {
     let debits = [];
     const account = await BankAccount.findOne({ accountNumber });
     if (side === "personal") {
-      debits = await Debit.find({ accountId: account._id }).populate([
-        {
-          path: "debtAccountId",
-          select: "accountNumber -_id",
-          populate: { path: "identityId", select: "aliasName -_id" },
-        },
-        { path: "statusId", select: "name -_id" },
-      ]).sort({updatedAt:"desc"});
+      debits = await Debit.find({ accountId: account._id })
+        .populate([
+          {
+            path: "debtAccountId",
+            select: "accountNumber -_id",
+            populate: { path: "identityId", select: "aliasName -_id" },
+          },
+          { path: "statusId", select: "name -_id" },
+        ])
+        .sort({ updatedAt: "desc" });
     } else {
-      debits = await Debit.find({ debtAccountId: account._id }).populate([
+      debits = await Debit.find({ debtAccountId: account._id })
+        .populate([
+          {
+            path: "accountId",
+            select: "accountNumber -_id",
+            populate: { path: "identityId", select: "aliasName -_id" },
+          },
+          { path: "statusId", select: "name -_id" },
+        ])
+        .sort({ updatedAt: "desc" });
+    }
+    return debits;
+  },
+
+  async deleteDebit(id) {
+    const cancelled = await Status.findOne({ name: "cancelled" });
+    const result = await Debit.findByIdAndUpdate(id, {
+      statusId: cancelled._id,
+      updatedAt: Date.now(),
+    });
+    return result;
+  },
+
+  async getDebitNotRead(accountNumber) {
+    const account = await BankAccount.findOne({ accountNumber });
+    const debits = await Debit.find({ debtAccountId: account._id })
+      .populate([
         {
           path: "accountId",
           select: "accountNumber -_id",
           populate: { path: "identityId", select: "aliasName -_id" },
         },
         { path: "statusId", select: "name -_id" },
-      ]).sort({updatedAt:"desc"});
-    }
-    return debits;
-  },
-
-  async deleteDebit(id) {
-    const cancelled = await Status.findOne({name:"cancelled"})
-    const result = await Debit.findByIdAndUpdate(id, {statusId:cancelled._id,updatedAt:Date.now()});
-    return result;
+      ])
+      .sort({ updatedAt: "desc" });
+      
+    const count = await Debit.count({
+      isRead: false,
+      debtAccountId: account._id,
+    });
+    
+    return {
+      count,
+      debits,
+    };
   },
 };

@@ -8,6 +8,7 @@ const schema = {
   content: String,
   statusId: { type: mongoose.Types.ObjectId, ref: "Status" },
   transferDate: { type: String, default: null },
+  isRead:{type:Boolean, default:false}
 };
 
 export default generate("Debits", schema);

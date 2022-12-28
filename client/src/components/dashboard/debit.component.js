@@ -172,7 +172,7 @@ function DebitTable({ side }) {
 
   return (
     <>
-      <Space size={765}>
+      <Space size={750}>
         <Title level={2}>
           {side === "personal"
             ? "Nhắc nợ của cá nhân"

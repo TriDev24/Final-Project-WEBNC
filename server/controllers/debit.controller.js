@@ -6,12 +6,12 @@ export default {
     const result = await service.createDebit(data);
     if (result === 1) {
       return res.json({
-        status:"success",
+        status: "success",
         message: "Tạo nhắc nợ thành công!",
       });
     }
     return res.json({
-      status:"error",
+      status: "error",
       message: "Không thể tạo nhắc nợ cho chính mình!",
     });
   },
@@ -36,5 +36,11 @@ export default {
       });
     }
     return res.status(204).end();
+  },
+
+  async getDebitNotRead(req, res) {
+    const accountNumber = req.params["accountNumber"];
+    const result = await service.getDebitNotRead(accountNumber)
+    return res.json(result);
   },
 };

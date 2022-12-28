@@ -3,7 +3,7 @@ Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjoiNjM5OWI2OWM2OGQ4
 Content-Type: application/json
 
 {
-    "accountNumber":"899604",
+    "accountNumber":"186672",
     "debtAccountNumber":"186672",
     "amountToPay":800000,
     "content":"Chuyển tiền gấp, đang thiếu"
@@ -11,4 +11,16 @@ Content-Type: application/json
 
 ###
 GET  http://localhost:8080/api/debits?accountNumber=186672&side=personal
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjoiNjM5OWI2OWM2OGQ4Zjc5MmVkM2JkZThjIiwiaWF0IjoxNjcxMjQ0ODgzLCJleHAiOjE2NzM4MzY4ODN9.A_EVVlVGojCfOxD4vuBWRZAtnb07PEna_B4NXN3_zeQ
+
+###
+GET http://localhost:8080/api/debtors?accountNumber=186672
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjoiNjM5OWI2OWM2OGQ4Zjc5MmVkM2JkZThjIiwiaWF0IjoxNjcxMjQ0ODgzLCJleHAiOjE2NzM4MzY4ODN9.A_EVVlVGojCfOxD4vuBWRZAtnb07PEna_B4NXN3_zeQ
+
+###
+GET http://localhost:8080/api/debits/notify/186672
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjoiNjM5OWI2OWM2OGQ4Zjc5MmVkM2JkZThjIiwiaWF0IjoxNjcxMjQ0ODgzLCJleHAiOjE2NzM4MzY4ODN9.A_EVVlVGojCfOxD4vuBWRZAtnb07PEna_B4NXN3_zeQ
+
+###
+DELETE  http://localhost:8080/api/debits/1231235sdasdsa
 Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjoiNjM5OWI2OWM2OGQ4Zjc5MmVkM2JkZThjIiwiaWF0IjoxNjcxMjQ0ODgzLCJleHAiOjE2NzM4MzY4ODN9.A_EVVlVGojCfOxD4vuBWRZAtnb07PEna_B4NXN3_zeQ
