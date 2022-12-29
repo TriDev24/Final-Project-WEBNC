@@ -1,29 +1,37 @@
-import crypto from 'crypto';
+import rsa from 'node-rsa';
+import * as fs from 'fs';
+
+const publicKey = new rsa();
+const privateKey = new rsa();
+
+const publicKeyContent = fs.readFileSync(
+    process.cwd() + '/keys/private.pem',
+    'utf-8'
+);
+const privateKeyContent = fs.readFileSync(
+    process.cwd() + '/keys/private.pem',
+    'utf-8'
+);
+
+publicKey.importKey(publicKeyContent);
+privateKey.importKey(privateKeyContent);
+
+const saltData = 'asdasdabsdjasjdabslkdnaklsndaklnsdaklnsd';
 
 export const generateSignature = () => {
-    const { privateKey } = crypto.generateKeyPairSync('rsa', {
-        // The standard secure default length for RSA keys is 2048 bits
-        modulusLength: 2048,
-    });
-    console.log('private key ne: ', privateKey);
-
-    return crypto.sign('sha256', Buffer.from(''), {
-        key: privateKey,
-        padding: crypto.constants.RSA_PKCS1_PSS_PADDING,
-    });
+    try {
+        return privateKey.encryptPrivate(saltData, 'base64');
+    } catch (error) {
+        console.log('error: ', error);
+    }
 };
 
 export const verifySignature = (signature) => {
-    const result = crypto.verify(
-        'sha256',
-        Buffer.from(''),
-        {
-            key: process.env.PUBLIC_KEY,
-            padding: crypto.constants.RSA_PKCS1_PSS_PADDING,
-        },
-        signature
-    );
-    console.log('decoded', result);
+    try {
+        const decrypted = publicKey.decryptPublic(signature, 'utf8');
 
-    return result;
+        return decrypted === saltData;
+    } catch (error) {
+        console.log('error: ', error);
+    }
 };

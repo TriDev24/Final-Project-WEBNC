@@ -3,6 +3,35 @@ import { verifySignature } from '../utils/rsa.util.js';
 
 export default {
     async getAll(req, res) {
+        const joinWithIdentity = {
+            $lookup: {
+                from: 'identities',
+                localField: 'identityId',
+                foreignField: '_id',
+                as: 'identities',
+            },
+        };
+
+        const pipelines = [joinWithIdentity];
+
+        const records = await BankAccount.aggregate(pipelines);
+        const bankAccounts = Array.from(records.values());
+
+        const responses = bankAccounts.map((b) => {
+            return {
+                _id: b._id,
+                accountNumber: b.accountNumber,
+                overBalance: b.overBalance,
+                identity: {
+                    aliasName: b.identities[0].aliasName,
+                },
+            };
+        });
+
+        return res.status(200).json(responses);
+    },
+
+    async getAllByUserId(req, res) {
         const { isPayment } = req.query;
 
         const where = { identityId: req.userId };
@@ -43,7 +72,7 @@ export default {
 
     async update(req, res) {
         const { id } = req.params;
-        const { isPayment } = req.body;
+        const { isPayment, deposit } = req.body;
 
         const session = await BankAccount.startSession();
         session.startTransaction();
@@ -76,6 +105,32 @@ export default {
                     await bulk.execute();
                     await session.commitTransaction();
                 }
+
+                return res.status(200).json('Update Bank Account Successfully');
+            }
+
+            const bankAccount = await BankAccount.findById(id);
+            if (!bankAccount) {
+                return res.status(404).json('Cannot find this Bank Account');
+            }
+
+            const where = {};
+
+            if (deposit) {
+                if (deposit < 0) {
+                    return res.status(401).json('Not allow negative number');
+                }
+                where['overBalance'] = bankAccount.overBalance + deposit;
+            }
+
+            const updatedBankAccount = await BankAccount.updateOne(
+                {
+                    _id: id,
+                },
+                where
+            );
+            if (!updatedBankAccount) {
+                res.status(500).json('Something went wrong!!!');
             }
 
             return res.status(200).json('Update Bank Account Successfully');
@@ -85,6 +140,7 @@ export default {
         }
     },
 
+    // API for another bank to connect
     async rechargeMoney(req, res) {
         const { id } = req.params;
         const { deposit, signature } = req.body;

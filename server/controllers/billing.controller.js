@@ -10,6 +10,108 @@ import Identity from '../models/identity.model.js';
 import { generateSignature, verifySignature } from '../utils/rsa.util.js';
 
 export default {
+    async getHistory(req, res) {
+        const { bankAccountId } = req.query;
+
+        // Get receiving billings
+        const sortedReceiveBillings = await Billing.find({
+            receiverId: bankAccountId,
+            transferType: TransferType.MoneyTransfer,
+        }).sort({ createdAt: -1 });
+
+        let receiveBillingSummaries = [];
+        for (const r of sortedReceiveBillings) {
+            const transferMethod = await TransferMethod.findById(
+                r.transferMethodId
+            );
+            const totalAmount =
+                transferMethod === 'Sender Pay Transfer Fee'
+                    ? r.deposit
+                    : r.deposit + r.transferFee;
+            const senderBankAccount = await BankAccount.findById(r.senderId);
+            const senderInformation = await Identity.findById(
+                senderBankAccount.identityId
+            );
+
+            const billing = {
+                _id: r._id,
+                sender: {
+                    name: senderInformation.aliasName,
+                    accountNumber: senderBankAccount.accountNumber,
+                },
+                totalAmount,
+                transferTime: r.transferTime,
+            };
+            receiveBillingSummaries.push(billing);
+        }
+
+        // Get Send Billings
+        const sortedTransferBillings = await Billing.find({
+            senderId: bankAccountId,
+            transferType: TransferType.MoneyTransfer,
+        }).sort({ createdAt: -1 });
+
+        let transferBillingSummaries = [];
+        for (const t of sortedTransferBillings) {
+            const transferMethod = await TransferMethod.findById(
+                t.transferMethodId
+            );
+            const totalAmount =
+                transferMethod === 'Sender Pay Transfer Fee'
+                    ? t.deposit + t.transferFee
+                    : t.deposit;
+            const receiverBankAccount = await BankAccount.findById(
+                t.receiverId
+            );
+            const receiverInformation = await Identity.findById(
+                receiverBankAccount.identityId
+            );
+
+            const billing = {
+                _id: t._id,
+                receiver: {
+                    name: receiverInformation.aliasName,
+                    accountNumber: receiverBankAccount.accountNumber,
+                },
+                totalAmount,
+                transferTime: t.transferTime,
+            };
+            transferBillingSummaries.push(billing);
+        }
+
+        // Get Debit Billings
+        const sortDebitBillings = await Billing.find({
+            senderId: bankAccountId,
+            transferType: TransferType.Debit,
+        }).sort({ createdAt: -1 });
+
+        const debitBillingSummaries = [];
+        for (const d of sortDebitBillings) {
+            const receiverBankAccount = await BankAccount.findById(
+                d.receiverId
+            );
+            const receiverInformation = await Identity.findById(
+                receiverBankAccount.identityId
+            );
+
+            return {
+                _id: d._id,
+                receiver: {
+                    name: receiverInformation.aliasName,
+                    accountNumber: receiverBankAccount.accountNumber,
+                },
+                deposit: d.deposit,
+                transferTime: d.transferTime,
+            };
+        }
+
+        return res.status(200).json({
+            receives: receiveBillingSummaries,
+            transfers: transferBillingSummaries,
+            debits: debitBillingSummaries,
+        });
+    },
+
     async create(req, res) {
         const {
             senderAccountNumber,
@@ -192,7 +294,7 @@ export default {
 
         // Cross external bank.
         const generatedSignature = generateSignature();
-        console.log('generatedSignature', generatedSignature.toJSON());
+        console.log('generatedSignature', generatedSignature);
 
         const decodedSignature = verifySignature(generatedSignature);
         console.log('decodedSignature', decodedSignature);

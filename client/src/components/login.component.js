@@ -49,7 +49,22 @@ const LoginForm = () => {
 
                 setLoading(false);
                 captchaRef.current.reset();
-                setTimeout(() => navigate('/dashboard'), 1000);
+
+                const { role } = result.profile;
+                switch (role) {
+                    case 'admin': {
+                        navigate('/admin/dashboard');
+                        return;
+                    }
+                    case 'employee': {
+                        navigate('/employee/dashboard');
+                        return;
+                    }
+                    default: {
+                        navigate('/dashboard');
+                        return;
+                    }
+                }
             } else {
                 messageApi.open({
                     type: 'error',
@@ -76,7 +91,10 @@ const LoginForm = () => {
                     name='email'
                     rules={[
                         { required: true, message: 'Mời bạn nhập email!' },
-                        { type: 'email', message: 'Email không đúng định dạng' },
+                        {
+                            type: 'email',
+                            message: 'Email không đúng định dạng',
+                        },
                     ]}>
                     <Input
                         prefix={

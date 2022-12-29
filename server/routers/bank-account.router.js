@@ -6,7 +6,9 @@ const router = Router();
 
 router.use(auth);
 
-router.get('/', controller.getAll);
+router.get('/all', controller.getAll);
+
+router.get('/', controller.getAllByUserId);
 
 router.get('/:id', controller.getById);
 

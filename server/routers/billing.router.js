@@ -6,6 +6,8 @@ const router = Router();
 
 router.use(auth);
 
+router.get('/history', controller.getHistory);
+
 router.post('/', controller.create);
 
 router.post('/:id/verify-otp', controller.verifyOtp);

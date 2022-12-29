@@ -1,1 +1,1 @@
-export * from './layout.component.js';
+export * from './customer-layout.component.js';

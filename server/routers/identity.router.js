@@ -4,11 +4,13 @@ import auth from '../middlewares/auth.middleware.js';
 
 const router = Router();
 
+router.use(auth);
+
+router.get('/', controller.getAll);
+
 router.post('/login', controller.login);
 
 router.post('/refresh-token', controller.generateRefreshToken);
-
-router.use(auth);
 
 router.post('/', controller.create);
 

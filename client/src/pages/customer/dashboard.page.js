@@ -1,16 +1,16 @@
 import Title from 'antd/es/typography/Title.js';
-import { AppLayout } from '../components/common/index.js';
+import { CustomerLayout } from '../../components/common/customer-layout.component.js';
 import styled from '@xstyled/styled-components';
-import { Button, Checkbox, message, Modal, Skeleton, Space, Table } from 'antd';
-import { ServiceList } from '../components/dashboard/index.js';
+import { Button, Checkbox, message, Modal, Skeleton, Table } from 'antd';
+import { ServiceList } from '../../components/dashboard/index.js';
 import { SwapOutlined, SecurityScanOutlined } from '@ant-design/icons';
 import { useEffect, useState, useCallback } from 'react';
-import { getProfileFromLocalStorage } from '../utils/local-storage.util.js';
-import { BankAccountList } from '../components/dashboard/bank-account-list.component.js';
-import { MoneyTransferForm } from '../components/money-transfer/money-transfer-form.component.js';
-import { ChangePasswordForm } from '../components/change-password-form.component';
+import { getProfileFromLocalStorage } from '../../utils/local-storage.util.js';
+import { BankAccountList } from '../../components/dashboard/bank-account-list.component.js';
+import { MoneyTransferForm } from '../../components/money-transfer/money-transfer-form.component.js';
+import { ChangePasswordForm } from '../../components/change-password-form.component';
 import { Form } from 'antd';
-import OTPInput from '../components/common/otp-input/index.js';
+import OTPInput from '../../components/common/otp-input/index.js';
 
 const GeneralInformationSection = styled.div`
     display: flex;
@@ -23,7 +23,7 @@ const ServiceSection = styled.div`
 
 const HistorySection = styled.div``;
 
-export const DashBoardPage = () => {
+export const CustomerDashBoardPage = () => {
     const [receivers, setReceivers] = useState(null);
     const [bankTypes, setBankTypes] = useState(null);
     const [transferMethods, setTransferMethods] = useState(null);
@@ -40,8 +40,6 @@ export const DashBoardPage = () => {
         useState(false);
     const [currentReceiver, setCurrentReceiver] = useState(null);
     const [otp, setOtp] = useState('');
-    const [isTriggerMoneyTransfer, setMoneyTransferTriggerStatus] =
-        useState(false);
 
     const toggleConfirmOtpModalVisibility = () => {
         setConfirmOtpModalVisibility(!confirmOtpModalVisibility);
@@ -89,7 +87,7 @@ export const DashBoardPage = () => {
 
     useEffect(() => {
         getReceivers();
-    }, [isTriggerMoneyTransfer, paymentAccountInfo]);
+    }, [paymentAccountInfo]);
 
     useEffect(() => {
         const getBankTypes = async () => {
@@ -141,6 +139,7 @@ export const DashBoardPage = () => {
                 );
                 message.success('Change Account Success');
                 setPaymentAccount(bankAccount);
+                getReceivers();
             })
             .catch((error) => message.error(error));
     };
@@ -342,8 +341,6 @@ export const DashBoardPage = () => {
                                         'current-receiver-account-number'
                                     ),
                                 };
-                                console.log('payload nene: ', payload);
-
                                 fetch(
                                     process.env.REACT_APP_RECEIVER_API_URL_PATH,
                                     {
@@ -388,11 +385,12 @@ export const DashBoardPage = () => {
     };
 
     return (
-        <AppLayout>
+        <CustomerLayout>
             <Modal
                 title='Xác nhận giao dịch'
                 centered
-                okText='Confirm'
+                okText='Xác nhận'
+                cancelText='Huỷ'
                 onOk={handleConfirmOtp}
                 onCancel={toggleConfirmOtpModalVisibility}
                 open={confirmOtpModalVisibility}>
@@ -458,6 +456,6 @@ export const DashBoardPage = () => {
                 <Title level={2}>Lịch sử giao dịch</Title>
                 <Table dataSource={dataSource} columns={columns} />
             </HistorySection>
-        </AppLayout>
+        </CustomerLayout>
     );
 };
