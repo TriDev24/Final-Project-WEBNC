@@ -80,7 +80,7 @@ const LoginForm = () => {
   return (
     <>
       <div style={{ textAlign: "center", margin: "20px" }}>
-        <Avatar size={200} src="/images/img_avatar.png"></Avatar>
+        <Avatar size={200} src="/images/avatar.png"></Avatar>
       </div>
       <Form
         name="normal_login"
