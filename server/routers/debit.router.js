@@ -4,7 +4,7 @@ import auth from '../middlewares/auth.middleware.js'
 
 const router = Router();
 
-router.use(auth)
+router.use(auth('user'))
 
 router.post('/',controller.createDebit)
 router.get('/',controller.getAllDebit)

@@ -32,3 +32,11 @@ Content-Type: application/json
     "otp":"5237",
     "password":"87654321"
 }
+
+###
+GET http://localhost:8080/api/identities
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoiNjM5OWI2OWM2OGQ4Zjc5MmVkM2JkZThjIiwicm9sZSI6InVzZXIifSwiaWF0IjoxNjcyMzgxMTg4LCJleHAiOjE2NzQ5NzMxODh9.oHIa84o8E4So_bphFKGPidsJ1wOtT1ZQJ0njAS6AaTg
+
+###
+POST http://localhost:8080/api/identities
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoiNjM5OWI2OWM2OGQ4Zjc5MmVkM2JkZThjIiwicm9sZSI6InVzZXIifSwiaWF0IjoxNjcyMzgxMTg4LCJleHAiOjE2NzQ5NzMxODh9.oHIa84o8E4So_bphFKGPidsJ1wOtT1ZQJ0njAS6AaTg

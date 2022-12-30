@@ -1,21 +1,19 @@
-import { Router } from 'express';
-import controller from '../controllers/identity.controller.js';
-import auth from '../middlewares/auth.middleware.js';
+import { Router } from "express";
+import controller from "../controllers/identity.controller.js";
+import auth from "../middlewares/auth.middleware.js";
 
 const router = Router();
 
-router.get('/send-mail/:email', controller.sendMail)
+router.get("/send-mail/:email", controller.sendMail);
 
-router.post('/verify',controller.verifyAndChangePassword)
+router.post("/verify", controller.verifyAndChangePassword);
 
-router.post('/login', controller.login);
+router.post("/login", controller.login);
 
-router.post('/refresh-token', controller.generateRefreshToken);
+router.post("/refresh-token", controller.generateRefreshToken);
 
-router.use(auth);
+router.get("/", auth("user"), controller.getAll);
 
-router.get('/', controller.getAll);
-
-router.post('/', controller.create);
+router.post("/", auth("employee"), controller.create);
 
 export default router;

@@ -39,7 +39,7 @@ export default {
         if (result) {
           const accessToken = jwt.sign(
             {
-              data: identity._id,
+              data: { id: identity._id, role: identity.permission[0].name },
             },
             process.env.JWT_SECRET_KEY,
             {
@@ -49,7 +49,7 @@ export default {
           );
           const refreshToken = jwt.sign(
             {
-              data: identity._id,
+              data: { id: identity._id, role: identity.permission[0].name },
             },
             process.env.JWT_SECRET_KEY,
             {
@@ -132,8 +132,6 @@ export default {
             expiresIn: "30d",
           }
         );
-        const test = await Identity.findById(decode.data);
-        console.log(test);
         return accessToken;
       } else {
         return -2;
@@ -148,7 +146,7 @@ export default {
   async sendMail(email) {
     const otp = generateOtp();
     const identity = await Identity.findOne({ email });
-    if(identity){
+    if (identity) {
       await redis.set(`${otp}`, `${identity._id}`, {
         EX: 300,
       });
@@ -156,7 +154,6 @@ export default {
       return result;
     }
     return -2;
-    
   },
 
   async verifyAndChangePassword(otp, newPassword) {
