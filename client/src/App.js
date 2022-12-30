@@ -3,6 +3,7 @@ import { CustomerDashBoardPage } from './pages/customer/dashboard.page.js';
 import { LoginPage } from './pages/login.page.js';
 import { EmployeeDashboardPage } from './pages/employee/dashboard.page.js';
 import { AdminDashboardPage } from './pages/admin/dashboard.page.js';
+import { ForgotPasswordPage } from './pages/forgot-password.page.js';
 import 'antd/dist/reset.css';
 
 export const App = () => {
@@ -45,6 +46,7 @@ export const App = () => {
                     path='/'
                     element={<Navigate to='/dashboard' replace />}></Route>
                 <Route path='/login' element={<LoginPage />}></Route>
+                <Route path='/forgot-password' element={<ForgotPasswordPage/>}></Route>
                 {setUpCustomerRoutes()}
                 {setUpEmployeeRoutes()}
                 {setUpAdminRoutes()}

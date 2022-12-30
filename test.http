@@ -20,3 +20,15 @@ Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjoiNjM5OWI2OWM2OGQ4
 ###
 GET http://localhost:8080/api/debits/notify/186672
 Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjoiNjM5OWI2OWM2OGQ4Zjc5MmVkM2JkZThjIiwiaWF0IjoxNjcxMjQ0ODgzLCJleHAiOjE2NzM4MzY4ODN9.A_EVVlVGojCfOxD4vuBWRZAtnb07PEna_B4NXN3_zeQ
+
+###
+GET http://localhost:8080/api/identities/send-mail/danilcevan@crossfitcoastal.com
+
+###
+POST http://localhost:8080/api/identities/verify
+Content-Type: application/json
+
+{
+    "otp":"5237",
+    "password":"87654321"
+}
