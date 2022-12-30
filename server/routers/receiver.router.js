@@ -4,10 +4,8 @@ import controller from '../controllers/receiver.controller.js';
 
 const router = Router();
 
-router.use(auth);
+router.get('/', auth(['customer']), controller.getAll);
 
-router.get('/', controller.getAll);
-
-router.post('/', controller.create);
+router.post('/', auth(['customer']), controller.create);
 
 export default router;

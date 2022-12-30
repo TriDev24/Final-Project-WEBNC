@@ -13,7 +13,7 @@ const schema = {
     description: String,
     transferFee: Number,
     transferTime: String,
-    otpCode: String,
+    otpCode: { type: String, default: null },
     isVerified: { type: Boolean, default: false },
     signature: { type: String, default: null },
 };

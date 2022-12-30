@@ -4,12 +4,10 @@ import controller from '../controllers/billing.controller.js';
 
 const router = Router();
 
-router.use(auth);
+router.get('/history', auth(['employee']), controller.getHistory);
 
-router.get('/history', controller.getHistory);
+router.post('/', auth(['customer']), controller.create);
 
-router.post('/', controller.create);
-
-router.post('/:id/verify-otp', controller.verifyOtp);
+router.post('/:id/verify-otp', auth(['customer']), controller.verifyOtp);
 
 export default router;

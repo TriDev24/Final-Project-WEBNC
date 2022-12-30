@@ -7,7 +7,7 @@ import TransferMethod from '../models/transfer-method.model.js';
 import { generateOtp } from '../utils/otp.util.js';
 import { sendVerifyOtpEmail } from '../utils/email.util.js';
 import Identity from '../models/identity.model.js';
-import { generateSignature, verifySignature } from '../utils/rsa.util.js';
+import { generateSignature } from '../utils/rsa.util.js';
 
 export default {
     async getHistory(req, res) {
@@ -142,7 +142,10 @@ export default {
         const internalBank = await BankType.findOne({ name: 'My Bank' });
         const isInternalBank = internalBank._id.toString() === bankTypeId;
 
+        console.log('is internal', isInternalBank);
+
         if (isInternalBank) {
+            console.log('is internal');
             // check if receiver existed
             const receiverBankAccount = await BankAccount.findOne({
                 accountNumber: receiverAccountNumber,
@@ -268,7 +271,6 @@ export default {
                 };
 
                 insertedData = await Billing.create(document);
-
                 if (!insertedData) {
                     return res.status(500).json('Something error');
                 }
@@ -294,41 +296,36 @@ export default {
 
         // Cross external bank.
         const generatedSignature = generateSignature();
-        console.log('generatedSignature', generatedSignature);
-
-        const decodedSignature = verifySignature(generatedSignature);
-        console.log('decodedSignature', decodedSignature);
 
         const url = `${process.env.EXTERNAL_BANK_API_URL}`;
         const payload = {
+            description,
+            deposit,
             signature: generatedSignature,
         };
 
         // Goi API cap nhat so du cua API lien ket
-        // fetch(url, {
-        //     method: 'POST',
-        //     headers: {
-        //         'Content-Type': 'application/json',
-        //     },
-        //     body: JSON.stringify(payload),
-        // })
-        //     .then(() => {
-        //         console.log('Ok');
-        //     })
-        //     .catch((error) =>
-        //         res.status(500).json(
-        //             `Something error on transfer money to external bank:
-        //                 ${error}`
-        //         )
-        //     );
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+        })
+            .then(() => {
+                res.status(200).json('Successfully');
+            })
+            .catch((error) =>
+                res.status(500).json(
+                    `Something error on transfer money to external bank:
+                        ${error}`
+                )
+            );
     },
 
     async verifyOtp(req, res) {
         const { id } = req.params;
         const { otp } = req.body;
-
-        console.log('id: ', id);
-        console.log('otp', otp);
 
         const billing = await Billing.findById(id);
         if (!billing) {

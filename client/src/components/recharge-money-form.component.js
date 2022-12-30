@@ -40,7 +40,7 @@ export const RechargeMoneyForm = ({ form, bankAccounts }) => {
     return (
         <Form layout='vertical' form={form}>
             <Form.Item
-                label='Bank Account Number'
+                label='Số tài khoản'
                 name='bankAccountId'
                 rules={[
                     {
@@ -55,7 +55,7 @@ export const RechargeMoneyForm = ({ form, bankAccounts }) => {
             </Form.Item>
 
             <Form.Item
-                label='Transfer Amount'
+                label='Số tiền'
                 name='deposit'
                 rules={[
                     {

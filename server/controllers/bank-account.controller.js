@@ -1,5 +1,7 @@
 import BankAccount from '../models/bank-account.model.js';
 import { verifySignature } from '../utils/rsa.util.js';
+import { TransferFee } from '../models/transfer-fee.model.js';
+import TransferMethod from '../models/transfer-method.model.js';
 
 export default {
     async getAll(req, res) {
@@ -142,28 +144,64 @@ export default {
 
     // API for another bank to connect
     async rechargeMoney(req, res) {
-        const { id } = req.params;
-        const { deposit, signature } = req.body;
+        const { id: receiverBankAccountId } = req.params;
+        const {
+            bankAccountId: senderBankAccountId,
+            deposit,
+            signature,
+            transferMethod,
+            transferTime,
+        } = req.body;
 
         const isNotValidSignature = verifySignature(signature);
         if (isNotValidSignature) {
             return res.status(403).json('Not valid signature');
         }
 
-        const bankAccount = await BankAccount.findById(id);
-        if (!bankAccount) {
+        const receiverBankAccount = await BankAccount.findById(
+            receiverBankAccountId
+        );
+        if (!receiverBankAccount) {
             return res.status(404).json('Cannot find this Bank Account');
         }
+
+        const totalAmount =
+            transferMethod === 'Receiver pay'
+                ? deposit - TransferFee.External
+                : deposit;
 
         const updatedBankAccount = await BankAccount.updateOne(
             {
                 _id: id,
             },
             {
-                overBalance: bankAccount.overBalance + deposit,
+                overBalance: receiverBankAccount.overBalance + totalAmount,
             }
         );
         if (!updatedBankAccount) {
+            return res.status(500).json('Something error');
+        }
+
+        // Save it billing.
+        const correspondTransferMethod =
+            transferMethod === 'Receiver pay'
+                ? await TransferMethod.findOne('Receiver Pay Transfer Fee')
+                : await TransferMethod.findOne('Sender Pay Transfer Fee');
+
+        const document = {
+            senderId: senderBankAccountId,
+            receiverId: receiverBankAccountId,
+            deposit,
+            description,
+            transferType: TransferType.MoneyTransfer,
+            transferMethodId: correspondTransferMethod._id,
+            transferFee: TransferFee.External,
+            transferTime,
+            signature,
+        };
+
+        insertedData = await Billing.create(document);
+        if (!insertedData) {
             return res.status(500).json('Something error');
         }
 

@@ -91,7 +91,9 @@ export const MoneyTransferForm = ({
                             message: 'Mời bạn chọn loại ngân hàng',
                         },
                     ]}>
-                    <Select>{renderBankTypeOptions()}</Select>
+                    <Select placeholder='Vui lòng chọn 1 ngân hàng cần chuyển'>
+                        {renderBankTypeOptions()}
+                    </Select>
                 </Form.Item>
                 <Form.Item>
                     <Collapse defaultActiveKey={['1']}>

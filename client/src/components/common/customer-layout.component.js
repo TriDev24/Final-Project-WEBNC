@@ -15,10 +15,12 @@ import {
     Space,
     Button,
     Badge,
+    Result,
     Alert,
 } from 'antd';
 import DebitTable from '../dashboard/debit.component.js';
 import DebtorTable from '../dashboard/debtor.component.js';
+import { getProfileFromLocalStorage } from '../../utils/local-storage.util.js';
 
 const { Header, Content, Footer, Sider } = Layout;
 
@@ -96,80 +98,82 @@ export const CustomerLayout = ({ children }) => {
     } = theme.useToken();
 
     return (
-        <Layout
-            style={{
-                minHeight: '100vh',
-            }}>
-            <Sider
-                collapsible
-                collapsed={collapsed}
-                onCollapse={(value) => setCollapsed(value)}>
-                <div style={{ textAlign: 'center', margin: '20px' }}>
-                    <Image
-                        height={40}
-                        width={40}
-                        src='./images/logo.png'></Image>
-                </div>
-                <Menu
-                    theme='dark'
-                    defaultSelectedKeys={['1']}
-                    mode='inline'
-                    items={items}
-                    onClick={(e) => setSelectedMenuItem(e.key)}
-                />
-            </Sider>
-            <Layout className='site-layout'>
-                <Header
-                    style={{
-                        padding: '0 40px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'flex-end',
-                        background: colorBgContainer,
-                    }}>
-                    <Space>
-                        <Dropdown
-                            menu={{
-                                items: dropItems,
-                            }}
-                            placement='bottomLeft'
-                            arrow={{
-                                pointAtCenter: true,
-                            }}>
-                            <Badge size='small' count={count}>
-                                <Button icon={<BellOutlined />}></Button>
-                            </Badge>
-                        </Dropdown>
-                        <Avatar
-                            size='large'
-                            src='/images/avatar.png'
-                            style={{
-                                marginBottom: '5px',
-                                marginLeft: '5px',
-                            }}></Avatar>
-                    </Space>
-                </Header>
-                <Content
-                    style={{
-                        margin: '0 16px',
-                    }}>
-                    <div
+        <>
+            <Layout
+                style={{
+                    minHeight: '100vh',
+                }}>
+                <Sider
+                    collapsible
+                    collapsed={collapsed}
+                    onCollapse={(value) => setCollapsed(value)}>
+                    <div style={{ textAlign: 'center', margin: '20px' }}>
+                        <Image
+                            height={40}
+                            width={40}
+                            src='./images/logo.png'></Image>
+                    </div>
+                    <Menu
+                        theme='dark'
+                        defaultSelectedKeys={['1']}
+                        mode='inline'
+                        items={items}
+                        onClick={(e) => setSelectedMenuItem(e.key)}
+                    />
+                </Sider>
+                <Layout className='site-layout'>
+                    <Header
                         style={{
-                            margin: '16px 0',
-                            padding: 24,
-                            minHeight: 360,
+                            padding: '0 40px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'flex-end',
                             background: colorBgContainer,
                         }}>
-                        {componentsSwitch(selectedMenuItem)}
-                    </div>
-                </Content>
-                <Footer
-                    style={{
-                        textAlign: 'center',
-                    }}>
-                    Internet Banking Footer
-                </Footer>
+                        <Space>
+                            <Dropdown
+                                menu={{
+                                    items: dropItems,
+                                }}
+                                placement='bottomLeft'
+                                arrow={{
+                                    pointAtCenter: true,
+                                }}>
+                                <Badge size='small' count={count}>
+                                    <Button icon={<BellOutlined />}></Button>
+                                </Badge>
+                            </Dropdown>
+                            <Avatar
+                                size='large'
+                                src='/images/avatar.png'
+                                style={{
+                                    marginBottom: '5px',
+                                    marginLeft: '5px',
+                                }}></Avatar>
+                        </Space>
+                    </Header>
+                    <Content
+                        style={{
+                            margin: '0 16px',
+                        }}>
+                        <div
+                            style={{
+                                margin: '16px 0',
+                                padding: 24,
+                                minHeight: 360,
+                                background: colorBgContainer,
+                            }}>
+                            {componentsSwitch(selectedMenuItem)}
+                        </div>
+                    </Content>
+                    <Footer
+                        style={{
+                            textAlign: 'center',
+                        }}>
+                        Internet Banking Footer
+                    </Footer>
+                </Layout>
             </Layout>
-        </Layout>
+        </>
     );
 };

@@ -1,12 +1,12 @@
 import { Router } from 'express';
-import controller from '../controllers/debtor.controller.js'
-import auth from '../middlewares/auth.middleware.js'
+import controller from '../controllers/debtor.controller.js';
+import auth from '../middlewares/auth.middleware.js';
 
 const router = Router();
 
-router.use(auth('user'))
+router.use(auth(['customer']));
 
-router.get('/',controller.getAllDebtor)
-router.delete('/:id',controller.deleteDebtor)
+router.get('/', controller.getAllDebtor);
+router.delete('/:id', controller.deleteDebtor);
 
-export default router
+export default router;

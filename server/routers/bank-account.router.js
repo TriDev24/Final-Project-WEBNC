@@ -4,18 +4,17 @@ import controller from '../controllers/bank-account.controller.js';
 
 const router = Router();
 
-router.use(auth);
+router.get('/all', auth(['employee']), controller.getAll);
 
-router.get('/all', controller.getAll);
+router.get('/', auth(['customer']), controller.getAllByUserId);
 
-router.get('/', controller.getAllByUserId);
+router.get('/:id', auth(['customer']), controller.getById);
 
-router.get('/:id', controller.getById);
+router.post('/', auth(['employee']), controller.create);
 
-router.post('/', controller.create);
+// API for other bank
+router.put('/:id/payment', controller.rechargeMoney);
 
-router.patch('/:id', controller.update);
-
-router.put('/:id/recharge', controller.rechargeMoney);
+router.patch('/:id', auth(['employee', 'customer']), controller.update);
 
 export default router;

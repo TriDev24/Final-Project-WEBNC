@@ -4,8 +4,6 @@ import controller from '../controllers/bank-type.controller.js';
 
 const router = Router();
 
-router.use(auth);
-
-router.get('/', controller.getAll);
+router.get('/', auth(['customer']), controller.getAll);
 
 export default router;
