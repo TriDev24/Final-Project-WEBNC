@@ -80,7 +80,7 @@ function Action({ id, setData, side, setLoading }) {
   return (
     <Space>
       {contextHolder}
-      <Button icon={<PayCircleOutlined />}></Button>
+      {side==="other"&&<Button icon={<PayCircleOutlined />}></Button>}
       <Button danger icon={<DeleteOutlined />} onClick={deleteDebit}></Button>
     </Space>
   );
