@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Dropdown, Button, Badge, Alert, Space } from "antd";
+import { Dropdown, Button, Badge, Alert, Space, notification } from "antd";
 import { BellOutlined } from "@ant-design/icons";
 
 const getItem = (label, key, icon, children) => {
@@ -14,10 +14,10 @@ const getItem = (label, key, icon, children) => {
 function Notify() {
   const [dropItems, setDropItems] = useState([]);
   const [count, setCount] = useState(0);
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
 
   const fetchApi = async () => {
-    setLoading(true)
+    setLoading(true);
     const url = `${
       process.env.REACT_APP_NOTIFY_URL_PATH
     }/${localStorage.getItem("payment-account-number")}`;
@@ -64,11 +64,11 @@ function Notify() {
     }
     setDropItems(items);
     setCount(result.count);
-    setLoading(false)
+    setLoading(false);
   };
 
   const handleClick = async (id) => {
-    setLoading(true)
+    setLoading(true);
     const url = `${process.env.REACT_APP_NOTIFY_URL_PATH}/${id}`;
     const result = await fetch(url, {
       method: "DELETE",
@@ -80,14 +80,34 @@ function Notify() {
       .then((response) => response.json())
       .then((data) => data);
     await fetchApi();
-    setLoading(false)
+    setLoading(false);
   };
 
   useEffect(() => {
     const paymentAccount = localStorage.getItem("payment-account-number");
+    const ws = new WebSocket("ws://localhost:40567");
     if (paymentAccount) {
       fetchApi();
+
+      ws.onopen = (event) => {
+        ws.send(`${paymentAccount}`);
+      };
+      ws.onmessage = async function (event) {
+        const message = event.data;
+        if (message === paymentAccount) {
+          setLoading(true);
+          await fetchApi();
+          setLoading(false);
+          notification.open({
+            message: "Thông báo",
+            description:
+              "Bạn có thông báo mới về nhắc nợ, hãy kiểm tra trong danh sách nhắc nợ",
+            placement: "top",
+          });
+        }
+      };
     }
+    return () => ws.close();
   }, [localStorage.getItem("payment-account-number")]);
 
   return (
