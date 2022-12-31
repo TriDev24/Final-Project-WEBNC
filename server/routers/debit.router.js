@@ -8,7 +8,7 @@ router.use(auth(['customer']));
 
 router.post('/', controller.createDebit);
 router.get('/', controller.getAllDebit);
-router.get('/notify/:accountNumber', controller.getDebitNotRead);
-router.delete('/:id', controller.deleteDebit);
+router.get('/notify/:accountNumber', controller.getAllNotify);
+router.delete('/:id/:side', controller.deleteDebit);
 
 export default router;

@@ -2,6 +2,7 @@ import Debit from "../models/debit.model.js";
 import Status from "../models/status.model.js";
 import BankAccount from "../models/bank-account.model.js";
 import Debtor from "../models/debtor.model.js";
+import Notify from "../models/notify.model.js";
 
 export default {
   async createDebit(data) {
@@ -64,36 +65,50 @@ export default {
     return debits;
   },
 
-  async deleteDebit(id) {
+  async deleteDebit(id, side) {
     const cancelled = await Status.findOne({ name: "cancelled" });
     const result = await Debit.findByIdAndUpdate(id, {
       statusId: cancelled._id,
       updatedAt: Date.now(),
     });
+    if (side === "personal") {
+      const notify = await Notify.create({
+        senderId: result.accountId,
+        receiverId: result.debtAccountId,
+        statusId: cancelled._id,
+        side,
+      });
+    } else {
+      const notify = await Notify.create({
+        senderId: result.debtAccountId,
+        receiverId: result.accountId,
+        statusId: cancelled._id,
+        side,
+      });
+    }
+
     return result;
   },
 
-  async getDebitNotRead(accountNumber) {
+  async getAllNotify(accountNumber) {
     const account = await BankAccount.findOne({ accountNumber });
-    const debits = await Debit.find({ debtAccountId: account._id })
+    const notifies = await Notify.find({ receiverId: account._id })
       .populate([
         {
-          path: "accountId",
+          path: "senderId",
           select: "accountNumber -_id",
           populate: { path: "identityId", select: "aliasName -_id" },
         },
         { path: "statusId", select: "name -_id" },
       ])
-      .sort({ updatedAt: "desc" });
-      
-    const count = await Debit.count({
-      isRead: false,
-      debtAccountId: account._id,
-    });
-    
+      .sort({ updatedAt: "desc" })
+      .limit(10);
+
+    const count = notifies.length;
+
     return {
       count,
-      debits,
+      notifies,
     };
   },
 };

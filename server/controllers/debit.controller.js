@@ -28,8 +28,9 @@ export default {
 
   async deleteDebit(req, res) {
     const id = req.params["id"];
+    const side = req.params["side"];
     if (id) {
-      const result = await service.deleteDebit(id);
+      const result = await service.deleteDebit(id, side);
       if (result) return res.json(result);
       return res.json({
         message: "Nhắc nợ không tồn tại!",
@@ -38,9 +39,9 @@ export default {
     return res.status(204).end();
   },
 
-  async getDebitNotRead(req, res) {
+  async getAllNotify(req, res) {
     const accountNumber = req.params["accountNumber"];
-    const result = await service.getDebitNotRead(accountNumber)
+    const result = await service.getAllNotify(accountNumber);
     return res.json(result);
   },
 };

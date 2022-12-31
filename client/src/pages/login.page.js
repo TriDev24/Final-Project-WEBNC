@@ -1,7 +1,7 @@
 import React from 'react';
 import LoginForm from '../components/login.component.js';
 
-export const LoginPage = () => {
+export const LoginPage = ({setAuth}) => {
     return (
         <div
             style={{
@@ -20,7 +20,7 @@ export const LoginPage = () => {
                     borderRadius: '20px',
                     backgroundColor: 'white',
                 }}>
-                <LoginForm />
+                <LoginForm setAuth={setAuth}/>
             </div>
         </div>
     );

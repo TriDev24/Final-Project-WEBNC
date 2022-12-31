@@ -49,7 +49,7 @@ function Action({ id, setData, side, setLoading }) {
   const deleteDebit = async () => {
     setLoading(true);
 
-    const url = `${process.env.REACT_APP_DEBIT_URL_PATH}/${id}`;
+    const url = `${process.env.REACT_APP_DEBIT_URL_PATH}/${id}/${side}`;
 
     const result = await fetch(url, {
       method: "DELETE",

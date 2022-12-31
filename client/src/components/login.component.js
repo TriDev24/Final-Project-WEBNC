@@ -4,7 +4,7 @@ import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import { Button, Form, Input, Avatar, message } from 'antd';
 import ReCAPTCHA from 'react-google-recaptcha';
 
-const LoginForm = () => {
+const LoginForm = ({setAuth}) => {
     const navigate = useNavigate();
     const captchaRef = useRef(null);
 
@@ -58,7 +58,7 @@ const LoginForm = () => {
 
                         setLoading(false);
                         captchaRef.current.reset();
-
+                        setAuth(true)
                         const { role } = result.profile;
                         switch (role) {
                             case 'admin': {
@@ -136,7 +136,7 @@ const LoginForm = () => {
                 />
 
                 <Form.Item>
-                    <Link to='/forgot-password'>Forgot password</Link>
+                    <Link to='/forgot-password'>Quên mật khẩu</Link>
                     {contextHolder}
                     <Button
                         style={{ width: '100%' }}
