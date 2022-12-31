@@ -38,10 +38,4 @@ export default {
     }
     return res.status(204).end();
   },
-
-  async getAllNotify(req, res) {
-    const accountNumber = req.params["accountNumber"];
-    const result = await service.getAllNotify(accountNumber);
-    return res.json(result);
-  },
 };

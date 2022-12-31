@@ -13,8 +13,8 @@ export const BankAccountList = ({
 }) => {
     return (
         <Container>
-            {bankAccounts.map((b) => (
-                <BankAccountItem
+            {bankAccounts.map((b, index) => (
+                <BankAccountItem key={index}
                     paymentAccount={paymentAccount}
                     onSelectPaymentAccountClick={onSelectPaymentAccountClick}
                     bankAccount={b}
