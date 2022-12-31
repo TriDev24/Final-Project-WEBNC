@@ -2,7 +2,6 @@ import jwt from 'jsonwebtoken';
 
 export default (roles) => {
     return (req, res, next) => {
-        console.log('vao mdw');
 
         const accessToken = req.headers['authorization'];
 
@@ -13,12 +12,7 @@ export default (roles) => {
                     process.env.JWT_SECRET_KEY
                 );
                 req.userId = decode.data.id;
-
-                console.log('roles', roles);
-
-                console.log('decode.data.role', decode.data.role);
                 const isContainRole = roles.includes(decode.data.role);
-                console.log('isContainRole', isContainRole);
 
                 if (isContainRole) {
                     next();

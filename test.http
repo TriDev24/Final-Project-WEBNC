@@ -19,8 +19,7 @@ Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjoiNjM5OWI2OWM2OGQ4
 
 ###
 GET http://localhost:8080/api/debits/notify/186672
-Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjoiNjM5OWI2OWM2OGQ4Zjc5MmVkM2JkZThjIiwiaWF0IjoxNjcxMjQ0ODgzLCJleHAiOjE2NzM4MzY4ODN9.A_EVVlVGojCfOxD4vuBWRZAtnb07PEna_B4NXN3_zeQ
-
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoiNjM5OTk2Y2JkMWIzN2M1NjMyYWMyMDRjIiwicm9sZSI6ImN1c3RvbWVyIn0sImlhdCI6MTY3MjQ4MTM3MywiZXhwIjoxNjczMDg2MTczfQ.MFR0pXZtRB4B7j2JekI92gkTab-31R1_6yhDIIPCpvU
 ###
 GET http://localhost:8080/api/identities/send-mail/danilcevan@crossfitcoastal.com
 

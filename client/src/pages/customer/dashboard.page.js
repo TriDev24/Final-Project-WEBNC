@@ -100,7 +100,7 @@ export const CustomerDashBoardPage = () => {
             })
                 .then((response) => response.json())
                 .then((data) => {
-                    localStorage.setItem('bank_types', JSON.stringify(data));
+                    localStorage.setItem('bank-types', JSON.stringify(data));
                     setBankTypes(data);
                 });
         };
@@ -116,7 +116,7 @@ export const CustomerDashBoardPage = () => {
                 .then((response) => response.json())
                 .then((data) => {
                     localStorage.setItem(
-                        'transfer_methods',
+                        'transfer-methods',
                         JSON.stringify(data)
                     );
                     setTransferMethods(data);

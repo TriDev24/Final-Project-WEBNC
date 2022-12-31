@@ -83,7 +83,7 @@ export default {
     const isPhoneExist = await Identity.findOne({ phoneNumber });
     if (!isIdentityExist) {
       if (!isPhoneExist) {
-        const permission = await Permission.findOne({ name: "user" });
+        const permission = await Permission.findOne({ name: "customer" });
         const hash = bcrypt.hashSync(password, 10);
         if (aliasName === "") {
           aliasName = firstName + " " + lastName;

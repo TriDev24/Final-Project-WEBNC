@@ -3,6 +3,7 @@ import Status from "../models/status.model.js";
 import BankAccount from "../models/bank-account.model.js";
 import Debtor from "../models/debtor.model.js";
 import Notify from "../models/notify.model.js";
+import { broadCast } from "../utils/ws.util.js";
 
 export default {
   async createDebit(data) {
@@ -78,6 +79,8 @@ export default {
         statusId: cancelled._id,
         side,
       });
+      const account = await BankAccount.findById(result.debtAccountId);
+      broadCast(account.accountNumber);
     } else {
       const notify = await Notify.create({
         senderId: result.debtAccountId,
@@ -85,30 +88,10 @@ export default {
         statusId: cancelled._id,
         side,
       });
+      const account = await BankAccount.findById(result.accountId);
+      broadCast(account.accountNumber);
     }
 
     return result;
-  },
-
-  async getAllNotify(accountNumber) {
-    const account = await BankAccount.findOne({ accountNumber });
-    const notifies = await Notify.find({ receiverId: account._id })
-      .populate([
-        {
-          path: "senderId",
-          select: "accountNumber -_id",
-          populate: { path: "identityId", select: "aliasName -_id" },
-        },
-        { path: "statusId", select: "name -_id" },
-      ])
-      .sort({ updatedAt: "desc" })
-      .limit(10);
-
-    const count = notifies.length;
-
-    return {
-      count,
-      notifies,
-    };
   },
 };

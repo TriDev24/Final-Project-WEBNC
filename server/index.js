@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import db from './utils/database.util.js';
 import routers from './routers/index.js';
+import ws from './utils/ws.util.js'
 
 dotenv.config();
 
