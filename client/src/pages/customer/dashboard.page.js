@@ -2,7 +2,7 @@ import Title from 'antd/es/typography/Title.js';
 import { CustomerLayout } from '../../components/common/customer-layout.component.js';
 import styled from '@xstyled/styled-components';
 import { Button, Checkbox, message, Modal, Skeleton, Table } from 'antd';
-import { ServiceList } from '../../components/dashboard/index.js';
+import { ServiceList } from '../../components/dashboard/service-list.component.js';
 import { SwapOutlined, SecurityScanOutlined } from '@ant-design/icons';
 import { useEffect, useState, useCallback } from 'react';
 import { getProfileFromLocalStorage } from '../../utils/local-storage.util.js';
@@ -99,7 +99,10 @@ export const CustomerDashBoardPage = () => {
                 },
             })
                 .then((response) => response.json())
-                .then((data) => setBankTypes(data));
+                .then((data) => {
+                    localStorage.setItem('bank_types', JSON.stringify(data));
+                    setBankTypes(data);
+                });
         };
 
         const getTransferMethods = async () => {
@@ -111,7 +114,13 @@ export const CustomerDashBoardPage = () => {
                 },
             })
                 .then((response) => response.json())
-                .then((data) => setTransferMethods(data));
+                .then((data) => {
+                    localStorage.setItem(
+                        'transfer_methods',
+                        JSON.stringify(data)
+                    );
+                    setTransferMethods(data);
+                });
         };
 
         getBankTypes();
@@ -438,8 +447,6 @@ export const CustomerDashBoardPage = () => {
                 onCancel={changePasswordModalVisible}>
                 <ChangePasswordForm
                     form={moneyTransferForm}
-                    receivers={receivers}
-                    bankTypes={bankTypes}
                     transferMethods={transferMethods}
                 />
             </Modal>
