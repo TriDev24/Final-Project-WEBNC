@@ -1,14 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   CreditCardOutlined,
   BankOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { Avatar, Layout, Menu, theme, Image, Space } from "antd";
+import { Layout, Menu, theme, Image, Space } from "antd";
 import DebitTable from "../dashboard/debit.component.js";
 import DebtorTable from "../dashboard/debtor.component.js";
 import Notify from "../dashboard/notify.component.js";
-import { getProfileFromLocalStorage } from "../../utils/local-storage.util.js";
+import { ChangePassword } from "../change-password.component.js";
 
 const { Header, Content, Footer, Sider } = Layout;
 
@@ -88,14 +88,7 @@ export const CustomerLayout = ({ children }) => {
           >
             <Space>
               <Notify></Notify>
-              <Avatar
-                size="large"
-                src="/images/avatar.png"
-                style={{
-                  marginBottom: "5px",
-                  marginLeft: "5px",
-                }}
-              ></Avatar>
+              <ChangePassword></ChangePassword>
             </Space>
           </Header>
           <Content
