@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { styled } from "@xstyled/styled-components";
-import { Avatar, Button, Dropdown, Modal, Form, Input } from "antd";
+import { Avatar, Button, Dropdown, Modal, Form, Input, message } from "antd";
+import { useNavigate, Link } from 'react-router-dom';
 import { SecurityScanOutlined } from "@ant-design/icons";
 
 const Container = styled.div`
@@ -19,8 +20,49 @@ const getItem = (label, key, icon, children) => {
 const items = [getItem(<ChangePasswordModal></ChangePasswordModal>, "1")];
 
 function ChangePasswordModal() {
-  const [changePasswordForm] = Form.useForm();
+  
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [messageApi, contextHolder] = message.useMessage();
+  const [loading, setLoading] = useState(false);
+  const [changePasswordForm] = Form.useForm();
+
+  
+
+  const onFinish = async (values) => {
+    console.log(222222444)
+    setLoading(true);
+    // let debtAccountNumber;
+    // if (debtAccount) {
+    //   debtAccountNumber = debtAccount;
+    // } else debtAccountNumber = values.debtAccountNumber;
+    // const { amountToPay, content } = values;
+
+    // const accountNumber = localStorage.getItem("payment-account-number");
+    const data = JSON.stringify({
+      "lhtinh": "test"
+    });
+    console.log(process.env.REACT_APP_DEBIT_URL_PATH);
+
+    const result = await fetch(process.env.REACT_APP_CHANGE_PASSWORD_PATH, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: localStorage.getItem("accessToken"),
+      },
+      body: data,
+    })
+      .then((response) => response.json())
+      .then((data) => data);
+
+    messageApi.open({
+      type: result.status,
+      content: result.message,
+    });
+
+    changePasswordForm.resetFields();
+    setLoading(false);
+  };
 
   const showModal = () => {
     setIsModalOpen(true);
@@ -55,7 +97,8 @@ function ChangePasswordModal() {
           <div style={{ textAlign: "center", margin: "20px" }}>
             <Avatar size={200} shape="square" src="/images/reset-password.png"></Avatar>
           </div>
-          <Form style={{width: "100%"}} form={changePasswordForm} layout="vertical">
+          <Form style={{width: "100%"}} name="normal_login"
+            className="login-form" form={changePasswordForm} onFinish={onFinish} layout="vertical">
             <Form.Item
               name="oldPassword"
               label="Mật khẩu cũ"
@@ -80,8 +123,7 @@ function ChangePasswordModal() {
             >
               <Input placeholder="Mật khẩu mới" />
             </Form.Item>
-
-            <Button type="primary" block style={{marginBottom:"20px"}}>
+            <Button type="primary" block style={{marginBottom:"20px"}} htmlType="submit" className="login-form-button" loading={loading} >
               Xác nhận
             </Button>
           </Form>
@@ -118,3 +160,4 @@ export const ChangePassword = () => {
     </Container>
   );
 };
+export default ChangePasswordModal;
