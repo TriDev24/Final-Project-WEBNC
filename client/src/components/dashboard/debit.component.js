@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Typography, Table, Modal } from 'antd';
-import { Button, Space, message, Tag } from 'antd';
+import { Typography, Table, Modal, Tooltip } from 'antd';
+import { Button, Space, message, Tag, Checkbox } from 'antd';
 import { PayCircleOutlined, DeleteOutlined } from '@ant-design/icons';
 import CreateDebitModal from './create-debit.component.js';
 import { styled } from '@xstyled/styled-components';
+import OTPInput from '../common/otp-input/index.js';
 
 const { Title } = Typography;
 
@@ -50,7 +51,14 @@ const fetchApi = async (side) => {
     return result;
 };
 
-function Action({ id, data, setData, side, setLoading }) {
+function Action({
+    id,
+    data,
+    setData,
+    toggleConfirmOtpModalVisibility,
+    side,
+    setLoading,
+}) {
     const [messageApi, contextHolder] = message.useMessage();
     const deleteDebit = async () => {
         setLoading(true);
@@ -86,6 +94,7 @@ function Action({ id, data, setData, side, setLoading }) {
 
     const payDebit = async () => {
         const foundedDebit = data.find((d) => (d.id = id));
+        console.log('foundedDebit', foundedDebit);
 
         const bankTypes = JSON.parse(localStorage.getItem('bank-types'));
         const internalBankType = bankTypes.find((b) => b.name === 'My Bank');
@@ -101,7 +110,7 @@ function Action({ id, data, setData, side, setLoading }) {
             bankTypeId: internalBankType._id,
             deposit: foundedDebit.amountToPay,
             transferMethodId: senderPayFeeMethod._id,
-            description: description ?? '',
+            description: data.content,
             transferTime: Date.now(),
         };
         const result = await fetch(process.env.REACT_APP_BILLING_API_URL_PATH, {
@@ -114,25 +123,38 @@ function Action({ id, data, setData, side, setLoading }) {
         })
             .then((response) => response.json())
             .then((data) => {
-                localStorage.setItem('billing-');
-            });
+                toggleConfirmOtpModalVisibility();
+                localStorage.setItem('billing-id', data._id);
+                localStorage.setItem('paid-debit-id', id);
 
-        await fetchApi(side).then((result) => setData(result));
+                fetchApi(side).then((result) => setData(result));
+            });
     };
 
     return (
         <Space>
             {contextHolder}
-            <Button icon={<PayCircleOutlined />} onClick={payDebit}></Button>
-            <Button
-                danger
-                icon={<DeleteOutlined />}
-                onClick={deleteDebit}></Button>
+            {side === 'other' && (
+                <Tooltip placement='top' title='Thanh toán'>
+                    <Button
+                        icon={<PayCircleOutlined />}
+                        onClick={payDebit}></Button>
+                </Tooltip>
+            )}
+            <Tooltip placement='top' title='Huỷ'>
+                <Button
+                    danger
+                    icon={<DeleteOutlined />}
+                    onClick={deleteDebit}></Button>
+            </Tooltip>
         </Space>
     );
 }
 
 function DebitTable({ side }) {
+    const [otp, setOtp] = useState('');
+    const [confirmOtpModalVisibility, setConfirmOtpModalVisibility] =
+        useState(false);
     const [data, setData] = useState([]);
     const [loadingState, setLoading] = useState(true);
     const columns = [
@@ -176,7 +198,9 @@ function DebitTable({ side }) {
                 <span>
                     {record.transferDate === null
                         ? 'Không có'
-                        : record.transferDate}
+                        : new Date(
+                              parseInt(record.transferDate)
+                          ).toLocaleString()}
                 </span>
             ),
         },
@@ -196,6 +220,9 @@ function DebitTable({ side }) {
                         id={record.id}
                         side={side}
                         data={data}
+                        toggleConfirmOtpModalVisibility={
+                            toggleConfirmOtpModalVisibility
+                        }
                         setLoading={setLoading}></Action>
                 ) : null;
             },
@@ -219,6 +246,10 @@ function DebitTable({ side }) {
         setLoading,
     };
 
+    const toggleConfirmOtpModalVisibility = () => {
+        setConfirmOtpModalVisibility(!confirmOtpModalVisibility);
+    };
+
     const handleConfirmOtp = () => {
         const url = `${
             process.env.REACT_APP_BILLING_API_URL_PATH
@@ -239,80 +270,37 @@ function DebitTable({ side }) {
                 message.success('Successfully');
                 toggleConfirmOtpModalVisibility();
 
-                // Show Success Modal.
-                const isNotSavedReceiverBefore = JSON.parse(
-                    localStorage.getItem('is-not-saved-receiver-before')
-                );
-                console.log(
-                    'isNotSavedReceiverBefore',
-                    isNotSavedReceiverBefore
-                );
+                updateToPaidDebit();
 
-                Modal.success({
-                    title: 'Thành công',
-                    content: (
-                        <>
-                            {isNotSavedReceiverBefore && (
-                                <Checkbox
-                                    id='saveReceiverCheckBox'
-                                    defaultChecked={false}>
-                                    Lưu nguời nhận
-                                </Checkbox>
-                            )}
-                        </>
-                    ),
-                    onOk: () => {
-                        if (isNotSavedReceiverBefore) {
-                            let savedReceiverCheckbox = document.querySelector(
-                                '#saveReceiverCheckBox'
-                            );
-                            var isSaveReceiverChecked =
-                                savedReceiverCheckbox.checked === true;
-
-                            if (isSaveReceiverChecked) {
-                                const payload = {
-                                    senderAccountNumber: localStorage.getItem(
-                                        'payment-account-number'
-                                    ),
-                                    receiverAccountNumber: localStorage.getItem(
-                                        'current-receiver-account-number'
-                                    ),
-                                };
-                                fetch(
-                                    process.env.REACT_APP_RECEIVER_API_URL_PATH,
-                                    {
-                                        method: 'POST',
-                                        headers: {
-                                            'Content-Type': 'application/json',
-                                            Authorization:
-                                                localStorage.getItem(
-                                                    'accessToken'
-                                                ),
-                                        },
-                                        body: JSON.stringify(payload),
-                                    }
-                                )
-                                    .then((response) => {
-                                        message.success(
-                                            'Lưu người nhận thành công'
-                                        );
-                                        getReceivers();
-                                    })
-                                    .catch((error) =>
-                                        message.error('Lưu người nhận thất bại')
-                                    );
-
-                                savedReceiverCheckbox.checked = false;
-                            }
-                        }
-
-                        moneyTransferForm.resetFields();
-                        setOtp('');
-                    },
-                });
+                fetchApi(side).then((result) => setData(result));
             })
             .catch((error) => {
                 message.error(error);
+            });
+    };
+
+    const updateToPaidDebit = () => {
+        const id = localStorage.getItem('paid-debit-id');
+        const now = Math.floor(Date.now() / 1000);
+        const url = `${process.env.REACT_APP_DEBIT_URL_PATH}/${id}`;
+        const payload = {
+            isPaid: true,
+            payDay: now,
+        };
+
+        fetch(url, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                authorization: localStorage.getItem('accessToken'),
+            },
+            body: JSON.stringify(payload),
+        })
+            .then(() => {
+                Modal.success('Thanh toán ghi nợ thành công');
+            })
+            .catch((error) => {
+                Modal.error('Có lỗi xảy ra');
             });
     };
 

@@ -49,7 +49,7 @@ export default {
 
     async update(req, res) {
         const { id } = req.params;
-        const { isPaid } = req.body;
+        const { isPaid, payday } = req.body;
         const where = {};
 
         const debit = await Debit.findById(id);
@@ -61,6 +61,7 @@ export default {
             const paidStatus = await Status.findOne({ name: 'paid' });
 
             where['statusId'] = paidStatus._id;
+            where['transferDate'] = payday;
         }
 
         const updatedDebit = await Debit.updateOne(

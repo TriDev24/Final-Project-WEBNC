@@ -276,10 +276,13 @@ export default {
                 }
             }
 
-            const identity = await Identity.findById(
-                receiverBankAccount.identityId
+            const sender = await Identity.findById(
+                senderBankAccount.identityId
             );
-            sendVerifyOtpEmail(identity.email, generatedOtp);
+            console.log('sender.email', sender.email);
+            console.log('generatedOtp', generatedOtp);
+
+            sendVerifyOtpEmail(sender.email, generatedOtp);
 
             return res.status(200).json({
                 _id: insertedData._id,
