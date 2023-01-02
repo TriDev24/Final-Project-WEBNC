@@ -113,6 +113,7 @@ function Action({
       description: data.content,
       transferTime: Date.now(),
     };
+    console.log(payload);
     const result = await fetch(process.env.REACT_APP_BILLING_API_URL_PATH, {
       method: "POST",
       headers: {
@@ -123,9 +124,16 @@ function Action({
     })
       .then((response) => response.json())
       .then((data) => {
-        toggleConfirmOtpModalVisibility();
-        localStorage.setItem("billing-id", data._id);
-        localStorage.setItem("paid-debit-id", id);
+        if (data._id) {
+          toggleConfirmOtpModalVisibility();
+          localStorage.setItem("billing-id", data._id);
+          localStorage.setItem("paid-debit-id", id);
+        } else {
+          messageApi.open({
+            type: "error",
+            content: data,
+          });
+        }
         setLoadingPayment(false);
       });
   };
