@@ -15,26 +15,30 @@ export default {
     const debtAccount = await BankAccount.findOne({
       accountNumber: debtAccountNumber,
     });
-    const status = await Status.findOne({ name: "unpaid" });
-    const newDebit = {
-      accountId: account._id,
-      debtAccountId: debtAccount._id,
-      amountToPay,
-      content,
-      statusId: status._id,
-    };
-    const debitInserted = await Debit.create(newDebit);
-    const debtor = await Debtor.findOne({
-      accountId: account._id,
-      debtAccountId: debtAccount._id,
-    });
-    if (!debtor) {
-      const debtorInserted = await Debtor.create({
+    if (account && debtAccount) {
+      const status = await Status.findOne({ name: "unpaid" });
+      const newDebit = {
+        accountId: account._id,
+        debtAccountId: debtAccount._id,
+        amountToPay,
+        content,
+        statusId: status._id,
+      };
+      const debitInserted = await Debit.create(newDebit);
+      const debtor = await Debtor.findOne({
         accountId: account._id,
         debtAccountId: debtAccount._id,
       });
+      if (!debtor) {
+        const debtorInserted = await Debtor.create({
+          accountId: account._id,
+          debtAccountId: debtAccount._id,
+        });
+      }
+      return 1;
+    } else {
+      return -2;
     }
-    return 1;
   },
 
   async getAllDebit(side, accountNumber) {
@@ -72,6 +76,9 @@ export default {
       statusId: cancelled._id,
       updatedAt: Date.now(),
     });
+    if(result.statusId.toString() === cancelled._id.toString()){
+      return -1
+    }
     if (side === "personal") {
       const notify = await Notify.create({
         senderId: result.accountId,
@@ -93,5 +100,41 @@ export default {
     }
 
     return result;
+  },
+
+  async updateDebit(id, isPaid) {
+    const where = {};
+    const debit = await Debit.findById(id);
+    if (!debit) {
+      return -2;
+    }
+
+    if (isPaid) {
+      const paidStatus = await Status.findOne({ name: "paid" });
+
+      where["statusId"] = paidStatus._id;
+      where["transferDate"] = Date.now();
+      where["updatedAt"] = Date.now();
+    }
+
+    const updatedDebit = await Debit.findByIdAndUpdate(
+      {
+        _id: id,
+      },
+      where
+    );
+    if (!updatedDebit) {
+      return -1;
+    }
+    const notify = await Notify.create({
+      senderId: updatedDebit.debtAccountId,
+      receiverId: updatedDebit.accountId,
+      statusId: where["statusId"],
+      side: "other",
+    });
+    const account = await BankAccount.findById(updatedDebit.accountId);
+    broadCast(account.accountNumber);
+
+    return 1;
   },
 };

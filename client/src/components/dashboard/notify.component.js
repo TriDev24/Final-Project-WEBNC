@@ -1,6 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { Dropdown, Button, Badge, Alert, Space, notification } from "antd";
+import {
+  Dropdown,
+  Button,
+  Badge,
+  Alert,
+  Space,
+  notification,
+  Typography,
+} from "antd";
 import { BellOutlined } from "@ant-design/icons";
+
+const { Title, Text } = Typography;
 
 const getItem = (label, key, icon, children) => {
   return {
@@ -10,6 +20,37 @@ const getItem = (label, key, icon, children) => {
     label,
   };
 };
+
+function NotifyMessage({ message, time, id, fetchApi, setLoading }) {
+  const handleClick = async () => {
+    setLoading(true);
+    const url = `${process.env.REACT_APP_NOTIFY_URL_PATH}/${id}`;
+    const result = await fetch(url, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: localStorage.getItem("accessToken"),
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => data);
+    await fetchApi();
+    setLoading(false);
+  };
+
+  return (
+    <Space direction="vertical">
+      <Title level={5}>Thông báo</Title>
+      <Text>{message}</Text>
+      <Text type="secondary">{time}</Text>
+      <Space style={{textAlign:"right"}}>
+        <Button size="small" danger onClick={handleClick}>
+          Xóa
+        </Button>
+      </Space>
+    </Space>
+  );
+}
 
 function Notify() {
   const [dropItems, setDropItems] = useState([]);
@@ -39,23 +80,13 @@ function Notify() {
           message = `Tài khoản ${notify.senderId.accountNumber} đã hủy nhắc nợ của bạn`;
       }
       return getItem(
-        <Alert
-          message="Thông báo"
-          description={message}
-          type="info"
-          action={
-            <Space>
-              <Button
-                size="small"
-                type="primary"
-                onClick={(e) => handleClick(notify._id)}
-              >
-                Đã xem
-              </Button>
-            </Space>
-          }
-          closable
-        />,
+        <NotifyMessage
+          message={message}
+          time={new Date(parseInt(notify.createdAt)).toLocaleString()}
+          id={notify._id}
+          setLoading={setLoading}
+          fetchApi={fetchApi}
+        ></NotifyMessage>,
         index
       );
     });
@@ -64,22 +95,6 @@ function Notify() {
     }
     setDropItems(items);
     setCount(result.count);
-    setLoading(false);
-  };
-
-  const handleClick = async (id) => {
-    setLoading(true);
-    const url = `${process.env.REACT_APP_NOTIFY_URL_PATH}/${id}`;
-    const result = await fetch(url, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        authorization: localStorage.getItem("accessToken"),
-      },
-    })
-      .then((response) => response.json())
-      .then((data) => data);
-    await fetchApi();
     setLoading(false);
   };
 
@@ -119,6 +134,7 @@ function Notify() {
       arrow={{
         pointAtCenter: true,
       }}
+      trigger={['click']}
     >
       <Badge size="small" count={count}>
         <Button loading={loading} icon={<BellOutlined />}></Button>
