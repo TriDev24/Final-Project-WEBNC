@@ -39,16 +39,18 @@ function NotifyMessage({ message, time, id, fetchApi, setLoading }) {
   };
 
   return (
-    <Space direction="vertical">
-      <Title level={5}>Thông báo</Title>
-      <Text>{message}</Text>
-      <Text type="secondary">{time}</Text>
-      <Space style={{textAlign:"right"}}>
+    <div style={{border:"1px solid gray", padding:"10px", borderRadius:"10px"}}>
+      <Space align="start" direction="vertical">
+        <Title level={5}>Thông báo</Title>
+        <Text>{message}</Text>
+        <Text type="secondary">{time}</Text>
+      </Space>
+      <div style={{ width: "100%", textAlign:"right" }}>
         <Button size="small" danger onClick={handleClick}>
           Xóa
         </Button>
-      </Space>
-    </Space>
+      </div>
+    </div>
   );
 }
 
@@ -134,7 +136,7 @@ function Notify() {
       arrow={{
         pointAtCenter: true,
       }}
-      trigger={['click']}
+      trigger={["click"]}
     >
       <Badge size="small" count={count}>
         <Button loading={loading} icon={<BellOutlined />}></Button>

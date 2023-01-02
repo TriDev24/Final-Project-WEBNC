@@ -28,7 +28,7 @@ export const EmployeeLayout = ({ children }) => {
                         <Image
                             height={40}
                             width={40}
-                            src='./images/logo.png'></Image>
+                            src='/images/logo.png'></Image>
                     </div>
                     <Menu
                         theme='dark'
