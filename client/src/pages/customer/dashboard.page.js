@@ -22,7 +22,7 @@ const ServiceSection = styled.div`
 
 const HistorySection = styled.div``;
 
-export const CustomerDashBoardPage = () => {
+export const CustomerDashBoardPage = ({setAuth}) => {
   const [receivers, setReceivers] = useState(null);
   const [bankTypes, setBankTypes] = useState(null);
   const [transferMethods, setTransferMethods] = useState(null);
@@ -360,7 +360,7 @@ export const CustomerDashBoardPage = () => {
   };
 
   return (
-    <CustomerLayout>
+    <CustomerLayout selected={"1"} setAuth={setAuth}>
       <Modal
         title="Xác nhận giao dịch"
         centered

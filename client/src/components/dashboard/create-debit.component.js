@@ -1,6 +1,10 @@
 import React, { useState } from "react";
-import { Button, Modal, Form, Input, Avatar, message } from "antd";
-import { MoneyCollectOutlined, BankOutlined } from "@ant-design/icons";
+import { Button, Modal, Form, Input, Avatar, message,Tooltip } from "antd";
+import {
+  MoneyCollectOutlined,
+  BankOutlined,
+  HighlightOutlined,
+} from "@ant-design/icons";
 
 const { TextArea } = Input;
 
@@ -52,7 +56,7 @@ const CreateDebitModal = ({ actions, debtAccount }) => {
 
   const handleCancel = async () => {
     setIsModalOpen(false);
-    if(!debtAccount){
+    if (!debtAccount) {
       actions.setLoading(true);
       await actions
         .fetchApi("personal")
@@ -62,13 +66,26 @@ const CreateDebitModal = ({ actions, debtAccount }) => {
   };
   return (
     <>
-      <Button
-        type="primary"
-        onClick={showModal}
-        style={{ marginBottom: "5px" }}
-      >
-        Tạo nhắc nợ
-      </Button>
+      {!debtAccount ? (
+        <Button
+          type="primary"
+          onClick={showModal}
+          icon={<HighlightOutlined />}
+          style={{ marginBottom: "5px" }}
+        >
+          Tạo nhắc nợ
+        </Button>
+      ) : (
+        <Tooltip placement="top" title="Tạo nhắc nợ">
+          <Button
+          type="primary"
+          onClick={showModal}
+          icon={<HighlightOutlined />}
+        ></Button>
+        </Tooltip>
+        
+      )}
+
       <Modal
         footer={null}
         title="Tạo nhắc nợ"

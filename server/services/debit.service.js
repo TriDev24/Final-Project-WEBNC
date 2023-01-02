@@ -70,15 +70,21 @@ export default {
     return debits;
   },
 
-  async deleteDebit(id, side) {
+  async deleteDebit(id, side, content) {
+    const debit = await Debit.findById(id);
     const cancelled = await Status.findOne({ name: "cancelled" });
+    const paid = await Status.findOne({ name: "paid" });
+    if (debit.statusId.toString() === paid._id.toString()) {
+      return -2;
+    }
+    if (debit.statusId.toString() === cancelled._id.toString()) {
+      return -1;
+    }
     const result = await Debit.findByIdAndUpdate(id, {
+      content,
       statusId: cancelled._id,
       updatedAt: Date.now(),
     });
-    if(result.statusId.toString() === cancelled._id.toString()){
-      return -1
-    }
     if (side === "personal") {
       const notify = await Notify.create({
         senderId: result.accountId,

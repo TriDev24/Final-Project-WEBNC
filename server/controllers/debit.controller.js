@@ -34,13 +34,18 @@ export default {
   async deleteDebit(req, res) {
     const id = req.params["id"];
     const side = req.params["side"];
+    const { content } = req.body;
     if (id) {
-      const result = await service.deleteDebit(id, side);
+      const result = await service.deleteDebit(id, side, content);
       if (result === -1)
         return res.json({
           message: "Nhắc nợ đã bị hủy!",
         });
-      else if (result) {
+      else if (result === -2) {
+        return res.json({
+          message: "Nhắc nợ đã được thanh toán!",
+        });
+      } else if (result) {
         return res.json(result);
       }
       return res.json({

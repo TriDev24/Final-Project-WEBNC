@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { getProfileFromLocalStorage } from "./utils/local-storage.util.js";
 import { Result, Spin } from "antd";
 import { styled } from "@xstyled/styled-components";
+import DebitPage from "./pages/customer/dashboard-debit.page.js";
 
 const PageScreen = styled.div`
   width: 100vw;
@@ -20,7 +21,7 @@ export const App = () => {
   const [isAuth, setAuth] = useState(getProfileFromLocalStorage());
 
   useEffect(() => {
-    setLoadingStatus(!isLoading);
+    setLoadingStatus(false);
   }, []);
 
   const setUpCustomerRoutes = () => {
@@ -30,7 +31,11 @@ export const App = () => {
       <>
         <Route
           path={`${basePath}/dashboard`}
-          element={<CustomerDashBoardPage />}
+          element={<CustomerDashBoardPage setAuth={setAuth} />}
+        ></Route>
+        <Route
+          path={`${basePath}/dashboard/debit/:side`}
+          element={<DebitPage setAuth={setAuth} />}
         ></Route>
       </>
     );
@@ -43,7 +48,7 @@ export const App = () => {
       <>
         <Route
           path={`${basePath}/dashboard`}
-          element={<EmployeeDashboardPage />}
+          element={<EmployeeDashboardPage setAuth={setAuth} />}
         ></Route>
       </>
     );
@@ -56,7 +61,7 @@ export const App = () => {
       <>
         <Route
           path={`${basePath}/dashboard`}
-          element={<AdminDashboardPage />}
+          element={<AdminDashboardPage setAuth={setAuth} />}
         ></Route>
       </>
     );
@@ -66,11 +71,15 @@ export const App = () => {
     if (!isAuth) {
       return (
         <Routes>
+          <Route path="/*" element={<Navigate to="/login" replace />}></Route>
           <Route
-            path="/"
-            element={<Navigate to="/login" replace />}
+            path="/login"
+            element={<LoginPage setAuth={setAuth} />}
           ></Route>
-          <Route path="/login" element={<LoginPage setAuth={setAuth} />}></Route>
+          <Route
+            path="/forgot-password"
+            element={<ForgotPasswordPage />}
+          ></Route>
         </Routes>
       );
     }
@@ -106,7 +115,10 @@ export const App = () => {
               path="/"
               element={<Navigate to={getDefaultPath()} replace />}
             ></Route>
-            <Route path="/login" element={<LoginPage setAuth={setAuth}/>}></Route>
+            <Route
+              path="/login"
+              element={<LoginPage setAuth={setAuth} />}
+            ></Route>
             <Route
               path="/forgot-password"
               element={<ForgotPasswordPage />}
@@ -114,6 +126,16 @@ export const App = () => {
             {setUpCustomerRoutes()}
             {setUpEmployeeRoutes()}
             {setUpAdminRoutes()}
+            <Route
+              path="*"
+              element={
+                <Result
+                  status="404"
+                  title="404"
+                  subTitle="Xin lỗi, trang bạn muốn truy cập không tồn tại"
+                />
+              }
+            ></Route>
           </Routes>
         )}
       </>

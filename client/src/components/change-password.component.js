@@ -1,24 +1,8 @@
 import React, { useState } from "react";
-import { styled } from "@xstyled/styled-components";
-import { Avatar, Button, Dropdown, Modal, Form, Input } from "antd";
+import { Avatar, Button, Modal, Form, Input } from "antd";
 import { SecurityScanOutlined } from "@ant-design/icons";
 
-const Container = styled.div`
-  margin: 20px 10px;
-`;
-
-const getItem = (label, key, icon, children) => {
-  return {
-    key,
-    icon,
-    children,
-    label,
-  };
-};
-
-const items = [getItem(<ChangePasswordModal></ChangePasswordModal>, "1")];
-
-function ChangePasswordModal() {
+export function ChangePasswordModal() {
   const [changePasswordForm] = Form.useForm();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -34,7 +18,7 @@ function ChangePasswordModal() {
 
   return (
     <>
-      <Button icon={<SecurityScanOutlined />} onClick={showModal}>
+      <Button style={{width:"135px"}} icon={<SecurityScanOutlined />} onClick={showModal}>
         Đổi mật khẩu
       </Button>
       <Modal
@@ -53,9 +37,17 @@ function ChangePasswordModal() {
           }}
         >
           <div style={{ textAlign: "center", margin: "20px" }}>
-            <Avatar size={200} shape="square" src="/images/reset-password.png"></Avatar>
+            <Avatar
+              size={200}
+              shape="square"
+              src="/images/reset-password.png"
+            ></Avatar>
           </div>
-          <Form style={{width: "100%"}} form={changePasswordForm} layout="vertical">
+          <Form
+            style={{ width: "100%" }}
+            form={changePasswordForm}
+            layout="vertical"
+          >
             <Form.Item
               name="oldPassword"
               label="Mật khẩu cũ"
@@ -81,7 +73,7 @@ function ChangePasswordModal() {
               <Input placeholder="Mật khẩu mới" />
             </Form.Item>
 
-            <Button type="primary" block style={{marginBottom:"20px"}}>
+            <Button type="primary" block style={{ marginBottom: "20px" }}>
               Xác nhận
             </Button>
           </Form>
@@ -90,31 +82,3 @@ function ChangePasswordModal() {
     </>
   );
 }
-
-export const ChangePassword = () => {
-  return (
-    <Container>
-      <Dropdown
-        menu={{
-          items,
-        }}
-        placement="bottomLeft"
-        arrow={{
-          pointAtCenter: true,
-        }}
-        trigger={["click"]}
-      >
-        <Button
-          type="ghost"
-          shape="circle"
-          icon={
-            <Avatar
-              style={{ marginBottom: "5px" }}
-              src="/images/avatar.png"
-            ></Avatar>
-          }
-        ></Button>
-      </Dropdown>
-    </Container>
-  );
-};

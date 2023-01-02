@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Typography, Table, Modal, Tooltip } from "antd";
-import { Button, Space, message, Tag, Checkbox } from "antd";
-import { PayCircleOutlined, DeleteOutlined } from "@ant-design/icons";
+import { Button, Space, message, Tag } from "antd";
+import { PayCircleOutlined } from "@ant-design/icons";
 import CreateDebitModal from "./create-debit.component.js";
 import { styled } from "@xstyled/styled-components";
 import OTPInput from "../common/otp-input/index.js";
+import DeleteDebitModal from "./delete-debit.component.js";
 
 const { Title } = Typography;
 
@@ -61,35 +62,6 @@ function Action({
 }) {
   const [messageApi, contextHolder] = message.useMessage();
   const [loadingPayment, setLoadingPayment] = useState(false);
-  const deleteDebit = async () => {
-    setLoading(true);
-
-    const url = `${process.env.REACT_APP_DEBIT_URL_PATH}/${id}/${side}`;
-
-    const result = await fetch(url, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        authorization: localStorage.getItem("accessToken"),
-      },
-    })
-      .then((response) => response.json())
-      .then((data) => data);
-
-    if (result.message) {
-      messageApi.open({
-        type: "error",
-        content: result.message,
-      });
-    } else {
-      messageApi.open({
-        type: "success",
-        content: "Đã hủy nhắc nợ thành công!",
-      });
-    }
-    await fetchApi(side).then((result) => setData(result));
-    setLoading(false);
-  };
 
   const payDebit = async () => {
     setLoadingPayment(true);
@@ -150,9 +122,13 @@ function Action({
           ></Button>
         </Tooltip>
       )}
-      <Tooltip placement="top" title="Huỷ">
-        <Button danger icon={<DeleteOutlined />} onClick={deleteDebit}></Button>
-      </Tooltip>
+      <DeleteDebitModal
+        id={id}
+        setData={setData}
+        side={side}
+        setLoading={setLoading}
+        fetchApi={fetchApi}
+      ></DeleteDebitModal>
     </Space>
   );
 }
@@ -324,13 +300,22 @@ function DebitTable({ side }) {
         onCancel={toggleConfirmOtpModalVisibility}
         open={confirmOtpModalVisibility}
       >
-        <OTPInput
-          autoFocus
-          length={4}
-          onChangeOTP={(value) => {
-            setOtp(value);
+        <div
+          style={{
+            textAlign: "center",
+            border: "1px solid black",
+            borderRadius: "10px",
+            padding: "5px",
           }}
-        />
+        >
+          <OTPInput
+            autoFocus
+            length={4}
+            onChangeOTP={(value) => {
+              setOtp(value);
+            }}
+          />
+        </div>
       </Modal>
       <ContentHeader>
         <Title level={2}>

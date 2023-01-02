@@ -6,7 +6,7 @@ import { CreateIdentityModal } from '../../components/create-identity.component.
 import { RechargeMoneyForm } from '../../components/recharge-money-form.component.js';
 import { HistoryTrackingForm } from '../../components/history-tracking-form.component.js';
 
-export const EmployeeDashboardPage = () => {
+export const EmployeeDashboardPage = ({setAuth}) => {
     const [bankAccounts, setBankAccounts] = useState(null);
     const [isCreateIdentityModalVisible, setCreateIdentityModalVisibility] =
         useState(false);
@@ -105,7 +105,7 @@ export const EmployeeDashboardPage = () => {
     };
 
     return (
-        <EmployeeLayout>
+        <EmployeeLayout setAuth={setAuth}>
             <CreateIdentityModal
                 isVisible={isCreateIdentityModalVisible}
                 onToggleVisibilityChange={toggleCreateIdentityModalVisibility}
