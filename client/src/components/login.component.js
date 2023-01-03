@@ -48,11 +48,12 @@ const LoginForm = () => {
             localStorage.setItem("accessToken", result.accessToken);
             localStorage.setItem("refreshToken", result.refreshToken);
 
+            localStorage.setItem('profile', JSON.stringify(result.profile))
             dispatch(actions.setProfile(result.profile));
 
             setLoading(false);
 
-            dispatch(actions.setAuth(true));
+            dispatch(actions.setAuth(localStorage.getItem('accessToken')));
 
             const { role } = result.profile;
             switch (role) {

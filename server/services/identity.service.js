@@ -44,7 +44,7 @@ export default {
             process.env.JWT_SECRET_KEY,
             {
               algorithm: "HS256",
-              expiresIn: "30d",
+              expiresIn: "1m",
             }
           );
           const refreshToken = jwt.sign(
@@ -54,7 +54,7 @@ export default {
             process.env.JWT_SECRET_KEY,
             {
               algorithm: "HS256",
-              expiresIn: "7d",
+              expiresIn: "1d",
             }
           );
           const profile = {
@@ -129,7 +129,7 @@ export default {
           process.env.JWT_SECRET_KEY,
           {
             algorithm: "HS256",
-            expiresIn: "30d",
+            expiresIn: "1m",
           }
         );
         return accessToken;

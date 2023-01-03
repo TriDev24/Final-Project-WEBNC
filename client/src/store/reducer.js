@@ -7,8 +7,8 @@ import {
 } from "./constants.js";
 
 const initState = {
-  profile: {},
-  isAuth: false,
+  profile: JSON.parse(localStorage.getItem("profile")),
+  isAuth: localStorage.getItem("accessToken"),
   paymentAccountNumber: null,
   bankTypes: [],
   transferMethods: [],
