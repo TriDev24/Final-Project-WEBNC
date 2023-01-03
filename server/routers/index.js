@@ -5,6 +5,7 @@ import BillingRouter from "./billing.router.js";
 import ReceiverRouter from "./receiver.router.js";
 import DebitRouter from "./debit.router.js";
 import UserRouter from "./users.router.js";
+import ChangePassword from "./change-password.router.js";
 import DebtorRouter from "./debtor.router.js";
 import TransferMethodRouter from "./transfer-method.router.js";
 import NotifyRouter from "./notify.router.js";
@@ -22,6 +23,7 @@ router.use("/identities", IdentityRouter);
 router.use("/debits", DebitRouter);
 router.use("/debtors", DebtorRouter);
 router.use("/transfer-methods", TransferMethodRouter);
+router.use("/change-password", ChangePassword);
 router.use("/users", UserRouter);
 router.use("/notify", NotifyRouter);
 

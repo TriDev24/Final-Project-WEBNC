@@ -1,15 +1,15 @@
 import Title from 'antd/es/typography/Title.js';
 import { CustomerLayout } from '../../components/common/customer-layout.component.js';
 import styled from '@xstyled/styled-components';
-import { Button, Checkbox, Input, message, Modal, Skeleton, Table } from 'antd';
+import { Button, Checkbox, message, Modal, Skeleton, Table } from 'antd';
 import { ServiceList } from '../../components/dashboard/service-list.component.js';
 import { SwapOutlined } from '@ant-design/icons';
 import { useEffect, useState, useCallback, useMemo } from 'react';
-import { getProfileFromLocalStorage } from '../../utils/local-storage.util.js';
 import { BankAccountList } from '../../components/dashboard/bank-account-list.component.js';
 import { MoneyTransferForm } from '../../components/money-transfer/money-transfer-form.component.js';
 import { Form } from 'antd';
 import OTPInput from '../../components/common/otp-input/index.js';
+import { useStore, actions } from '../../store';
 
 const GeneralInformationSection = styled.div`
     display: flex;
@@ -23,10 +23,10 @@ const ServiceSection = styled.div`
 const HistorySection = styled.div``;
 
 export const CustomerDashBoardPage = () => {
+    const [state, dispatch] = useStore();
+    const [paymentAccountHistory, setPaymentAccountHistory] = useState(null);
+    const { profile, paymentAccountNumber, bankTypes, transferMethods } = state;
     const [receivers, setReceivers] = useState(null);
-    const [renameReceiverForm] = Form.useForm();
-    const [bankTypes, setBankTypes] = useState(null);
-    const [transferMethods, setTransferMethods] = useState(null);
     const [moneyTransferForm] = Form.useForm();
     const [paymentAccountInfo, setPaymentAccount] = useState(null);
     const [bankAccounts, setBankAccountList] = useState([]);
@@ -36,12 +36,53 @@ export const CustomerDashBoardPage = () => {
         useState(false);
     const [moneyTransferModalVisibility, setMoneyTransferModalVisibility] =
         useState(false);
-    const [paymentAccountHistory, setPaymentAccountHistory] = useState(null);
     const [otp, setOtp] = useState('');
 
     const toggleConfirmOtpModalVisibility = () => {
         setConfirmOtpModalVisibility(!confirmOtpModalVisibility);
     };
+
+    useEffect(() => {
+        getPaymentBankAccount();
+    }, [bankAccounts]);
+
+    useEffect(() => {
+        getReceivers();
+        getPaymentBankAccountHistory();
+    }, [paymentAccountInfo]);
+
+    useEffect(() => {
+        const getBankTypes = async () => {
+            fetch(process.env.REACT_APP_BANK_TYPE_API_URL_PATH, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: localStorage.getItem('accessToken'),
+                },
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    dispatch(actions.setBankTypes(data));
+                });
+        };
+
+        const getTransferMethods = async () => {
+            fetch(process.env.REACT_APP_TRANSFER_METHOD_API_URL_PATH, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: localStorage.getItem('accessToken'),
+                },
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    dispatch(actions.setTransferMethods(data));
+                });
+        };
+
+        getBankTypes();
+        getTransferMethods();
+    }, []);
 
     const getPaymentBankAccount = useCallback(() => {
         const apiUrl = `${process.env.REACT_APP_BANK_ACCOUNT_API_URL_PATH}?isPayment=true`;
@@ -55,15 +96,40 @@ export const CustomerDashBoardPage = () => {
         })
             .then((response) => response.json())
             .then((data) => {
+                console.log('vao day trc');
                 setPaymentAccount(data[0]);
                 localStorage.setItem(
                     'payment-account-number',
                     data[0].accountNumber
                 );
+                dispatch(
+                    actions.setPaymentAccountNumber(
+                        localStorage.getItem('payment-account-number')
+                    )
+                );
             });
     }, []);
 
+    const getReceivers = useCallback(() => {
+        const url = `${process.env.REACT_APP_RECEIVER_API_URL_PATH}?accountNumber=${paymentAccountNumber}`;
+
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: localStorage.getItem('accessToken'),
+            },
+        })
+            .then((response) => response.json())
+            .then((data) => setReceivers(data));
+    }, []);
+
     const getPaymentBankAccountHistory = useCallback(() => {
+        console.log('vao day sau');
+        console.log(
+            'alo 1234: ',
+            localStorage.getItem('payment-account-number')
+        );
         const paymentAccountNumber = localStorage.getItem(
             'payment-account-number'
         );
@@ -87,6 +153,7 @@ export const CustomerDashBoardPage = () => {
             onOk: () => {
                 const url = `${process.env.REACT_APP_RECEIVER_API_URL_PATH}/${receiverId}`;
                 fetch(url, {
+                    method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',
                         Authorization: localStorage.getItem('accessToken'),
@@ -102,69 +169,6 @@ export const CustomerDashBoardPage = () => {
             },
         });
     };
-
-    const getReceivers = useCallback(() => {
-        const url = `${
-            process.env.REACT_APP_RECEIVER_API_URL_PATH
-        }?accountNumber=${localStorage.getItem('payment-account-number')}`;
-
-        fetch(url, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: localStorage.getItem('accessToken'),
-            },
-        })
-            .then((response) => response.json())
-            .then((data) => setReceivers(data));
-    }, []);
-
-    useEffect(() => {
-        getPaymentBankAccount();
-    }, [bankAccounts]);
-
-    useEffect(() => {
-        getReceivers();
-        getPaymentBankAccountHistory();
-    }, [paymentAccountInfo]);
-
-    useEffect(() => {
-        const getBankTypes = async () => {
-            fetch(process.env.REACT_APP_BANK_TYPE_API_URL_PATH, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: localStorage.getItem('accessToken'),
-                },
-            })
-                .then((response) => response.json())
-                .then((data) => {
-                    localStorage.setItem('bank-types', JSON.stringify(data));
-                    setBankTypes(data);
-                });
-        };
-
-        const getTransferMethods = async () => {
-            fetch(process.env.REACT_APP_TRANSFER_METHOD_API_URL_PATH, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: localStorage.getItem('accessToken'),
-                },
-            })
-                .then((response) => response.json())
-                .then((data) => {
-                    localStorage.setItem(
-                        'transfer-methods',
-                        JSON.stringify(data)
-                    );
-                    setTransferMethods(data);
-                });
-        };
-
-        getBankTypes();
-        getTransferMethods();
-    }, []);
 
     const handleSelectPaymentAccountClick = (bankAccount) => {
         const url = `${process.env.REACT_APP_BANK_ACCOUNT_API_URL_PATH}/${bankAccount._id}`;
@@ -185,7 +189,12 @@ export const CustomerDashBoardPage = () => {
                     'payment-account-number',
                     bankAccount.accountNumber
                 );
-                message.success('Change Account Success');
+                dispatch(
+                    actions.setPaymentAccountNumber(
+                        localStorage.getItem('payment-account-number')
+                    )
+                );
+                message.success('Thay đổi tài khoản thành công');
                 setPaymentAccount(bankAccount);
                 getReceivers();
             })
@@ -205,8 +214,6 @@ export const CustomerDashBoardPage = () => {
             onClick: toggleMoneyTransferModalVisible,
         },
     ];
-
-    const dataSource = [];
 
     const historyColumns = useMemo(
         () => [
@@ -306,9 +313,7 @@ export const CustomerDashBoardPage = () => {
                 <div>
                     <Title level={2}>Thông tin chung</Title>
                     <p>Số tài khoản: {paymentAccountInfo.accountNumber}</p>
-                    <p>
-                        Chủ tài khoản: {getProfileFromLocalStorage().aliasName}
-                    </p>
+                    <p>Chủ tài khoản: {profile.aliasName}</p>
                     <p>Số dư: {paymentAccountInfo.overBalance} (VNĐ)</p>
                 </div>
                 <Button type='primary' onClick={handleChangeAccountClick}>
@@ -387,6 +392,7 @@ export const CustomerDashBoardPage = () => {
             .then(() => {
                 message.success('Successfully');
                 toggleConfirmOtpModalVisibility();
+                getPaymentBankAccountHistory();
 
                 // Show Success Modal.
                 const isNotSavedReceiverBefore = JSON.parse(

@@ -57,7 +57,7 @@ export default {
         const document = {
             senderAccountNumber,
             receiverAccountNumber,
-            receiverName: receiverInformation.aliasName,
+            aliasName: receiverInformation.aliasName,
         };
 
         const insertedData = await Receiver.create(document);

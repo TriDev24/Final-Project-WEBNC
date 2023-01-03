@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { Typography, Table, Modal, Tooltip } from "antd";
-import { Button, Space, message, Tag, Checkbox } from "antd";
-import { PayCircleOutlined, DeleteOutlined } from "@ant-design/icons";
+import { Button, Space, message, Tag } from "antd";
+import { PayCircleOutlined } from "@ant-design/icons";
 import CreateDebitModal from "./create-debit.component.js";
 import { styled } from "@xstyled/styled-components";
 import OTPInput from "../common/otp-input/index.js";
+import DeleteDebitModal from "./delete-debit.component.js";
+import { useStore } from "../../store";
 
 const { Title } = Typography;
 
@@ -13,151 +15,10 @@ const ContentHeader = styled.div`
   justify-content: space-between;
 `;
 
-const fetchApi = async (side) => {
-  const url = `${
-    process.env.REACT_APP_DEBIT_URL_PATH
-  }?accountNumber=${localStorage.getItem(
-    "payment-account-number"
-  )}&side=${side}`;
-
-  const result = await fetch(url, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      authorization: localStorage.getItem("accessToken"),
-    },
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      return data.map((value, index) => ({
-        key: index,
-        id: value._id,
-        accountNumber:
-          side === "personal"
-            ? value.debtAccountId.accountNumber
-            : value.accountId.accountNumber,
-        aliasName:
-          side === "personal"
-            ? value.debtAccountId.identityId.aliasName
-            : value.accountId.identityId.aliasName,
-        amountToPay: value.amountToPay,
-        content: value.content,
-        status: value.statusId.name,
-        transferDate: value.transferDate,
-        createdAt: new Date(parseInt(value.createdAt)).toLocaleString(),
-      }));
-    });
-
-  return result;
-};
-
-function Action({
-  id,
-  data,
-  setData,
-  toggleConfirmOtpModalVisibility,
-  side,
-  setLoading,
-}) {
-  const [messageApi, contextHolder] = message.useMessage();
-  const [loadingPayment, setLoadingPayment] = useState(false);
-  const deleteDebit = async () => {
-    setLoading(true);
-
-    const url = `${process.env.REACT_APP_DEBIT_URL_PATH}/${id}/${side}`;
-
-    const result = await fetch(url, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        authorization: localStorage.getItem("accessToken"),
-      },
-    })
-      .then((response) => response.json())
-      .then((data) => data);
-
-    if (result.message) {
-      messageApi.open({
-        type: "error",
-        content: result.message,
-      });
-    } else {
-      messageApi.open({
-        type: "success",
-        content: "Đã hủy nhắc nợ thành công!",
-      });
-    }
-    await fetchApi(side).then((result) => setData(result));
-    setLoading(false);
-  };
-
-  const payDebit = async () => {
-    setLoadingPayment(true);
-    const foundedDebit = data.find((d) => (d.id = id));
-    console.log("foundedDebit", foundedDebit);
-
-    const bankTypes = JSON.parse(localStorage.getItem("bank-types"));
-    const internalBankType = bankTypes.find((b) => b.name === "My Bank");
-    const transferMethods = JSON.parse(
-      localStorage.getItem("transfer-methods")
-    );
-    const senderPayFeeMethod = transferMethods.find(
-      (t) => t.name === "Sender Pay Transfer Fee"
-    );
-    const payload = {
-      senderAccountNumber: localStorage.getItem("payment-account-number"),
-      receiverAccountNumber: foundedDebit.accountNumber,
-      bankTypeId: internalBankType._id,
-      deposit: foundedDebit.amountToPay,
-      transferMethodId: senderPayFeeMethod._id,
-      description: data.content,
-      transferTime: Date.now(),
-    };
-    console.log(payload);
-    const result = await fetch(process.env.REACT_APP_BILLING_API_URL_PATH, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        authorization: localStorage.getItem("accessToken"),
-      },
-      body: JSON.stringify(payload),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data._id) {
-          toggleConfirmOtpModalVisibility();
-          localStorage.setItem("billing-id", data._id);
-          localStorage.setItem("paid-debit-id", id);
-        } else {
-          messageApi.open({
-            type: "error",
-            content: data,
-          });
-        }
-        setLoadingPayment(false);
-      });
-  };
-
-  return (
-    <Space>
-      {contextHolder}
-      {side === "other" && (
-        <Tooltip placement="top" title="Thanh toán">
-          <Button
-            loading={loadingPayment}
-            icon={<PayCircleOutlined />}
-            onClick={payDebit}
-          ></Button>
-        </Tooltip>
-      )}
-      <Tooltip placement="top" title="Huỷ">
-        <Button danger icon={<DeleteOutlined />} onClick={deleteDebit}></Button>
-      </Tooltip>
-    </Space>
-  );
-}
 
 function DebitTable({ side }) {
+  const [state, dispatch] = useStore()
+  const {bankTypes, transferMethods, paymentAccountNumber} = state
   const [messageApi, contextHolder] = message.useMessage();
   const [otp, setOtp] = useState("");
   const [confirmOtpModalVisibility, setConfirmOtpModalVisibility] =
@@ -231,6 +92,120 @@ function DebitTable({ side }) {
       },
     },
   ];
+
+  const fetchApi = async (side) => {
+    const url = `${
+      process.env.REACT_APP_DEBIT_URL_PATH
+    }?accountNumber=${paymentAccountNumber}&side=${side}`;
+  
+    const result = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: localStorage.getItem("accessToken"),
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        return data.map((value, index) => ({
+          key: index,
+          id: value._id,
+          accountNumber:
+            side === "personal"
+              ? value.debtAccountId.accountNumber
+              : value.accountId.accountNumber,
+          aliasName:
+            side === "personal"
+              ? value.debtAccountId.identityId.aliasName
+              : value.accountId.identityId.aliasName,
+          amountToPay: value.amountToPay,
+          content: value.content,
+          status: value.statusId.name,
+          transferDate: value.transferDate,
+          createdAt: new Date(parseInt(value.createdAt)).toLocaleString(),
+        }));
+      });
+  
+    return result;
+  };
+
+  function Action({
+    id,
+    data,
+    setData,
+    toggleConfirmOtpModalVisibility,
+    side,
+    setLoading,
+  }) {
+    const [messageApi, contextHolder] = message.useMessage();
+    const [loadingPayment, setLoadingPayment] = useState(false);
+  
+    const payDebit = async () => {
+      setLoadingPayment(true);
+      const foundedDebit = data.find((d) => (d.id = id));
+      console.log("foundedDebit", foundedDebit);
+  
+      const internalBankType = bankTypes.find((b) => b.name === "My Bank");
+
+      const senderPayFeeMethod = transferMethods.find(
+        (t) => t.name === "Sender Pay Transfer Fee"
+      );
+      const payload = {
+        senderAccountNumber: paymentAccountNumber,
+        receiverAccountNumber: foundedDebit.accountNumber,
+        bankTypeId: internalBankType._id,
+        deposit: foundedDebit.amountToPay,
+        transferMethodId: senderPayFeeMethod._id,
+        description: data.content,
+        transferTime: Date.now(),
+      };
+      console.log(payload);
+      const result = await fetch(process.env.REACT_APP_BILLING_API_URL_PATH, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          authorization: localStorage.getItem("accessToken"),
+        },
+        body: JSON.stringify(payload),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data._id) {
+            toggleConfirmOtpModalVisibility();
+            localStorage.setItem("billing-id", data._id);
+            localStorage.setItem("paid-debit-id", id);
+          } else {
+            messageApi.open({
+              type: "error",
+              content: data,
+            });
+          }
+          setLoadingPayment(false);
+        });
+    };
+  
+    return (
+      <Space>
+        {contextHolder}
+        {side === "other" && (
+          <Tooltip placement="top" title="Thanh toán">
+            <Button
+              loading={loadingPayment}
+              icon={<PayCircleOutlined />}
+              onClick={payDebit}
+            ></Button>
+          </Tooltip>
+        )}
+        <DeleteDebitModal
+          id={id}
+          setData={setData}
+          side={side}
+          setLoading={setLoading}
+          fetchApi={fetchApi}
+        ></DeleteDebitModal>
+      </Space>
+    );
+  }
 
   useEffect(() => {
     const fetchData = async () => {
@@ -324,13 +299,22 @@ function DebitTable({ side }) {
         onCancel={toggleConfirmOtpModalVisibility}
         open={confirmOtpModalVisibility}
       >
-        <OTPInput
-          autoFocus
-          length={4}
-          onChangeOTP={(value) => {
-            setOtp(value);
+        <div
+          style={{
+            textAlign: "center",
+            border: "1px solid black",
+            borderRadius: "10px",
+            padding: "5px",
           }}
-        />
+        >
+          <OTPInput
+            autoFocus
+            length={4}
+            onChangeOTP={(value) => {
+              setOtp(value);
+            }}
+          />
+        </div>
       </Modal>
       <ContentHeader>
         <Title level={2}>
