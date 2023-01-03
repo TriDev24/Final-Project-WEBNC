@@ -1,10 +1,76 @@
 import React, { useState } from "react";
+<<<<<<< HEAD
+import { styled } from "@xstyled/styled-components";
+import { Avatar, Button, Dropdown, Modal, Form, Input, message } from "antd";
+import { useNavigate, Link } from 'react-router-dom';
+import { SecurityScanOutlined } from "@ant-design/icons";
+
+const Container = styled.div`
+  margin: 20px 10px;
+`;
+
+const getItem = (label, key, icon, children) => {
+  return {
+    key,
+    icon,
+    children,
+    label,
+  };
+};
+
+const items = [getItem(<ChangePasswordModal></ChangePasswordModal>, "1")];
+
+function ChangePasswordModal() {
+  
+=======
 import { Avatar, Button, Modal, Form, Input } from "antd";
 import { SecurityScanOutlined } from "@ant-design/icons";
 
 export function ChangePasswordModal() {
   const [changePasswordForm] = Form.useForm();
+>>>>>>> d7a57cd36610244ed5be6b099d4fe251f1cb16ef
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [messageApi, contextHolder] = message.useMessage();
+  const [loading, setLoading] = useState(false);
+  const [changePasswordForm] = Form.useForm();
+
+  
+
+  const onFinish = async (values) => {
+    console.log(222222444)
+    setLoading(true);
+    // let debtAccountNumber;
+    // if (debtAccount) {
+    //   debtAccountNumber = debtAccount;
+    // } else debtAccountNumber = values.debtAccountNumber;
+    // const { amountToPay, content } = values;
+
+    // const accountNumber = localStorage.getItem("payment-account-number");
+    const data = JSON.stringify({
+      "lhtinh": "test"
+    });
+    console.log(process.env.REACT_APP_DEBIT_URL_PATH);
+
+    const result = await fetch(process.env.REACT_APP_CHANGE_PASSWORD_PATH, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: localStorage.getItem("accessToken"),
+      },
+      body: data,
+    })
+      .then((response) => response.json())
+      .then((data) => data);
+
+    messageApi.open({
+      type: result.status,
+      content: result.message,
+    });
+
+    changePasswordForm.resetFields();
+    setLoading(false);
+  };
 
   const showModal = () => {
     setIsModalOpen(true);
@@ -43,11 +109,16 @@ export function ChangePasswordModal() {
               src="/images/reset-password.png"
             ></Avatar>
           </div>
+<<<<<<< HEAD
+          <Form style={{width: "100%"}} name="normal_login"
+            className="login-form" form={changePasswordForm} onFinish={onFinish} layout="vertical">
+=======
           <Form
             style={{ width: "100%" }}
             form={changePasswordForm}
             layout="vertical"
           >
+>>>>>>> d7a57cd36610244ed5be6b099d4fe251f1cb16ef
             <Form.Item
               name="oldPassword"
               label="Mật khẩu cũ"
@@ -72,8 +143,12 @@ export function ChangePasswordModal() {
             >
               <Input placeholder="Mật khẩu mới" />
             </Form.Item>
+<<<<<<< HEAD
+            <Button type="primary" block style={{marginBottom:"20px"}} htmlType="submit" className="login-form-button" loading={loading} >
+=======
 
             <Button type="primary" block style={{ marginBottom: "20px" }}>
+>>>>>>> d7a57cd36610244ed5be6b099d4fe251f1cb16ef
               Xác nhận
             </Button>
           </Form>
@@ -82,3 +157,35 @@ export function ChangePasswordModal() {
     </>
   );
 }
+<<<<<<< HEAD
+
+export const ChangePassword = () => {
+  return (
+    <Container>
+      <Dropdown
+        menu={{
+          items,
+        }}
+        placement="bottomLeft"
+        arrow={{
+          pointAtCenter: true,
+        }}
+        trigger={["click"]}
+      >
+        <Button
+          type="ghost"
+          shape="circle"
+          icon={
+            <Avatar
+              style={{ marginBottom: "5px" }}
+              src="/images/avatar.png"
+            ></Avatar>
+          }
+        ></Button>
+      </Dropdown>
+    </Container>
+  );
+};
+export default ChangePasswordModal;
+=======
+>>>>>>> d7a57cd36610244ed5be6b099d4fe251f1cb16ef
