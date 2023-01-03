@@ -35,6 +35,14 @@ export default {
           debtAccountId: debtAccount._id,
         });
       }
+      const notify = await Notify.create({
+        senderId: debitInserted.accountId,
+        receiverId: debitInserted.debtAccountId,
+        statusId: status._id,
+        side:"personal",
+      });
+      const bankAccount = await BankAccount.findById(debitInserted.debtAccountId);
+      broadCast(bankAccount.accountNumber);
       return 1;
     } else {
       return -2;

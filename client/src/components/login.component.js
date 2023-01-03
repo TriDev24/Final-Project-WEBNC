@@ -5,6 +5,7 @@ import { Button, Form, Input, Avatar, message } from "antd";
 import ReCAPTCHA from "react-google-recaptcha";
 
 const LoginForm = ({ setAuth }) => {
+  const [visible, setVisible] = useState(true);
   const navigate = useNavigate();
   const captchaRef = useRef(null);
   const [messageApi, contextHolder] = message.useMessage();
@@ -117,11 +118,14 @@ const LoginForm = ({ setAuth }) => {
             placeholder="Mật khẩu"
           />
         </Form.Item>
-        <ReCAPTCHA
-          style={{ marginBottom: "20px" }}
-          sitekey={process.env.REACT_APP_SITE_KEY}
-          ref={captchaRef}
-        />
+
+        {visible && (
+          <ReCAPTCHA
+            style={{ marginBottom: "20px" }}
+            sitekey={process.env.REACT_APP_SITE_KEY}
+            ref={captchaRef}
+          />
+        )}
 
         <Form.Item>
           <Link to="/forgot-password">Quên mật khẩu</Link>

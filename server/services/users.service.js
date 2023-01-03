@@ -5,7 +5,7 @@ export default {
 
   async getAllUser() {
     let users = [];
-    const permission = await Permission.findOne({ name: 'user' });
+    const permission = await Permission.findOne({ name: 'customer' });
     users = await Identity.find({permissionId: permission._id});
     return users;
   },

@@ -80,6 +80,8 @@ function Notify() {
           message = `Nhắc nợ của tài khoản ${notify.senderId.accountNumber} đã bị hủy`;
         } else
           message = `Tài khoản ${notify.senderId.accountNumber} đã hủy nhắc nợ của bạn`;
+      }else if(notify.statusId.name === "unpaid"){
+        message = `Tài khoản ${notify.senderId.accountNumber} đã gửi cho bạn một nhắc nợ`;
       }
       return getItem(
         <NotifyMessage
