@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { CustomerDashBoardPage } from "./pages/customer/dashboard.page.js";
 import { LoginPage } from "./pages/login.page.js";
 import { EmployeeDashboardPage } from "./pages/employee/dashboard.page.js";
@@ -6,9 +6,10 @@ import { AdminDashboardPage } from "./pages/admin/dashboard.page.js";
 import { ForgotPasswordPage } from "./pages/forgot-password.page.js";
 import "antd/dist/reset.css";
 import { useEffect, useState } from "react";
-import { getProfileFromLocalStorage } from "./utils/local-storage.util.js";
-import { Result, Spin } from "antd";
+import { Result, Spin, message } from "antd";
 import { styled } from "@xstyled/styled-components";
+import DebitPage from "./pages/customer/dashboard-debit.page.js";
+import { useStore, actions } from "./store";
 
 const PageScreen = styled.div`
   width: 100vw;
@@ -16,11 +17,52 @@ const PageScreen = styled.div`
 `;
 
 export const App = () => {
+  const navigate = useNavigate();
+  const [state, dispatch] = useStore();
+  const { isAuth, profile } = state;
   const [isLoading, setLoadingStatus] = useState(true);
-  const [isAuth, setAuth] = useState(getProfileFromLocalStorage());
+
+  const fetchToken = async () => {
+    if (localStorage.getItem("refreshToken")) {
+      const data = JSON.stringify({
+        refreshToken: localStorage.getItem("refreshToken"),
+      });
+      const result = await fetch(
+        `${process.env.REACT_APP_IDENTITY_API_URL_PATH}/refresh-token`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: data,
+        }
+      )
+        .then((response) => response.json())
+        .then((data) => data);
+      if (result.accessToken) {
+        localStorage.setItem("accessToken", result.accessToken);
+        dispatch(actions.setAuth(localStorage.getItem("accessToken")));
+      }
+      if (result.message) {
+        localStorage.clear();
+        dispatch(actions.setAuth(false));
+        message.info("Phiên đăng nhập của bạn đã hết hạn!").then(() => {
+          navigate("/login");
+        });
+      }
+    }
+  };
 
   useEffect(() => {
-    setLoadingStatus(!isLoading);
+    console.log(2)
+    setLoadingStatus(false);
+    fetchToken()
+    const timeId = setInterval(() => {
+      console.log(1);
+      fetchToken();
+    }, 50 * 1000);
+
+    return () => clearInterval(timeId);
   }, []);
 
   const setUpCustomerRoutes = () => {
@@ -31,6 +73,10 @@ export const App = () => {
         <Route
           path={`${basePath}/dashboard`}
           element={<CustomerDashBoardPage />}
+        ></Route>
+        <Route
+          path={`${basePath}/dashboard/debit/:side`}
+          element={<DebitPage />}
         ></Route>
       </>
     );
@@ -66,15 +112,16 @@ export const App = () => {
     if (!isAuth) {
       return (
         <Routes>
+          <Route path="/*" element={<Navigate to="/login" replace />}></Route>
+          <Route path="/login" element={<LoginPage />}></Route>
           <Route
-            path="/"
-            element={<Navigate to="/login" replace />}
+            path="/forgot-password"
+            element={<ForgotPasswordPage />}
           ></Route>
-          <Route path="/login" element={<LoginPage setAuth={setAuth} />}></Route>
         </Routes>
       );
     }
-    const { role } = getProfileFromLocalStorage();
+    const { role } = profile;
 
     const currentUrl = window.location.href;
 
@@ -106,7 +153,7 @@ export const App = () => {
               path="/"
               element={<Navigate to={getDefaultPath()} replace />}
             ></Route>
-            <Route path="/login" element={<LoginPage setAuth={setAuth}/>}></Route>
+            <Route path="/login" element={<LoginPage />}></Route>
             <Route
               path="/forgot-password"
               element={<ForgotPasswordPage />}
@@ -114,6 +161,16 @@ export const App = () => {
             {setUpCustomerRoutes()}
             {setUpEmployeeRoutes()}
             {setUpAdminRoutes()}
+            <Route
+              path="*"
+              element={
+                <Result
+                  status="404"
+                  title="404"
+                  subTitle="Xin lỗi, trang bạn muốn truy cập không tồn tại"
+                />
+              }
+            ></Route>
           </Routes>
         )}
       </>
@@ -121,7 +178,7 @@ export const App = () => {
   };
 
   const getDefaultPath = () => {
-    const { role } = getProfileFromLocalStorage();
+    const { role } = profile;
 
     return `${role}/dashboard`;
   };

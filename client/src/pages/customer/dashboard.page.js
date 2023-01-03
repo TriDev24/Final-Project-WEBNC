@@ -5,11 +5,11 @@ import { Button, Checkbox, message, Modal, Skeleton, Table } from "antd";
 import { ServiceList } from "../../components/dashboard/service-list.component.js";
 import { SwapOutlined } from "@ant-design/icons";
 import { useEffect, useState, useCallback } from "react";
-import { getProfileFromLocalStorage } from "../../utils/local-storage.util.js";
 import { BankAccountList } from "../../components/dashboard/bank-account-list.component.js";
 import { MoneyTransferForm } from "../../components/money-transfer/money-transfer-form.component.js";
 import { Form } from "antd";
 import OTPInput from "../../components/common/otp-input/index.js";
+import { useStore, actions } from "../../store";
 
 const GeneralInformationSection = styled.div`
   display: flex;
@@ -23,9 +23,9 @@ const ServiceSection = styled.div`
 const HistorySection = styled.div``;
 
 export const CustomerDashBoardPage = () => {
+  const [state, dispatch] = useStore();
+  const { profile, paymentAccountNumber, bankTypes, transferMethods } = state;
   const [receivers, setReceivers] = useState(null);
-  const [bankTypes, setBankTypes] = useState(null);
-  const [transferMethods, setTransferMethods] = useState(null);
   const [moneyTransferForm] = Form.useForm();
   const [paymentAccountInfo, setPaymentAccount] = useState(null);
   const [bankAccounts, setBankAccountList] = useState([]);
@@ -35,7 +35,6 @@ export const CustomerDashBoardPage = () => {
     useState(false);
   const [moneyTransferModalVisibility, setMoneyTransferModalVisibility] =
     useState(false);
-  const [currentReceiver, setCurrentReceiver] = useState(null);
   const [otp, setOtp] = useState("");
 
   const toggleConfirmOtpModalVisibility = () => {
@@ -55,14 +54,15 @@ export const CustomerDashBoardPage = () => {
       .then((response) => response.json())
       .then((data) => {
         setPaymentAccount(data[0]);
-        localStorage.setItem("payment-account-number", data[0].accountNumber);
+        localStorage.setItem("payment-account-number", data[0].accountNumber)
+        dispatch(actions.setPaymentAccountNumber(localStorage.getItem("payment-account-number")));
       });
   }, []);
 
   const getReceivers = useCallback(() => {
     const url = `${
       process.env.REACT_APP_RECEIVER_API_URL_PATH
-    }?accountNumber=${localStorage.getItem("payment-account-number")}`;
+    }?accountNumber=${paymentAccountNumber}`;
 
     fetch(url, {
       method: "GET",
@@ -94,8 +94,7 @@ export const CustomerDashBoardPage = () => {
       })
         .then((response) => response.json())
         .then((data) => {
-          localStorage.setItem("bank-types", JSON.stringify(data));
-          setBankTypes(data);
+          dispatch(actions.setBankTypes(data));
         });
     };
 
@@ -109,8 +108,7 @@ export const CustomerDashBoardPage = () => {
       })
         .then((response) => response.json())
         .then((data) => {
-          localStorage.setItem("transfer-methods", JSON.stringify(data));
-          setTransferMethods(data);
+          dispatch(actions.setTransferMethods(data));
         });
     };
 
@@ -133,10 +131,8 @@ export const CustomerDashBoardPage = () => {
       body: JSON.stringify(data),
     })
       .then((response) => {
-        localStorage.setItem(
-          "payment-account-number",
-          bankAccount.accountNumber
-        );
+        localStorage.setItem("payment-account-number", bankAccount.accountNumber)
+        dispatch(actions.setPaymentAccountNumber(localStorage.getItem("payment-account-number")));
         message.success("Change Account Success");
         setPaymentAccount(bankAccount);
         getReceivers();
@@ -212,7 +208,7 @@ export const CustomerDashBoardPage = () => {
         <div>
           <Title level={2}>Thông tin chung</Title>
           <p>Số tài khoản: {paymentAccountInfo.accountNumber}</p>
-          <p>Chủ tài khoản: {getProfileFromLocalStorage().aliasName}</p>
+          <p>Chủ tài khoản: {profile.aliasName}</p>
           <p>Số dư: {paymentAccountInfo.overBalance} (VNĐ)</p>
         </div>
         <Button type="primary" onClick={handleChangeAccountClick}>
@@ -232,7 +228,7 @@ export const CustomerDashBoardPage = () => {
 
     // validate.
     const payload = {
-      senderAccountNumber: localStorage.getItem("payment-account-number"),
+      senderAccountNumber: paymentAccountNumber,
       receiverAccountNumber,
       bankTypeId,
       deposit,
@@ -319,9 +315,7 @@ export const CustomerDashBoardPage = () => {
 
               if (isSaveReceiverChecked) {
                 const payload = {
-                  senderAccountNumber: localStorage.getItem(
-                    "payment-account-number"
-                  ),
+                  senderAccountNumber: paymentAccountNumber,
                   receiverAccountNumber: localStorage.getItem(
                     "current-receiver-account-number"
                   ),
@@ -360,7 +354,7 @@ export const CustomerDashBoardPage = () => {
   };
 
   return (
-    <CustomerLayout>
+    <CustomerLayout selected={"1"}>
       <Modal
         title="Xác nhận giao dịch"
         centered

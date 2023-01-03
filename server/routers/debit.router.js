@@ -9,6 +9,6 @@ router.use(auth(['customer']));
 router.post('/', controller.createDebit);
 router.get('/', controller.getAllDebit);
 router.patch('/:id', controller.updateDebit);
-router.delete('/:id/:side', controller.deleteDebit);
+router.put('/:id/:side', controller.deleteDebit);
 
 export default router;

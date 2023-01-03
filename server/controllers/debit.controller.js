@@ -34,13 +34,18 @@ export default {
   async deleteDebit(req, res) {
     const id = req.params["id"];
     const side = req.params["side"];
+    const { content } = req.body;
     if (id) {
-      const result = await service.deleteDebit(id, side);
+      const result = await service.deleteDebit(id, side, content);
       if (result === -1)
         return res.json({
           message: "Nhắc nợ đã bị hủy!",
         });
-      else if (result) {
+      else if (result === -2) {
+        return res.json({
+          message: "Nhắc nợ đã được thanh toán!",
+        });
+      } else if (result) {
         return res.json(result);
       }
       return res.json({
@@ -61,10 +66,10 @@ export default {
     const { isPaid } = req.body;
     const result = await service.updateDebit(id, isPaid);
     if (result === -1) {
-      return res.status(401).status("Something went wrong");
+      return res.status(401).status("Có lỗi xảy ra");
     } else if (result == -2) {
-      return res.status(404).json(`Cannot find this debit with id ${id}`);
+      return res.status(404).json(`Không tìm thấy nhắc nợ với id = ${id}`);
     }
-    return res.status(200).json("Updated Success");
+    return res.status(200).json("Cập nhập thành công");
   },
 };

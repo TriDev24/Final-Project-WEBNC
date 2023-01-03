@@ -40,20 +40,21 @@ export default {
     return res.json(result);
   },
 
-  async generateRefreshToken(req, res) {
+  async generateAccessToken(req, res) {
     const result = await service.generateAccessToken(req.body);
     if (result === -1) {
-      res.json({
+      return res.json({
         message: "Token đã hết hạn!",
       });
     } else if (result === -2) {
-      res.json({
+      return res.json({
         message: "Token không tồn tại!",
       });
+    } else {
+      return res.json({
+        accessToken: result,
+      });
     }
-    res.json({
-      accessToken: result,
-    });
   },
 
   async sendMail(req, res) {

@@ -5,10 +5,9 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import { Layout, Menu, theme, Image, Space } from "antd";
-import DebitTable from "../dashboard/debit.component.js";
-import DebtorTable from "../dashboard/debtor.component.js";
+import { Link } from "react-router-dom";
 import Notify from "../dashboard/notify.component.js";
-import { ChangePassword } from "../change-password.component.js";
+import IdentityOption from "../identity-option.component.js";
 
 const { Header, Content, Footer, Sider } = Layout;
 
@@ -22,32 +21,40 @@ const getItem = (label, key, icon, children) => {
 };
 
 const items = [
-  getItem("Tài khoản", "1", <CreditCardOutlined />),
+  getItem(
+    <>
+      <Link to="/customer/dashboard">Tài khoản</Link>
+    </>,
+    "1",
+    <CreditCardOutlined />
+  ),
   getItem("Nhắc nợ", "2", <BankOutlined />, [
-    getItem("Cá nhân", "3", <UserOutlined />),
-    getItem("Người khác", "4", <UserOutlined />),
-    getItem("Danh sách người nợ", "5", <UserOutlined />),
+    getItem(
+      <>
+        <Link to="/customer/dashboard/debit/personal">Cá nhân</Link>
+      </>,
+      "3",
+      <UserOutlined />
+    ),
+    getItem(
+      <>
+        <Link to="/customer/dashboard/debit/other">Người khác</Link>
+      </>,
+      "4",
+      <UserOutlined />
+    ),
+    getItem(
+      <>
+        <Link to="/customer/dashboard/debit/debtor">Danh sách người nợ</Link>
+      </>,
+      "5",
+      <UserOutlined />
+    ),
   ]),
 ];
 
-export const CustomerLayout = ({ children }) => {
+export const CustomerLayout = ({ selected, children }) => {
   const [collapsed, setCollapsed] = useState(false);
-  const [selectedMenuItem, setSelectedMenuItem] = useState("1");
-
-  const componentsSwitch = (key) => {
-    switch (key) {
-      case "1":
-        return children;
-      case "3":
-        return <DebitTable side={"personal"} />;
-      case "4":
-        return <DebitTable side={"other"} />;
-      case "5":
-        return <DebtorTable />;
-      default:
-        break;
-    }
-  };
 
   const {
     token: { colorBgContainer },
@@ -70,10 +77,9 @@ export const CustomerLayout = ({ children }) => {
           </div>
           <Menu
             theme="dark"
-            defaultSelectedKeys={["1"]}
+            defaultSelectedKeys={[`${selected}`]}
             mode="inline"
             items={items}
-            onClick={(e) => setSelectedMenuItem(e.key)}
           />
         </Sider>
         <Layout className="site-layout">
@@ -88,7 +94,7 @@ export const CustomerLayout = ({ children }) => {
           >
             <Space>
               <Notify></Notify>
-              <ChangePassword></ChangePassword>
+              <IdentityOption></IdentityOption>
             </Space>
           </Header>
           <Content
@@ -104,7 +110,7 @@ export const CustomerLayout = ({ children }) => {
                 background: colorBgContainer,
               }}
             >
-              {componentsSwitch(selectedMenuItem)}
+              {children}
             </div>
           </Content>
           <Footer

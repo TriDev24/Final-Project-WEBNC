@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { AdminLayout } from '../../components/common/admin-layout.component.js';
 import { ManagementList } from '../../components/management-list.component.js';
 
-export const AdminDashboardPage = () => {
+export const AdminDashboardPage = ({setAuth}) => {
     const settingItems = useMemo(
         [
             {
@@ -31,7 +31,7 @@ export const AdminDashboardPage = () => {
     );
 
     return (
-        <AdminLayout>
+        <AdminLayout setAuth={setAuth}>
             <ManagementList sources={settingItems} />
         </AdminLayout>
     );

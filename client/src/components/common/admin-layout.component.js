@@ -1,26 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   CreditCardOutlined,
   BankOutlined,
   UserOutlined,
-  BellOutlined,
 } from "@ant-design/icons";
-import {
-  Avatar,
-  Layout,
-  Menu,
-  theme,
-  Image,
-  Dropdown,
-  Space,
-  Button,
-  Badge,
-  Alert,
-  Result,
-} from "antd";
-import DebitTable from "../dashboard/debit.component.js";
-import DebtorTable from "../dashboard/debtor.component.js";
-import { getProfileFromLocalStorage } from "../../utils/local-storage.util.js";
+import { Layout, Menu, theme, Image, Space } from "antd";
+import IdentityOption from "../identity-option.component.js";
 
 const { Header, Content, Footer, Sider } = Layout;
 
@@ -42,56 +27,8 @@ const items = [
   ]),
 ];
 
-export const AdminLayout = ({ children }) => {
-  const [count, setCount] = useState(0);
+export const AdminLayout = ({ setAuth, children }) => {
   const [collapsed, setCollapsed] = useState(false);
-  const [selectedMenuItem, setSelectedMenuItem] = useState("1");
-  const [dropItems, setDropItems] = useState([]);
-
-  useEffect(() => {
-    const fetchApi = async () => {
-      const url = `${
-        process.env.REACT_APP_DEBIT_URL_PATH
-      }/notify/${localStorage.getItem("payment-account-number")}`;
-
-      const result = await fetch(url, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          authorization: localStorage.getItem("accessToken"),
-        },
-      })
-        .then((response) => response.json())
-        .then((data) => data);
-      const items = result.debits.map((debit, index) => {
-        let message = `Tài khoản ${debit.accountId.accountNumber} đã gửi cho bạn một nhắc nợ`;
-        if (debit.statusId.name === "paid") {
-          message = `Tài khoản ${debit.accountId.accountNumber} đã thanh toán nhắc nợ của bạn`;
-        } else if (debit.statusId.name === "cancelled") {
-          message = `Nhắc nợ của tài khoản ${debit.accountId.accountNumber} đã được hủy`;
-        }
-        return getItem(<Alert message={message} type="info" />, index);
-      });
-      setDropItems(items);
-      setCount(result.count);
-    };
-    fetchApi();
-  }, []);
-
-  const componentsSwitch = (key) => {
-    switch (key) {
-      case "1":
-        return children;
-      case "3":
-        return <DebitTable side={"personal"} />;
-      case "4":
-        return <DebitTable side={"other"} />;
-      case "5":
-        return <DebtorTable />;
-      default:
-        break;
-    }
-  };
 
   const {
     token: { colorBgContainer },
@@ -117,7 +54,6 @@ export const AdminLayout = ({ children }) => {
             defaultSelectedKeys={["1"]}
             mode="inline"
             items={items}
-            onClick={(e) => setSelectedMenuItem(e.key)}
           />
         </Sider>
         <Layout className="site-layout">
@@ -131,27 +67,7 @@ export const AdminLayout = ({ children }) => {
             }}
           >
             <Space>
-              <Dropdown
-                menu={{
-                  items: dropItems,
-                }}
-                placement="bottomLeft"
-                arrow={{
-                  pointAtCenter: true,
-                }}
-              >
-                <Badge size="small" count={count}>
-                  <Button icon={<BellOutlined />}></Button>
-                </Badge>
-              </Dropdown>
-              <Avatar
-                size="large"
-                src="/images/avatar.png"
-                style={{
-                  marginBottom: "5px",
-                  marginLeft: "5px",
-                }}
-              ></Avatar>
+              <IdentityOption setAuth={setAuth}></IdentityOption>
             </Space>
           </Header>
           <Content
@@ -166,9 +82,7 @@ export const AdminLayout = ({ children }) => {
                 minHeight: 360,
                 background: colorBgContainer,
               }}
-            >
-              {componentsSwitch(selectedMenuItem)}
-            </div>
+            ></div>
           </Content>
           <Footer
             style={{
