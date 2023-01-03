@@ -53,7 +53,7 @@ const items = [
   ]),
 ];
 
-export const CustomerLayout = ({ selected, setAuth, children }) => {
+export const CustomerLayout = ({ selected, children }) => {
   const [collapsed, setCollapsed] = useState(false);
 
   const {
@@ -94,7 +94,7 @@ export const CustomerLayout = ({ selected, setAuth, children }) => {
           >
             <Space>
               <Notify></Notify>
-              <IdentityOption setAuth={setAuth}></IdentityOption>
+              <IdentityOption></IdentityOption>
             </Space>
           </Header>
           <Content

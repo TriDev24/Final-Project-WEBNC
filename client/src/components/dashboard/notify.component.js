@@ -3,12 +3,12 @@ import {
   Dropdown,
   Button,
   Badge,
-  Alert,
   Space,
   notification,
   Typography,
 } from "antd";
 import { BellOutlined } from "@ant-design/icons";
+import { useStore } from "../../store";
 
 const { Title, Text } = Typography;
 
@@ -55,6 +55,8 @@ function NotifyMessage({ message, time, id, fetchApi, setLoading }) {
 }
 
 function Notify() {
+  const [state, dispatch] = useStore()
+  const {paymentAccountNumber} = state
   const [dropItems, setDropItems] = useState([]);
   const [count, setCount] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -63,7 +65,7 @@ function Notify() {
     setLoading(true);
     const url = `${
       process.env.REACT_APP_NOTIFY_URL_PATH
-    }/${localStorage.getItem("payment-account-number")}`;
+    }/${paymentAccountNumber}`;
     const result = await fetch(url, {
       method: "GET",
       headers: {
@@ -103,7 +105,7 @@ function Notify() {
   };
 
   useEffect(() => {
-    const paymentAccount = localStorage.getItem("payment-account-number");
+    const paymentAccount = paymentAccountNumber;
     const ws = new WebSocket("ws://localhost:40567");
     if (paymentAccount) {
       fetchApi();
@@ -127,7 +129,7 @@ function Notify() {
       };
     }
     return () => ws.close();
-  }, [localStorage.getItem("payment-account-number")]);
+  }, [paymentAccountNumber]);
 
   return (
     <Dropdown

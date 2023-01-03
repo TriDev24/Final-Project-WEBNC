@@ -6,7 +6,6 @@ const { TextArea } = Input;
 
 function DeleteDebitModal({ id, setData, side, setLoading, fetchApi }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [messageApi, contextHolder] = message.useMessage();
   const [loadingDelete, setLoadingDelete] = useState(false);
   const [form] = Form.useForm();
 
@@ -34,15 +33,9 @@ function DeleteDebitModal({ id, setData, side, setLoading, fetchApi }) {
       .then((data) => data);
 
     if (result.message) {
-      messageApi.open({
-        type: "error",
-        content: result.message,
-      });
+      message.error(result.message)
     } else {
-      messageApi.open({
-        type: "success",
-        content: "Đã hủy nhắc nợ thành công!",
-      });
+      message.success("Đã hủy nhắc nợ thành công!")
     }
     await fetchApi(side).then((result) => setData(result));
     setLoading(false);
@@ -98,7 +91,6 @@ function DeleteDebitModal({ id, setData, side, setLoading, fetchApi }) {
             </Form.Item>
 
             <Form.Item>
-              {contextHolder}
               <Button
                 style={{ width: "100%" }}
                 type="primary"

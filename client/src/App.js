@@ -6,10 +6,10 @@ import { AdminDashboardPage } from "./pages/admin/dashboard.page.js";
 import { ForgotPasswordPage } from "./pages/forgot-password.page.js";
 import "antd/dist/reset.css";
 import { useEffect, useState } from "react";
-import { getProfileFromLocalStorage } from "./utils/local-storage.util.js";
 import { Result, Spin } from "antd";
 import { styled } from "@xstyled/styled-components";
 import DebitPage from "./pages/customer/dashboard-debit.page.js";
+import { useStore } from "./store";
 
 const PageScreen = styled.div`
   width: 100vw;
@@ -17,8 +17,9 @@ const PageScreen = styled.div`
 `;
 
 export const App = () => {
+  const [state, dispatch] = useStore();
+  const { isAuth, profile } = state;
   const [isLoading, setLoadingStatus] = useState(true);
-  const [isAuth, setAuth] = useState(getProfileFromLocalStorage());
 
   useEffect(() => {
     setLoadingStatus(false);
@@ -31,11 +32,11 @@ export const App = () => {
       <>
         <Route
           path={`${basePath}/dashboard`}
-          element={<CustomerDashBoardPage setAuth={setAuth} />}
+          element={<CustomerDashBoardPage />}
         ></Route>
         <Route
           path={`${basePath}/dashboard/debit/:side`}
-          element={<DebitPage setAuth={setAuth} />}
+          element={<DebitPage />}
         ></Route>
       </>
     );
@@ -48,7 +49,7 @@ export const App = () => {
       <>
         <Route
           path={`${basePath}/dashboard`}
-          element={<EmployeeDashboardPage setAuth={setAuth} />}
+          element={<EmployeeDashboardPage />}
         ></Route>
       </>
     );
@@ -61,7 +62,7 @@ export const App = () => {
       <>
         <Route
           path={`${basePath}/dashboard`}
-          element={<AdminDashboardPage setAuth={setAuth} />}
+          element={<AdminDashboardPage />}
         ></Route>
       </>
     );
@@ -72,10 +73,7 @@ export const App = () => {
       return (
         <Routes>
           <Route path="/*" element={<Navigate to="/login" replace />}></Route>
-          <Route
-            path="/login"
-            element={<LoginPage setAuth={setAuth} />}
-          ></Route>
+          <Route path="/login" element={<LoginPage />}></Route>
           <Route
             path="/forgot-password"
             element={<ForgotPasswordPage />}
@@ -83,7 +81,7 @@ export const App = () => {
         </Routes>
       );
     }
-    const { role } = getProfileFromLocalStorage();
+    const { role } = profile;
 
     const currentUrl = window.location.href;
 
@@ -115,10 +113,7 @@ export const App = () => {
               path="/"
               element={<Navigate to={getDefaultPath()} replace />}
             ></Route>
-            <Route
-              path="/login"
-              element={<LoginPage setAuth={setAuth} />}
-            ></Route>
+            <Route path="/login" element={<LoginPage />}></Route>
             <Route
               path="/forgot-password"
               element={<ForgotPasswordPage />}
@@ -143,7 +138,7 @@ export const App = () => {
   };
 
   const getDefaultPath = () => {
-    const { role } = getProfileFromLocalStorage();
+    const { role } = profile;
 
     return `${role}/dashboard`;
   };

@@ -3,13 +3,15 @@ import { useNavigate, Link } from "react-router-dom";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { Button, Form, Input, Avatar, message } from "antd";
 import ReCAPTCHA from "react-google-recaptcha";
+import { useStore, actions } from "../store";
 
-const LoginForm = ({ setAuth }) => {
+const LoginForm = () => {
   const [visible, setVisible] = useState(true);
   const navigate = useNavigate();
   const captchaRef = useRef(null);
   const [messageApi, contextHolder] = message.useMessage();
   const [loading, setLoading] = useState(false);
+  const [state, dispatch] = useStore();
 
   const onFinish = async (values) => {
     setLoading(true);
@@ -45,10 +47,13 @@ const LoginForm = ({ setAuth }) => {
           .then(() => {
             localStorage.setItem("accessToken", result.accessToken);
             localStorage.setItem("refreshToken", result.refreshToken);
-            localStorage.setItem("profile", JSON.stringify(result.profile));
+
+            dispatch(actions.setProfile(result.profile));
 
             setLoading(false);
-            setAuth(true);
+
+            dispatch(actions.setAuth(true));
+
             const { role } = result.profile;
             switch (role) {
               case "admin": {

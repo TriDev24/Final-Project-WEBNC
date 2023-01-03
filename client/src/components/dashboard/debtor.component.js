@@ -2,10 +2,13 @@ import React, { useEffect, useState } from "react";
 import { Typography, Table, Space, Tooltip, message,Button } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
 import CreateDebitModal from "./create-debit.component.js";
+import { useStore } from "../../store";
 
 const { Title } = Typography;
 
 function DebtorTable() {
+  const [state, dispatch] = useStore()
+  const {paymentAccountNumber} = state
   const [data, setData] = useState([]);
   const [messageApi, contextHolder] = message.useMessage();
   const [loadingState, setLoading] = useState(true);
@@ -13,7 +16,7 @@ function DebtorTable() {
   const fetchApi = async () => {
     const url = `${
       process.env.REACT_APP_DEBTOR_URL_PATH
-    }?accountNumber=${localStorage.getItem("payment-account-number")}`;
+    }?accountNumber=${paymentAccountNumber}`;
 
     const result = await fetch(url, {
       method: "GET",

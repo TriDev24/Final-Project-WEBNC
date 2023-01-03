@@ -1,14 +1,17 @@
 import React, { useState } from "react";
-import { Button, Modal, Form, Input, Avatar, message,Tooltip } from "antd";
+import { Button, Modal, Form, Input, Avatar, message, Tooltip } from "antd";
 import {
   MoneyCollectOutlined,
   BankOutlined,
   HighlightOutlined,
 } from "@ant-design/icons";
+import { useStore } from "../../store";
 
 const { TextArea } = Input;
 
 const CreateDebitModal = ({ actions, debtAccount }) => {
+  const [state, dispatch] = useStore();
+  const { paymentAccountNumber } = state;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
   const [loading, setLoading] = useState(false);
@@ -22,7 +25,7 @@ const CreateDebitModal = ({ actions, debtAccount }) => {
     } else debtAccountNumber = values.debtAccountNumber;
     const { amountToPay, content } = values;
 
-    const accountNumber = localStorage.getItem("payment-account-number");
+    const accountNumber = paymentAccountNumber;
     const data = JSON.stringify({
       accountNumber,
       debtAccountNumber,
@@ -78,12 +81,11 @@ const CreateDebitModal = ({ actions, debtAccount }) => {
       ) : (
         <Tooltip placement="top" title="Tạo nhắc nợ">
           <Button
-          type="primary"
-          onClick={showModal}
-          icon={<HighlightOutlined />}
-        ></Button>
+            type="primary"
+            onClick={showModal}
+            icon={<HighlightOutlined />}
+          ></Button>
         </Tooltip>
-        
       )}
 
       <Modal

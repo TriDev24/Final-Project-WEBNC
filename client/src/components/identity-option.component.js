@@ -13,11 +13,11 @@ const getItem = (label, key, icon, children) => {
 
 
 
-function IdentityOption({setAuth}) {
+function IdentityOption() {
 
   const items = [
     getItem(<ChangePasswordModal></ChangePasswordModal>, "1"),
-    getItem(<Logout setAuth={setAuth}></Logout>, "2"),
+    getItem(<Logout></Logout>, "2"),
   ];
 
   return (

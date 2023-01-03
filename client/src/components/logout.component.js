@@ -1,14 +1,15 @@
 import { Button } from "antd";
 import { useNavigate } from "react-router-dom";
 import { LogoutOutlined } from "@ant-design/icons";
-import { getProfileFromLocalStorage } from "../utils/local-storage.util.js";
+import { useStore, actions } from "../store";
 
-function Logout({setAuth}) {
+function Logout() {
   const navigate = useNavigate();
+  const [state, dispatch] = useStore()
 
   const handleClick = () => {
     localStorage.clear();
-    setAuth(getProfileFromLocalStorage())
+    dispatch(actions.setAuth(false));
     navigate("/login");
   };
 
