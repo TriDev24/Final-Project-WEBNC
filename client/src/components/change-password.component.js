@@ -29,25 +29,23 @@ function ChangePasswordModal() {
   
 
   const onFinish = async (values) => {
-    console.log(222222444)
+    const {
+      newPassword,
+      oldPassword
+    } = values;
+    const refreshToken = localStorage.getItem('refreshToken')
     setLoading(true);
-    // let debtAccountNumber;
-    // if (debtAccount) {
-    //   debtAccountNumber = debtAccount;
-    // } else debtAccountNumber = values.debtAccountNumber;
-    // const { amountToPay, content } = values;
-
-    // const accountNumber = localStorage.getItem("payment-account-number");
     const data = JSON.stringify({
-      "lhtinh": "test"
+      "newPassword": newPassword,
+      "oldPassword": oldPassword,
+      "refreshToken": refreshToken
     });
-    console.log(process.env.REACT_APP_DEBIT_URL_PATH);
 
     const result = await fetch(process.env.REACT_APP_CHANGE_PASSWORD_PATH, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        // authorization: localStorage.getItem("accessToken"),
+        authorization: localStorage.getItem("accessToken"),
       },
       body: data,
     })
@@ -55,8 +53,8 @@ function ChangePasswordModal() {
       .then((data) => data);
 
     messageApi.open({
-      type: result.status,
-      content: result.message,
+      type: "success",
+      content: "Đổi mật khẩu thành công",
     });
 
     changePasswordForm.resetFields();
@@ -75,6 +73,7 @@ function ChangePasswordModal() {
 
   return (
     <>
+    {contextHolder}
       <Button style={{width:"135px"}} icon={<SecurityScanOutlined />} onClick={showModal}>
         Đổi mật khẩu
       </Button>
@@ -105,6 +104,7 @@ function ChangePasswordModal() {
             <Form.Item
               name="oldPassword"
               label="Mật khẩu cũ"
+              
               rules={[
                 {
                   required: true,
@@ -112,7 +112,7 @@ function ChangePasswordModal() {
                 },
               ]}
             >
-              <Input placeholder="Mật khẩu cũ" />
+              <Input type="password" placeholder="Mật khẩu cũ" />
             </Form.Item>
             <Form.Item
               name="newPassword"
@@ -124,7 +124,7 @@ function ChangePasswordModal() {
                 },
               ]}
             >
-              <Input placeholder="Mật khẩu mới" />
+              <Input type="password" placeholder="Mật khẩu mới" />
             </Form.Item>
             <Button type="primary" block style={{marginBottom:"20px"}} htmlType="submit" className="login-form-button" loading={loading} >
 
@@ -136,32 +136,4 @@ function ChangePasswordModal() {
     </>
   );
 }
-
-// export const ChangePassword = () => {
-//   return (
-//     <Container>
-//       <Dropdown
-//         menu={{
-//           items,
-//         }}
-//         placement="bottomLeft"
-//         arrow={{
-//           pointAtCenter: true,
-//         }}
-//         trigger={["click"]}
-//       >
-//         <Button
-//           type="ghost"
-//           shape="circle"
-//           icon={
-//             <Avatar
-//               style={{ marginBottom: "5px" }}
-//               src="/images/avatar.png"
-//             ></Avatar>
-//           }
-//         ></Button>
-//       </Dropdown>
-//     </Container>
-//   );
-// };
 export default ChangePasswordModal;
