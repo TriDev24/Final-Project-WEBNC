@@ -9,7 +9,7 @@ import {
 const initState = {
   profile: JSON.parse(localStorage.getItem("profile")),
   isAuth: localStorage.getItem("accessToken"),
-  paymentAccountNumber: null,
+  paymentAccountNumber: localStorage.getItem("payment-account-number"),
   bankTypes: [],
   transferMethods: [],
 };

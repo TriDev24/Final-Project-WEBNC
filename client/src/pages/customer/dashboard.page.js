@@ -54,7 +54,8 @@ export const CustomerDashBoardPage = () => {
       .then((response) => response.json())
       .then((data) => {
         setPaymentAccount(data[0]);
-        dispatch(actions.setPaymentAccountNumber(data[0].accountNumber));
+        localStorage.setItem("payment-account-number", data[0].accountNumber)
+        dispatch(actions.setPaymentAccountNumber(localStorage.getItem("payment-account-number")));
       });
   }, []);
 
@@ -130,7 +131,8 @@ export const CustomerDashBoardPage = () => {
       body: JSON.stringify(data),
     })
       .then((response) => {
-        dispatch(actions.setPaymentAccountNumber(bankAccount.accountNumber));
+        localStorage.setItem("payment-account-number", bankAccount.accountNumber)
+        dispatch(actions.setPaymentAccountNumber(localStorage.getItem("payment-account-number")));
         message.success("Change Account Success");
         setPaymentAccount(bankAccount);
         getReceivers();
