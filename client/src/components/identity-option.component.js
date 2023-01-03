@@ -1,5 +1,5 @@
 import { Avatar, Button, Dropdown } from "antd";
-import { ChangePasswordModal } from "../components/change-password.component.js";
+import ChangePasswordModal  from "../components/change-password.component.js";
 import Logout from "../components/logout.component.js";
 
 const getItem = (label, key, icon, children) => {
