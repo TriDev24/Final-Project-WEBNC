@@ -40,7 +40,7 @@ export default {
     return res.json(result);
   },
 
-  async generateRefreshToken(req, res) {
+  async generateAccessToken(req, res) {
     const result = await service.generateAccessToken(req.body);
     if (result === -1) {
       res.json({

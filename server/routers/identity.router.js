@@ -10,7 +10,7 @@ router.post('/verify', controller.verifyAndChangePassword);
 
 router.post('/login', controller.login);
 
-router.post('/refresh-token', controller.generateRefreshToken);
+router.post('/refresh-token', controller.generateAccessToken);
 
 router.get('/', auth(['customer']), controller.getAll);
 

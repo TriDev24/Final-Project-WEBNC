@@ -66,10 +66,10 @@ export default {
     const { isPaid } = req.body;
     const result = await service.updateDebit(id, isPaid);
     if (result === -1) {
-      return res.status(401).status("Something went wrong");
+      return res.status(401).status("Có lỗi xảy ra");
     } else if (result == -2) {
-      return res.status(404).json(`Cannot find this debit with id ${id}`);
+      return res.status(404).json(`Không tìm thấy nhắc nợ với id = ${id}`);
     }
-    return res.status(200).json("Updated Success");
+    return res.status(200).json("Cập nhập thành công");
   },
 };
