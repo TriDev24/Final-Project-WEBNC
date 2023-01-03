@@ -8,16 +8,16 @@ const Container = styled.div`
   margin: 20px 10px;
 `;
 
-const getItem = (label, key, icon, children) => {
-  return {
-    key,
-    icon,
-    children,
-    label,
-  };
-};
+// const getItem = (label, key, icon, children) => {
+//   return {
+//     key,
+//     icon,
+//     children,
+//     label,
+//   };
+// };
 
-const items = [getItem(<ChangePasswordModal></ChangePasswordModal>, "1")];
+// const items = [getItem(<ChangePasswordModal></ChangePasswordModal>, "1")];
 
 function ChangePasswordModal() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -47,7 +47,7 @@ function ChangePasswordModal() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        authorization: localStorage.getItem("accessToken"),
+        // authorization: localStorage.getItem("accessToken"),
       },
       body: data,
     })
@@ -137,31 +137,31 @@ function ChangePasswordModal() {
   );
 }
 
-export const ChangePassword = () => {
-  return (
-    <Container>
-      <Dropdown
-        menu={{
-          items,
-        }}
-        placement="bottomLeft"
-        arrow={{
-          pointAtCenter: true,
-        }}
-        trigger={["click"]}
-      >
-        <Button
-          type="ghost"
-          shape="circle"
-          icon={
-            <Avatar
-              style={{ marginBottom: "5px" }}
-              src="/images/avatar.png"
-            ></Avatar>
-          }
-        ></Button>
-      </Dropdown>
-    </Container>
-  );
-};
+// export const ChangePassword = () => {
+//   return (
+//     <Container>
+//       <Dropdown
+//         menu={{
+//           items,
+//         }}
+//         placement="bottomLeft"
+//         arrow={{
+//           pointAtCenter: true,
+//         }}
+//         trigger={["click"]}
+//       >
+//         <Button
+//           type="ghost"
+//           shape="circle"
+//           icon={
+//             <Avatar
+//               style={{ marginBottom: "5px" }}
+//               src="/images/avatar.png"
+//             ></Avatar>
+//           }
+//         ></Button>
+//       </Dropdown>
+//     </Container>
+//   );
+// };
 export default ChangePasswordModal;
