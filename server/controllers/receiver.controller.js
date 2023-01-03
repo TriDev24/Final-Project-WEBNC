@@ -19,13 +19,11 @@ export default {
             const bankType = await BankType.findById(
                 receiverBankAccount.bankTypeId
             );
-            const identity = await Identity.findById(
-                receiverBankAccount.identityId
-            );
 
             responses.push({
+                _id: r._id,
                 accountNumber: receiverBankAccount.accountNumber,
-                aliasName: identity.aliasName,
+                aliasName: r.aliasName,
                 bankType: {
                     id: receiverBankAccount.bankTypeId,
                     name: bankType.name,
@@ -35,15 +33,79 @@ export default {
 
         res.status(200).json(responses);
     },
+    async getById(req, res) {
+        const { id } = req.params;
+
+        const receiver = await Receiver.findById(id);
+        if (!receiver) {
+            return res
+                .status(404)
+                .json(`Không tìm thấy người nhận với id: ${id}`);
+        }
+
+        return res.status(200).json(receiver);
+    },
     async create(req, res) {
         const { senderAccountNumber, receiverAccountNumber } = req.body;
+        const receiverBankAccount = await BankAccount.findOne({
+            accountNumber: receiverAccountNumber,
+        });
+        const receiverInformation = await Identity.findById(
+            receiverBankAccount.identityId
+        );
+
         const document = {
             senderAccountNumber,
             receiverAccountNumber,
+            receiverName: receiverInformation.aliasName,
         };
 
         const insertedData = await Receiver.create(document);
 
         res.status(200).json(insertedData);
+    },
+    async update(req, res) {
+        const { id } = req.params;
+        const { receiverName } = req.body;
+
+        const receiver = await Receiver.findById(id);
+        if (!receiver) {
+            return res
+                .status(404)
+                .json(`Không tìm thấy người nhận với id: ${id}`);
+        }
+
+        const updatedReceiver = await Receiver.updateOne(
+            {
+                _id: id,
+            },
+            {
+                receiverName,
+            }
+        );
+        if (!updatedReceiver) {
+            return res.status(500).json(`Đã có lỗi xảy ra, vui lòng thử lại`);
+        }
+
+        return res.status(200).json('Cập nhật thành công');
+    },
+    async delete(req, res) {
+        const { id } = req.params;
+
+        const receiver = await Receiver.findById(id);
+        if (!receiver) {
+            return res
+                .status(404)
+                .json(`Không tìm thấy người nhận với id: ${id}`);
+        }
+
+        const effected = await Receiver.deleteOne({
+            _id: id,
+        });
+        if (!effected) {
+            return res.status(500).json(`Đã có lỗi xảy ra`);
+        }
+
+        return res.status(200).json('Xoá người nhận thành công');
     },
 };

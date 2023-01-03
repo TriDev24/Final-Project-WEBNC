@@ -6,6 +6,12 @@ const router = Router();
 
 router.get('/history', auth(['employee']), controller.getHistory);
 
+router.get(
+    '/payment-account-history',
+    auth(['customer']),
+    controller.getPaymentAccountHistory
+);
+
 router.post('/', auth(['customer']), controller.create);
 
 router.post('/:id/verify-otp', auth(['customer']), controller.verifyOtp);

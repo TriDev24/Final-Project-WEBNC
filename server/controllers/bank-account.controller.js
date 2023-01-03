@@ -120,7 +120,7 @@ export default {
 
             if (deposit) {
                 if (deposit < 0) {
-                    return res.status(401).json('Not allow negative number');
+                    return res.status(401).json('Không được nhập số âm');
                 }
                 where['overBalance'] = bankAccount.overBalance + deposit;
             }
@@ -132,13 +132,17 @@ export default {
                 where
             );
             if (!updatedBankAccount) {
-                res.status(500).json('Something went wrong!!!');
+                res.status(500).json(
+                    'Đã có lỗi xảy ra, vui lòng thử lại sau!!!'
+                );
             }
 
-            return res.status(200).json('Update Bank Account Successfully');
+            return res.status(200).json('Cập nhật thành công!!!');
         } catch (error) {
             await session.abortTransaction();
-            return res.status(500).json('Something went wrong on server');
+            return res
+                .status(500)
+                .json('Đã có lỗi xảy ra, vui lòng thử lại sau!!!');
         }
     },
 

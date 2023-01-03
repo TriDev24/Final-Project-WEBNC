@@ -2,7 +2,6 @@ import jwt from 'jsonwebtoken';
 
 export default (roles) => {
     return (req, res, next) => {
-
         const accessToken = req.headers['authorization'];
 
         if (accessToken) {
@@ -28,12 +27,12 @@ export default (roles) => {
                         message: 'Token đã hết hạn!',
                     });
                 return res.status(401).json({
-                    message: 'Unauthorized',
+                    message: 'Chưa được xác thực',
                 });
             }
         } else {
             return res.status(403).json({
-                message: 'No token provided',
+                message: 'Không có token nào được cung cấp',
             });
         }
     };

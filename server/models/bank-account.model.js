@@ -7,6 +7,7 @@ const schema = {
     isPayment: Boolean,
     identityId: { type: mongoose.Types.ObjectId, ref: 'Identities' },
     bankTypeId: { type: mongoose.Types.ObjectId, ref: 'Bank-Types' },
+    isLocked: { type: Boolean, default: false },
 };
 
 export default generate('Bank-Accounts', schema);

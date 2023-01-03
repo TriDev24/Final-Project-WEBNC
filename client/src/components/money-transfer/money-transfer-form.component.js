@@ -1,14 +1,18 @@
+import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { styled } from '@xstyled/styled-components';
 import {
     Button,
     Form,
     Input,
     InputNumber,
+    Modal,
     Radio,
     Select,
     Skeleton,
+    Space,
+    Collapse,
+    message,
 } from 'antd';
-import { Collapse } from 'antd';
 import { ReceiverItem } from './receiver-item.component.js';
 
 const { Panel } = Collapse;
@@ -23,11 +27,30 @@ const StyledDepositInput = styled(InputNumber)`
     width: 100%;
 `;
 
+const ReceiverItemContainer = styled.div`
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 4px;
+    padding: 10px 0;
+
+    &:hover {
+        background: lightgray;
+        cursor: pointer;
+        transition: background 0.25s;
+    }
+`;
+
+const ActionFields = styled(Space)`
+    margin: 0 5px;
+`;
+
 export const MoneyTransferForm = ({
     form,
     receivers,
     bankTypes,
     transferMethods,
+    onDeleteReceiverClick,
     onConfirmTransfer,
 }) => {
     const handleReceiverItemClick = (receiver) => {
@@ -42,10 +65,19 @@ export const MoneyTransferForm = ({
             <Skeleton />
         ) : (
             receivers.map((r) => (
-                <ReceiverItem
-                    onSelectItemClick={handleReceiverItemClick}
-                    receiver={r}
-                />
+                <ReceiverItemContainer>
+                    <ReceiverItem
+                        onSelectItemClick={handleReceiverItemClick}
+                        receiver={r}
+                    />
+                    <ActionFields direction='horizontal'>
+                        <Button
+                            type='text'
+                            onClick={() => onDeleteReceiverClick(r._id)}
+                            icon={<DeleteOutlined />}
+                        />
+                    </ActionFields>
+                </ReceiverItemContainer>
             ))
         );
 
@@ -70,6 +102,7 @@ export const MoneyTransferForm = ({
 
     return (
         <Container>
+            <Modal></Modal>
             <Form form={form} layout='vertical'>
                 <Form.Item
                     name='receiverAccountNumber'
