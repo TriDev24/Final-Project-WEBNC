@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-<<<<<<< HEAD
 import { styled } from "@xstyled/styled-components";
 import { Avatar, Button, Dropdown, Modal, Form, Input, message } from "antd";
 import { useNavigate, Link } from 'react-router-dom';
@@ -21,14 +20,6 @@ const getItem = (label, key, icon, children) => {
 const items = [getItem(<ChangePasswordModal></ChangePasswordModal>, "1")];
 
 function ChangePasswordModal() {
-  
-=======
-import { Avatar, Button, Modal, Form, Input } from "antd";
-import { SecurityScanOutlined } from "@ant-design/icons";
-
-export function ChangePasswordModal() {
-  const [changePasswordForm] = Form.useForm();
->>>>>>> d7a57cd36610244ed5be6b099d4fe251f1cb16ef
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [messageApi, contextHolder] = message.useMessage();
@@ -109,16 +100,8 @@ export function ChangePasswordModal() {
               src="/images/reset-password.png"
             ></Avatar>
           </div>
-<<<<<<< HEAD
           <Form style={{width: "100%"}} name="normal_login"
             className="login-form" form={changePasswordForm} onFinish={onFinish} layout="vertical">
-=======
-          <Form
-            style={{ width: "100%" }}
-            form={changePasswordForm}
-            layout="vertical"
-          >
->>>>>>> d7a57cd36610244ed5be6b099d4fe251f1cb16ef
             <Form.Item
               name="oldPassword"
               label="Mật khẩu cũ"
@@ -143,12 +126,8 @@ export function ChangePasswordModal() {
             >
               <Input placeholder="Mật khẩu mới" />
             </Form.Item>
-<<<<<<< HEAD
             <Button type="primary" block style={{marginBottom:"20px"}} htmlType="submit" className="login-form-button" loading={loading} >
-=======
 
-            <Button type="primary" block style={{ marginBottom: "20px" }}>
->>>>>>> d7a57cd36610244ed5be6b099d4fe251f1cb16ef
               Xác nhận
             </Button>
           </Form>
@@ -157,7 +136,6 @@ export function ChangePasswordModal() {
     </>
   );
 }
-<<<<<<< HEAD
 
 export const ChangePassword = () => {
   return (
@@ -187,5 +165,3 @@ export const ChangePassword = () => {
   );
 };
 export default ChangePasswordModal;
-=======
->>>>>>> d7a57cd36610244ed5be6b099d4fe251f1cb16ef
