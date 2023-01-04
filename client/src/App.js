@@ -8,7 +8,7 @@ import 'antd/dist/reset.css';
 import { useEffect, useState } from 'react';
 import { Result, Spin, message } from 'antd';
 import { styled } from '@xstyled/styled-components';
-import DebitPage from './pages/customer/dashboard-debit.page.js';
+import DebitPage from './pages/customer/debit.page.js';
 import { useStore, actions } from './store';
 
 const PageScreen = styled.div`

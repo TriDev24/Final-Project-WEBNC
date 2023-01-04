@@ -7,7 +7,7 @@ import { RechargeMoneyForm } from '../../components/recharge-money-form.componen
 import { HistoryTrackingForm } from '../../components/history-tracking-form.component.js';
 import { BankTransactionHistoryForm } from '../../components/bank-transaction-history-form.js';
 
-export const EmployeeDashboardPage = ({setAuth}) => {
+export const EmployeeDashboardPage = ({ setAuth }) => {
     const [bankAccounts, setBankAccounts] = useState(null);
     const [isCreateIdentityModalVisible, setCreateIdentityModalVisibility] =
         useState(false);
@@ -32,7 +32,7 @@ export const EmployeeDashboardPage = ({setAuth}) => {
             !isWatchMoneyTransferHistoryModalVisible
         );
     };
-    
+
     const toggleBankTransactionHistoryModalVisibility = () => {
         setBankTransactionHistoryModalVisibility(
             !isBankTransactionHistoryModalVisible
@@ -65,13 +65,6 @@ export const EmployeeDashboardPage = ({setAuth}) => {
                     'Xem được các giao dịch: Giao dịch nhận tiền, Giao dịch chuyển khoản, Giao dịch thanh toán nhắc nợ, Được sắp xếp từ mới đến cũ, có thể hiện khác nhau cho các loại thanh toán khác nhau',
                 actionTitle: 'Xem lịch sử',
                 onItemClick: toggleWatchMoneyTransferModalVisibility,
-            },
-            {
-                title: 'Xem danh sách giao dịch trong tháng với các ngân hàng khác (đối soát)',
-                description:
-                    'Xem được các giao dịch: Xem trong khoảng thời gian. Xem theo từng ngân hàng, hoặc tất cả ngân hàng liên kết. Có thống kê tổng số tiền đã giao dịch',
-                actionTitle: 'Xem lịch sử',
-                onItemClick: toggleBankTransactionHistoryModalVisibility,
             },
         ],
         []
@@ -142,7 +135,7 @@ export const EmployeeDashboardPage = ({setAuth}) => {
             </Modal>
 
             <Modal
-                title='Theo dõi lịch sử giao dịch'
+                title='Theo dõi lịch sử giao dịch (trong 30 ngày trước)'
                 centered
                 open={isWatchMoneyTransferHistoryModalVisible}
                 onOk={toggleWatchMoneyTransferModalVisibility}
@@ -156,7 +149,7 @@ export const EmployeeDashboardPage = ({setAuth}) => {
                 open={isBankTransactionHistoryModalVisible}
                 onOk={toggleBankTransactionHistoryModalVisibility}
                 onCancel={toggleBankTransactionHistoryModalVisibility}>
-                <BankTransactionHistoryForm/>
+                <BankTransactionHistoryForm />
             </Modal>
 
             <ManagementList sources={settingItems} />

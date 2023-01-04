@@ -1,5 +1,7 @@
+import { LockOutlined, UnlockOutlined } from '@ant-design/icons';
 import { styled } from '@xstyled/styled-components';
-import { Button, message } from 'antd';
+import { Button, message, Space, Tooltip } from 'antd';
+import { useState } from 'react';
 
 const Container = styled.div`
     display: flex;
@@ -19,35 +21,113 @@ const StyledParagraph = styled.p`
     margin: 0;
 `;
 
+const ActionFields = styled(Space)`
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+`;
+
 export const BankAccountItem = ({
     paymentAccount,
     onSelectPaymentAccountClick,
     bankAccount,
 }) => {
+    const [isLocked, setLockStatus] = useState(bankAccount.isLocked);
     const isPaymentAccount = bankAccount._id === paymentAccount._id;
 
     const onChangeToPaymentAccountClick = () => {
         onSelectPaymentAccountClick(bankAccount);
     };
 
+    const toggleLockBankAccount = () => {
+        const url = `${process.env.REACT_APP_BANK_ACCOUNT_API_URL_PATH}/${bankAccount._id}`;
+        const payload = {
+            isLocked,
+        };
+        fetch(url, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: localStorage.getItem('accessToken'),
+            },
+            body: JSON.stringify(payload),
+        })
+            .then(() => {
+                message.success('Cập nhật tài khoản thành công');
+                setLockStatus(!isLocked);
+            })
+            .catch((error) => {
+                message.error('Khoá tài khoản thất bại');
+            });
+    };
+
     const renderSignIfIsPaymentAccountOrButtonIfContrast = () =>
         isPaymentAccount == true ? (
             <i>Mặc định</i>
         ) : (
-            <Button onClick={onChangeToPaymentAccountClick}>
-                Đặt làm mặc định
-            </Button>
+            <ActionFields direction='horizontal'>
+                {isLocked === false && (
+                    <Button onClick={onChangeToPaymentAccountClick}>
+                        Đặt làm mặc định
+                    </Button>
+                )}
+
+                <Button
+                    icon={
+                        isLocked === false ? (
+                            <Tooltip title='Khoá tài khoản'>
+                                <LockOutlined />
+                            </Tooltip>
+                        ) : (
+                            <Tooltip title='Mở khoá'>
+                                <UnlockOutlined />
+                            </Tooltip>
+                        )
+                    }
+                    onClick={toggleLockBankAccount}
+                />
+            </ActionFields>
         );
+
+    const renderAccountNumberText = () => {
+        return (
+            <>
+                {isLocked ? (
+                    <del>
+                        <strong>Số tài khoản: </strong>
+                        {bankAccount.accountNumber}
+                    </del>
+                ) : (
+                    <>
+                        <strong>Số tài khoản: </strong>
+                        {bankAccount.accountNumber}
+                    </>
+                )}
+            </>
+        );
+    };
+
+    const renderOverBalanceText = () => {
+        return (
+            <>
+                {isLocked ? (
+                    <del>
+                        <strong>Số dư: </strong> {bankAccount.overBalance}
+                    </del>
+                ) : (
+                    <>
+                        <strong>Số dư: </strong> {bankAccount.overBalance}
+                    </>
+                )}
+            </>
+        );
+    };
 
     return (
         <Container>
             <AccountInformation>
-                <StyledParagraph>
-                    <strong>Số tài khoản:</strong> {bankAccount.accountNumber}
-                </StyledParagraph>
-                <StyledParagraph>
-                    <strong>Số dư:</strong> {bankAccount.overBalance}
-                </StyledParagraph>
+                <StyledParagraph>{renderAccountNumberText()}</StyledParagraph>
+                <StyledParagraph>{renderOverBalanceText()}</StyledParagraph>
             </AccountInformation>
             {renderSignIfIsPaymentAccountOrButtonIfContrast()}
         </Container>

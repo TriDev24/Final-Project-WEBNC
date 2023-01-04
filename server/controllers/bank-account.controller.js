@@ -74,11 +74,16 @@ export default {
 
     async update(req, res) {
         const { id } = req.params;
-        const { isPayment, deposit } = req.body;
+        const { isPayment, isLocked, deposit } = req.body;
 
         const session = await BankAccount.startSession();
         session.startTransaction();
         try {
+            const bankAccount = await BankAccount.findById(id);
+            if (!bankAccount) {
+                return res.status(404).json('Cannot find this Bank Account');
+            }
+
             if (isPayment) {
                 const records = await BankAccount.find({
                     identityId: req.userId,
@@ -111,9 +116,22 @@ export default {
                 return res.status(200).json('Update Bank Account Successfully');
             }
 
-            const bankAccount = await BankAccount.findById(id);
-            if (!bankAccount) {
-                return res.status(404).json('Cannot find this Bank Account');
+            if (isLocked) {
+                const updatedBankAccount = await BankAccount.updateOne(
+                    {
+                        _id: id,
+                    },
+                    {
+                        isLocked,
+                    }
+                );
+                if (!updatedBankAccount) {
+                    return res
+                        .status(500)
+                        .json('Đã có lỗi xảy ra, vui lòng thử lại sau!!!');
+                }
+
+                return res.status(200).json('Cập nhật thành công!!!');
             }
 
             const where = {};

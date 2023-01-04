@@ -12,12 +12,18 @@ import { generateSignature } from '../utils/rsa.util.js';
 export default {
     async getHistory(req, res) {
         const { bankAccountId } = req.query;
+        const now = Math.floor(Date.now() / 1000);
+        const thirtyDayBeforeFromNow = now - 2506000; // 30 day
 
         // Get receiving billings
         const sortedReceiveBillings = await Billing.find({
             receiverId: bankAccountId,
             transferType: TransferType.MoneyTransfer,
             isVerified: true,
+            createdAt: {
+                $lte: now,
+                $gte: thirtyDayBeforeFromNow,
+            },
         }).sort({ createdAt: -1 });
 
         let receiveBillingSummaries = [];
@@ -51,6 +57,10 @@ export default {
             senderId: bankAccountId,
             transferType: TransferType.MoneyTransfer,
             isVerified: true,
+            createdAt: {
+                $lte: now,
+                $gte: thirtyDayBeforeFromNow,
+            },
         }).sort({ createdAt: -1 });
 
         let transferBillingSummaries = [];
@@ -86,6 +96,10 @@ export default {
             senderId: bankAccountId,
             transferType: TransferType.Debit,
             isVerified: true,
+            createdAt: {
+                $lte: now,
+                $gte: thirtyDayBeforeFromNow,
+            },
         }).sort({ createdAt: -1 });
 
         const debitBillingSummaries = [];
@@ -117,6 +131,8 @@ export default {
 
     async getPaymentAccountHistory(req, res) {
         const { accountNumber } = req.query;
+        const now = Math.floor(Date.now() / 1000);
+        const thirtyDayBeforeFromNow = now - 2506000;
 
         const bankAccount = await BankAccount.findOne({ accountNumber });
         if (!bankAccount) {
@@ -130,6 +146,10 @@ export default {
         const receiveBillings = await Billing.find({
             receiverId: bankAccount._id,
             isVerified: true,
+            createdAt: {
+                $lte: now,
+                $gte: thirtyDayBeforeFromNow,
+            },
         });
 
         const parseReceiveBillings = [];
@@ -151,7 +171,6 @@ export default {
             senderId: bankAccount._id,
             isVerified: true,
         });
-        console.log('sending', transferBillings);
 
         const parseTransferBillings = [];
         for (const t of transferBillings) {
