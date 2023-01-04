@@ -6,6 +6,7 @@ import {
 } from "@ant-design/icons";
 import { Layout, Menu, theme, Image, Space } from "antd";
 import IdentityOption from "../identity-option.component.js";
+import { Link } from "react-router-dom";
 
 const { Header, Content, Footer, Sider } = Layout;
 
@@ -19,12 +20,20 @@ const getItem = (label, key, icon, children) => {
 };
 
 const items = [
-  getItem("Tài khoản", "1", <CreditCardOutlined />),
-  getItem("Nhắc nợ", "2", <BankOutlined />, [
-    getItem("Cá nhân", "3", <UserOutlined />),
-    getItem("Người khác", "4", <UserOutlined />),
-    getItem("Danh sách người nợ", "5", <UserOutlined />),
-  ]),
+  getItem(
+    <>
+      <Link to="/admin/dashboard">Nhân viên</Link>
+    </>,
+    "1",
+    <CreditCardOutlined />
+  ),
+  getItem(
+    <>
+      <Link to="/admin/dashboard/transaction">Giao dịch</Link>
+    </>,
+    "2",
+    <CreditCardOutlined />
+  ),
 ];
 
 export const AdminLayout = ({ setAuth, children }) => {
@@ -47,7 +56,7 @@ export const AdminLayout = ({ setAuth, children }) => {
           onCollapse={(value) => setCollapsed(value)}
         >
           <div style={{ textAlign: "center", margin: "20px" }}>
-            <Image height={40} width={40} src="./images/logo.png"></Image>
+            <Image height={40} width={40} src="/images/logo.png"></Image>
           </div>
           <Menu
             theme="dark"
