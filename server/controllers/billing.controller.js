@@ -145,6 +145,7 @@ export default {
 
         const receiveBillings = await Billing.find({
             receiverId: bankAccount._id,
+            transferType: TransferType.MoneyTransfer,
             isVerified: true,
             createdAt: {
                 $lte: now,
@@ -169,7 +170,12 @@ export default {
 
         const transferBillings = await Billing.find({
             senderId: bankAccount._id,
+            transferType: TransferType.MoneyTransfer,
             isVerified: true,
+            createdAt: {
+                $lte: now,
+                $gte: thirtyDayBeforeFromNow,
+            },
         });
 
         const parseTransferBillings = [];
@@ -187,9 +193,36 @@ export default {
             });
         }
 
+        // Debit
+        const debitBillings = await Billing.find({
+            senderId: bankAccount._id,
+            transferType: TransferType.Debit,
+            isVerified: true,
+            createdAt: {
+                $lte: now,
+                $gte: thirtyDayBeforeFromNow,
+            },
+        });
+
+        const parseDebitBillings = [];
+        for (const d of debitBillings) {
+            const receiver = await BankAccount.findById(d.receiverId);
+
+            parseDebitBillings.push({
+                deposit: d.deposit,
+                description: d.description,
+                transferTime: d.transferTime,
+                receiver: {
+                    accountNumber: receiver.accountNumber,
+                },
+                type: 'debit',
+            });
+        }
+
         const mergedBillings = [
             ...parseReceiveBillings,
             ...parseTransferBillings,
+            ...parseDebitBillings,
         ];
         const sortedBillings = mergedBillings.sort(
             (a, b) => a.createdAt - b.createdAt

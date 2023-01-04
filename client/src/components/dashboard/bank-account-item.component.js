@@ -113,10 +113,12 @@ export const BankAccountItem = ({
                 {isLocked ? (
                     <del>
                         <strong>Số dư: </strong> {bankAccount.overBalance}
+                        <i> (VNĐ)</i>
                     </del>
                 ) : (
                     <>
                         <strong>Số dư: </strong> {bankAccount.overBalance}
+                        <i> (VNĐ)</i>
                     </>
                 )}
             </>

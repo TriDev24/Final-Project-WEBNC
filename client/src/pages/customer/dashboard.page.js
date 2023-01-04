@@ -229,12 +229,6 @@ export const CustomerDashBoardPage = () => {
                 key: 'transferMoney',
             },
             {
-                title: 'Hình thức thanh toán',
-                dataIndex: 'method',
-                key: 'method',
-                render: (content) => <strong>{content}</strong>,
-            },
-            {
                 title: 'Nội dung',
                 dataIndex: 'description',
                 key: 'description',
@@ -254,31 +248,80 @@ export const CustomerDashBoardPage = () => {
         if (!paymentAccountHistory) {
             return <Skeleton />;
         } else {
-            const mappedDataSource = paymentAccountHistory.map((p, index) => {
-                if (p.type === 'receive') {
-                    return {
-                        key: index,
-                        senderAccountNumber: p.sender.accountNumber,
-                        receiverAccountNumber: 'Tôi',
-                        transferMoney: p.deposit,
-                        method: 'Nhận',
-                        description: p.description,
-                        transferTime: p.transferTime,
-                    };
-                }
-
+            // Nhan tien
+            const receiveBillings = paymentAccountHistory.filter(
+                (p) => p.type === 'receive'
+            );
+            const mappedReceiveBillingDataSource = receiveBillings.map((r) => {
                 return {
-                    key: index,
-                    senderAccountNumber: 'Tôi',
-                    receiverAccountNumber: p.receiver.accountNumber,
-                    transferMoney: p.deposit,
-                    method: 'Gửi',
-                    description: p.description,
-                    transferTime: p.transferTime,
+                    senderAccountNumber: r.sender.accountNumber,
+                    receiverAccountNumber: 'Tôi',
+                    transferMoney: r.deposit,
+                    description: r.description,
+                    transferTime: r.transferTime,
                 };
             });
+
+            // Chuyen tien
+            const transferBillings = paymentAccountHistory.filter(
+                (p) => p.type === 'transfer'
+            );
+            const mappedTransferBillingDataSource = transferBillings.map(
+                (t) => {
+                    return {
+                        senderAccountNumber: 'Tôi',
+                        receiverAccountNumber: t.receiver.accountNumber,
+                        transferMoney: t.deposit,
+                        description: t.description,
+                        transferTime: t.transferTime,
+                    };
+                }
+            );
+
+            // Nhac no
+            const debitBillings = paymentAccountHistory.filter(
+                (p) => p.type === 'debit'
+            );
+            const mappedDebitBillingDataSource = debitBillings.map((d) => {
+                return {
+                    senderAccountNumber: 'Tôi',
+                    receiverAccountNumber: d.receiver.accountNumber,
+                    transferMoney: d.deposit,
+                    description: d.description,
+                    transferTime: d.transferTime,
+                };
+            });
+
             return (
-                <Table columns={historyColumns} dataSource={mappedDataSource} />
+                <>
+                    <p>
+                        <strong>
+                            <i>Giao dịch nhận tiền</i>
+                        </strong>
+                    </p>
+                    <Table
+                        columns={historyColumns}
+                        dataSource={mappedReceiveBillingDataSource}
+                    />
+                    <p>
+                        <strong>
+                            <i>Giao dịch chuyển tiền</i>
+                        </strong>
+                    </p>
+                    <Table
+                        columns={historyColumns}
+                        dataSource={mappedTransferBillingDataSource}
+                    />
+                    <p>
+                        <strong>
+                            <i>Giao dịch thanh toán nhắc nợ</i>
+                        </strong>
+                    </p>
+                    <Table
+                        columns={historyColumns}
+                        dataSource={mappedDebitBillingDataSource}
+                    />
+                </>
             );
         }
     };
