@@ -63,7 +63,7 @@ export default {
                         process.env.JWT_SECRET_KEY,
                         {
                             algorithm: 'HS256',
-                            expiresIn: '30d',
+                            expiresIn: '7d',
                         }
                     );
                     const profile = {

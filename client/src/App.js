@@ -23,9 +23,10 @@ export const App = () => {
     const [isLoading, setLoadingStatus] = useState(true);
 
     const fetchToken = async () => {
-        if (localStorage.getItem('refreshToken')) {
+        const refreshToken = localStorage.getItem("refreshToken")
+        if (refreshToken) {
             const data = JSON.stringify({
-                refreshToken: localStorage.getItem('refreshToken'),
+                refreshToken
             });
             const result = await fetch(
                 `${process.env.REACT_APP_IDENTITY_API_URL_PATH}/refresh-token`,
