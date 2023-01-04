@@ -5,14 +5,14 @@ import { ManagementList } from '../../components/management-list.component.js';
 import { CreateIdentityModal } from '../../components/create-identity.component.js';
 import { RechargeMoneyForm } from '../../components/recharge-money-form.component.js';
 import { HistoryTrackingForm } from '../../components/history-tracking-form.component.js';
-import { BankTransactionHistoryForm } from '../../components/bank-transaction-history-form.js';
+import { BankTransactionHistoryForm } from '../../components/bank-transaction-history-form.component.js';
 
-export const AdminDashboardPage = ({setAuth}) => {
+export const AdminDashboardPage = ({ setAuth }) => {
     const [
         isBankTransactionHistoryModalVisible,
         setBankTransactionHistoryModalVisibility,
     ] = useState(false);
-    
+
     const toggleBankTransactionHistoryModalVisibility = () => {
         setBankTransactionHistoryModalVisibility(
             !isBankTransactionHistoryModalVisible
@@ -40,7 +40,7 @@ export const AdminDashboardPage = ({setAuth}) => {
                 open={isBankTransactionHistoryModalVisible}
                 onOk={toggleBankTransactionHistoryModalVisibility}
                 onCancel={toggleBankTransactionHistoryModalVisibility}>
-                <BankTransactionHistoryForm/>
+                <BankTransactionHistoryForm />
             </Modal>
             <ManagementList sources={settingItems} />
         </AdminLayout>

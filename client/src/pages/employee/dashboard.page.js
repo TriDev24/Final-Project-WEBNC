@@ -5,10 +5,12 @@ import { ManagementList } from '../../components/management-list.component.js';
 import { CreateIdentityModal } from '../../components/create-identity.component.js';
 import { RechargeMoneyForm } from '../../components/recharge-money-form.component.js';
 import { HistoryTrackingForm } from '../../components/history-tracking-form.component.js';
-import { BankTransactionHistoryForm } from '../../components/bank-transaction-history-form.js';
+import { AddBankAccountForm } from '../../components/add-bank-account-form.component.js';
 
 export const EmployeeDashboardPage = ({ setAuth }) => {
     const [bankAccounts, setBankAccounts] = useState(null);
+    const [customers, setCustomers] = useState(null);
+    const [addBankAccountForm] = Form.useForm();
     const [isCreateIdentityModalVisible, setCreateIdentityModalVisibility] =
         useState(false);
     const [rechargeMoneyForm] = Form.useForm();
@@ -18,10 +20,8 @@ export const EmployeeDashboardPage = ({ setAuth }) => {
         isWatchMoneyTransferHistoryModalVisible,
         setWatchMoneyTransferHistoryModalVisibility,
     ] = useState(false);
-    const [
-        isBankTransactionHistoryModalVisible,
-        setBankTransactionHistoryModalVisibility,
-    ] = useState(false);
+    const [isAddBankAccountModalVisible, setAddBankAccountModalVisibility] =
+        useState(false);
 
     const toggleCreateIdentityModalVisibility = () => {
         setCreateIdentityModalVisibility(!isCreateIdentityModalVisible);
@@ -33,10 +33,8 @@ export const EmployeeDashboardPage = ({ setAuth }) => {
         );
     };
 
-    const toggleBankTransactionHistoryModalVisibility = () => {
-        setBankTransactionHistoryModalVisibility(
-            !isBankTransactionHistoryModalVisible
-        );
+    const toggleAddBankAccountModalVisibility = () => {
+        setAddBankAccountModalVisibility(!isAddBankAccountModalVisible);
     };
 
     const toggleRechargeMoneyModalVisibility = () => {
@@ -51,6 +49,12 @@ export const EmployeeDashboardPage = ({ setAuth }) => {
                     'Thêm những thông tin cơ bản của khách hàng, và hệ thống tự phát sinh 01 tài khoản thanh toán cho tài khoản khách hàng',
                 actionTitle: 'Tạo tài khoản',
                 onItemClick: toggleCreateIdentityModalVisibility,
+            },
+            {
+                title: 'Tạo tài khoản thanh toán cho khách hàng',
+                description: 'Tạo mới một tài khoản thanh toán cho người dùng.',
+                actionTitle: 'Thêm mới',
+                onItemClick: toggleAddBankAccountModalVisibility,
             },
             {
                 title: 'Nạp tiền vào tài khoản',
@@ -84,8 +88,23 @@ export const EmployeeDashboardPage = ({ setAuth }) => {
             .then((data) => setBankAccounts(data));
     }, []);
 
+    const getAllCustomers = useCallback(() => {
+        const url = `${process.env.REACT_APP_USER_API_URL_PATH}?role=customer`;
+
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: localStorage.getItem('accessToken'),
+            },
+        })
+            .then((response) => response.json())
+            .then((data) => setCustomers(data));
+    }, []);
+
     useEffect(() => {
         getAllBankAccounts();
+        getAllCustomers();
     }, []);
 
     const handleConfirmRechargeMoney = () => {
@@ -115,6 +134,41 @@ export const EmployeeDashboardPage = ({ setAuth }) => {
         rechargeMoneyForm.resetFields();
     };
 
+    const handleConfirmAddBankAccount = () => {
+        const { identityId } = addBankAccountForm.getFieldsValue();
+        const payload = {
+            identityId,
+        };
+
+        fetch(process.env.REACT_APP_BANK_ACCOUNT_API_URL_PATH, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: localStorage.getItem('accessToken'),
+            },
+            body: JSON.stringify(payload),
+        })
+            .then((response) => response.json())
+            .then((value) => {
+                message.success('Tạo tài khoản thành công');
+                console.log('bank account moi tao: ', value);
+                Modal.confirm({
+                    title: 'Thành công',
+                    content: (
+                        <div>
+                            <p>
+                                <strong>Số tài khoản: </strong>
+                                {value.accountNumber}
+                            </p>
+                        </div>
+                    ),
+                });
+            })
+            .catch((error) => {
+                message.error('Đã có lỗi xảy ra');
+            });
+    };
+
     return (
         <EmployeeLayout setAuth={setAuth}>
             <CreateIdentityModal
@@ -135,21 +189,24 @@ export const EmployeeDashboardPage = ({ setAuth }) => {
             </Modal>
 
             <Modal
-                title='Theo dõi lịch sử giao dịch (trong 30 ngày trước)'
+                title='Thêm mới tài khoản thanh toán'
+                centered
+                open={isAddBankAccountModalVisible}
+                onOk={handleConfirmAddBankAccount}
+                onCancel={toggleAddBankAccountModalVisibility}>
+                <AddBankAccountForm
+                    form={addBankAccountForm}
+                    customers={customers}
+                />
+            </Modal>
+
+            <Modal
+                title='Theo dõi lịch sử giao dịch'
                 centered
                 open={isWatchMoneyTransferHistoryModalVisible}
                 onOk={toggleWatchMoneyTransferModalVisibility}
                 onCancel={toggleWatchMoneyTransferModalVisibility}>
                 <HistoryTrackingForm bankAccounts={bankAccounts} />
-            </Modal>
-
-            <Modal
-                title='Theo dõi lịch sử giao dịch các ngân hàng'
-                centered
-                open={isBankTransactionHistoryModalVisible}
-                onOk={toggleBankTransactionHistoryModalVisibility}
-                onCancel={toggleBankTransactionHistoryModalVisibility}>
-                <BankTransactionHistoryForm />
             </Modal>
 
             <ManagementList sources={settingItems} />

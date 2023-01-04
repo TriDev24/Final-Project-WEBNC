@@ -6,8 +6,9 @@ const Container = styled.div``;
 export const ManagementList = ({ sources }) => {
     return (
         <Container>
-            {sources.map((s) => (
+            {sources.map((s, index) => (
                 <ManagementItem
+                    key={index}
                     title={s.title}
                     description={s.description}
                     actionTitle={s.actionTitle}

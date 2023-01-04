@@ -2,7 +2,7 @@ import service from '../services/users.service.js';
 
 export default {
     async getAllUser(req, res) {
-        const users = await service.getAllUser();
+        const users = await service.getAllUser(req.query);
         return res.status(200).json(users);
     },
 

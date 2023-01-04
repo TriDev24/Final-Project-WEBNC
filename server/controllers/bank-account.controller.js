@@ -2,6 +2,7 @@ import BankAccount from '../models/bank-account.model.js';
 import { verifySignature } from '../utils/rsa.util.js';
 import { TransferFee } from '../models/transfer-fee.model.js';
 import TransferMethod from '../models/transfer-method.model.js';
+import BankType from '../models/bank-type.model.js';
 
 export default {
     async getAll(req, res) {
@@ -56,9 +57,10 @@ export default {
 
     async create(req, res) {
         const { identityId } = req.body;
+        console.log('identityId', identityId);
 
         const defaultBank = await BankType.findOne({ name: 'My Bank' });
-
+        console.log('identityId', identityId);
         const defaultBankAccount = {
             accountNumber: Math.floor(Math.random() * 1000000),
             overBalance: 0,
@@ -68,8 +70,11 @@ export default {
         };
 
         const insertedData = await BankAccount.create(defaultBankAccount);
+        if (!insertedData) {
+            return res.status(500).json({ message: 'Đã có lỗi xảy ra' });
+        }
 
-        res.status(200).json(insertedData);
+        res.status(200).json(defaultBankAccount);
     },
 
     async update(req, res) {
