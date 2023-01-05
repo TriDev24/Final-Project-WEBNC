@@ -42,7 +42,7 @@ export const BankAccountItem = ({
     const toggleLockBankAccount = () => {
         const url = `${process.env.REACT_APP_BANK_ACCOUNT_API_URL_PATH}/${bankAccount._id}`;
         const payload = {
-            isLocked,
+            isLocked: !bankAccount.isLocked,
         };
         fetch(url, {
             method: 'PATCH',
@@ -54,7 +54,7 @@ export const BankAccountItem = ({
         })
             .then(() => {
                 message.success('Cập nhật tài khoản thành công');
-                setLockStatus(!isLocked);
+                setLockStatus(!bankAccount.isLocked);
             })
             .catch((error) => {
                 message.error('Khoá tài khoản thất bại');

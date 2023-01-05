@@ -239,6 +239,7 @@ export default {
             description,
             bankTypeId,
             transferMethodId,
+            transferType,
             transferTime,
         } = req.body;
         const generatedOtp = generateOtp();
@@ -256,6 +257,8 @@ export default {
         }
         const isReceiverPayForTransferFee =
             transferMethod.name === 'Receiver Pay Transfer Fee';
+
+        console.log('transfer type', transferType);
 
         // Transfer ObjectId -> string using toString() method.
         const internalBank = await BankType.findOne({ name: 'My Bank' });
@@ -332,7 +335,7 @@ export default {
                     receiverId: receiverBankAccount._id,
                     deposit,
                     description,
-                    transferType: TransferType.MoneyTransfer,
+                    transferType: transferType ?? TransferType.MoneyTransfer,
                     transferMethodId,
                     transferFee: TransferFee.Internal,
                     transferTime,
@@ -391,7 +394,7 @@ export default {
                     receiverId: receiverBankAccount._id,
                     deposit,
                     description,
-                    transferType: TransferType.MoneyTransfer,
+                    transferType: transferType ?? TransferType.MoneyTransfer,
                     transferMethodId,
                     transferFee: TransferFee.Internal,
                     transferTime,
