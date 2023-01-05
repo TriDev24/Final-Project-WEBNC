@@ -1,5 +1,4 @@
 import Title from 'antd/es/typography/Title.js';
-import { CustomerLayout } from '../../components/common/customer-layout.component.js';
 import styled from '@xstyled/styled-components';
 import { Button, Checkbox, message, Modal, Skeleton, Table } from 'antd';
 import { ServiceList } from '../../components/dashboard/service-list.component.js';
@@ -10,6 +9,7 @@ import { MoneyTransferForm } from '../../components/money-transfer/money-transfe
 import { Form } from 'antd';
 import OTPInput from '../../components/common/otp-input/index.js';
 import { useStore, actions } from '../../store';
+import ContentLayout from '../../components/common/content-layout.component.js';
 
 const GeneralInformationSection = styled.div`
     display: flex;
@@ -252,8 +252,9 @@ export const CustomerDashBoardPage = () => {
             const receiveBillings = paymentAccountHistory.filter(
                 (p) => p.type === 'receive'
             );
-            const mappedReceiveBillingDataSource = receiveBillings.map((r) => {
+            const mappedReceiveBillingDataSource = receiveBillings.map((r, index) => {
                 return {
+                    key: index,
                     senderAccountNumber: r.sender.accountNumber,
                     receiverAccountNumber: 'Tôi',
                     transferMoney: r.deposit,
@@ -267,8 +268,9 @@ export const CustomerDashBoardPage = () => {
                 (p) => p.type === 'transfer'
             );
             const mappedTransferBillingDataSource = transferBillings.map(
-                (t) => {
+                (t,index) => {
                     return {
+                        key: index,
                         senderAccountNumber: 'Tôi',
                         receiverAccountNumber: t.receiver.accountNumber,
                         transferMoney: t.deposit,
@@ -282,8 +284,9 @@ export const CustomerDashBoardPage = () => {
             const debitBillings = paymentAccountHistory.filter(
                 (p) => p.type === 'debit'
             );
-            const mappedDebitBillingDataSource = debitBillings.map((d) => {
+            const mappedDebitBillingDataSource = debitBillings.map((d,index) => {
                 return {
+                    key: index,
                     senderAccountNumber: 'Tôi',
                     receiverAccountNumber: d.receiver.accountNumber,
                     transferMoney: d.deposit,
@@ -519,7 +522,7 @@ export const CustomerDashBoardPage = () => {
     };
 
     return (
-        <CustomerLayout>
+        <ContentLayout>
             <Modal
                 title='Xác nhận giao dịch'
                 centered
@@ -578,6 +581,6 @@ export const CustomerDashBoardPage = () => {
                 <Title level={2}>Lịch sử giao dịch (trong 30 ngày qua)</Title>
                 {renderPaymentAccountHistoryTable()}
             </HistorySection>
-        </CustomerLayout>
+        </ContentLayout>
     );
 };
