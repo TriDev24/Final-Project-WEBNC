@@ -1,7 +1,7 @@
 import Title from 'antd/es/typography/Title.js';
 import { CustomerLayout } from '../../components/common/customer-layout.component.js';
 import styled from '@xstyled/styled-components';
-import { Button, Checkbox, message, Modal, Skeleton, Table } from 'antd';
+import { Button, Checkbox, message, Modal, Input, Skeleton, Table } from 'antd';
 import { ServiceList } from '../../components/dashboard/service-list.component.js';
 import { SwapOutlined } from '@ant-design/icons';
 import { useEffect, useState, useCallback, useMemo } from 'react';
@@ -37,6 +37,52 @@ export const CustomerDashBoardPage = () => {
     const [moneyTransferModalVisibility, setMoneyTransferModalVisibility] =
         useState(false);
     const [otp, setOtp] = useState('');
+    const [addReceiverForm] = Form.useForm();
+
+    const handleAddReceiver = () => {
+        Modal.confirm({
+            title: 'Thêm người nhận',
+            content: (
+                <Form layout='vertical'>
+                    <Form.Item
+                        name='receiverAccountNumber'
+                        label='Số tài khoản'>
+                        <Input placeholder='VD: 512315123' />
+                    </Form.Item>
+                    <Form.Item name='aliasName' label='Tên thường gọi'>
+                        <Input placeholder='VD: Văn A' />
+                    </Form.Item>
+                </Form>
+            ),
+            okText: 'Xác nhận',
+            cancelText: 'Huỷ',
+            onOk: () => {
+                const { aliasName, receiverAccountNumber } =
+                    addReceiverForm.getFieldsValue();
+                const payload = {
+                    senderAccountNumber: localStorage.getItem(
+                        'payment-account-number'
+                    ),
+                    receiverAccountNumber,
+                    aliasName,
+                };
+
+                fetch(process.env.REACT_APP_RECEIVER_API_URL_PATH, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: localStorage.getItem('accessToken'),
+                    },
+                    body: JSON.stringify(payload),
+                })
+                    .then(() => {
+                        message.success('Thêm người nhận thành công');
+                    })
+                    .catch(() => {
+                        message.error('Thêm người nhận thất bại');
+                    });
+            },
+        });
+    };
 
     const toggleConfirmOtpModalVisibility = () => {
         setConfirmOtpModalVisibility(!confirmOtpModalVisibility);
@@ -560,6 +606,7 @@ export const CustomerDashBoardPage = () => {
                     form={moneyTransferForm}
                     receivers={receivers}
                     bankTypes={bankTypes}
+                    onAddReceiver={handleAddReceiver}
                     transferMethods={transferMethods}
                     onDeleteReceiverClick={handleDeleteReceiverClick}
                     onConfirmTransfer={handleConfirmTransfer}

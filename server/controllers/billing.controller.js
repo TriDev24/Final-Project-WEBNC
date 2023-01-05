@@ -225,7 +225,7 @@ export default {
             ...parseDebitBillings,
         ];
         const sortedBillings = mergedBillings.sort(
-            (a, b) => a.createdAt - b.createdAt
+            (a, b) => parseInt(b.transferTime) - parseInt(a.transferTime)
         );
 
         return res.status(200).json(sortedBillings);

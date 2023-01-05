@@ -46,10 +46,17 @@ export default {
         return res.status(200).json(receiver);
     },
     async create(req, res) {
-        const { senderAccountNumber, receiverAccountNumber } = req.body;
+        const { senderAccountNumber, receiverAccountNumber, aliasName } =
+            req.body;
         const receiverBankAccount = await BankAccount.findOne({
             accountNumber: receiverAccountNumber,
         });
+        if (!receiverBankAccount) {
+            return res
+                .status(401)
+                .json({ message: 'Không tìm thấy người nhận' });
+        }
+
         const receiverInformation = await Identity.findById(
             receiverBankAccount.identityId
         );
@@ -57,7 +64,7 @@ export default {
         const document = {
             senderAccountNumber,
             receiverAccountNumber,
-            aliasName: receiverInformation.aliasName,
+            aliasName: aliasName ?? receiverInformation.aliasName,
         };
 
         const insertedData = await Receiver.create(document);

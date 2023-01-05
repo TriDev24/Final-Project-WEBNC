@@ -1,4 +1,4 @@
-import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import { DeleteOutlined, PlusCircleFilled } from '@ant-design/icons';
 import { styled } from '@xstyled/styled-components';
 import {
     Button,
@@ -11,7 +11,7 @@ import {
     Skeleton,
     Space,
     Collapse,
-    message,
+    Tooltip,
 } from 'antd';
 import { ReceiverItem } from './receiver-item.component.js';
 
@@ -25,6 +25,12 @@ const Container = styled.div`
 
 const StyledDepositInput = styled(InputNumber)`
     width: 100%;
+`;
+
+const FlexLayout = styled.div`
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 `;
 
 const ReceiverItemContainer = styled.div`
@@ -50,6 +56,7 @@ export const MoneyTransferForm = ({
     receivers,
     bankTypes,
     transferMethods,
+    onAddReceiver,
     onDeleteReceiverClick,
     onConfirmTransfer,
 }) => {
@@ -132,6 +139,15 @@ export const MoneyTransferForm = ({
                     <Collapse defaultActiveKey={['1']}>
                         <Panel
                             header='Hoặc chọn người nhận từ danh sách đã lưu'
+                            extra={
+                                <Tooltip title='Thêm người nhận mới'>
+                                    <Button
+                                        type='text'
+                                        icon={<PlusCircleFilled />}
+                                        onClick={onAddReceiver}
+                                    />
+                                </Tooltip>
+                            }
                             key='1'>
                             {renderReceiverOptions()}
                         </Panel>
