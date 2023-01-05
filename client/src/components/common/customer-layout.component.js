@@ -5,11 +5,13 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import { Layout, Menu, theme, Image, Space } from "antd";
-import { Link } from "react-router-dom";
+import { Link, Route, Routes } from "react-router-dom";
 import Notify from "../dashboard/notify.component.js";
 import IdentityOption from "../identity-option.component.js";
+import DebitPage from "../../pages/customer/debit.page.js";
+import { CustomerDashBoardPage } from "../../pages/customer/dashboard.page.js";
 
-const { Header, Content, Footer, Sider } = Layout;
+const { Header, Footer, Sider } = Layout;
 
 const getItem = (label, key, icon, children) => {
   return {
@@ -53,7 +55,7 @@ const items = [
   ]),
 ];
 
-export const CustomerLayout = ({ selected, children }) => {
+export const CustomerLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
 
   const {
@@ -77,7 +79,7 @@ export const CustomerLayout = ({ selected, children }) => {
           </div>
           <Menu
             theme="dark"
-            defaultSelectedKeys={[`${selected}`]}
+            defaultSelectedKeys={['1']}
             mode="inline"
             items={items}
           />
@@ -97,22 +99,17 @@ export const CustomerLayout = ({ selected, children }) => {
               <IdentityOption></IdentityOption>
             </Space>
           </Header>
-          <Content
-            style={{
-              margin: "0 16px",
-            }}
-          >
-            <div
-              style={{
-                margin: "16px 0",
-                padding: 24,
-                minHeight: 360,
-                background: colorBgContainer,
-              }}
-            >
-              {children}
-            </div>
-          </Content>
+          <Routes>
+            <Route
+              path={`/dashboard`}
+              element={<CustomerDashBoardPage />}
+            ></Route>
+            <Route
+              path={`/dashboard/debit/:side`}
+              element={<DebitPage />}
+            ></Route>
+          </Routes>
+
           <Footer
             style={{
               textAlign: "center",
