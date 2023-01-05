@@ -2,6 +2,7 @@ import Identity from "./identity.component.js";
 import Debit from "./debit.component.js";
 import Debtor from "./debtor.component.js"
 import Notify from "./notify.component.js"
+import User from "./user.component.js"
 
 export default {
   schemas: {
@@ -13,7 +14,8 @@ export default {
     ...Identity,
     ...Debit,
     ...Debtor,
-    ...Notify
+    ...Notify,
+    ...User
   },
   securitySchemes: {
     Authorization: {
