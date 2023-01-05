@@ -5,8 +5,9 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import { Layout, Menu, theme, Image, Space } from "antd";
-import IdentityOption from "../identity-option.component.js";
 import { Link } from "react-router-dom";
+import Notify from "../dashboard/notify.component.js";
+import IdentityOption from "../identity-option.component.js";
 
 const { Header, Content, Footer, Sider } = Layout;
 
@@ -36,7 +37,7 @@ const items = [
   ),
 ];
 
-export const AdminLayout = ({ setAuth, children }) => {
+export const AdminLayout = ({ selected, children }) => {
   const [collapsed, setCollapsed] = useState(false);
 
   const {
@@ -60,7 +61,7 @@ export const AdminLayout = ({ setAuth, children }) => {
           </div>
           <Menu
             theme="dark"
-            defaultSelectedKeys={["1"]}
+            defaultSelectedKeys={[`${selected}`]}
             mode="inline"
             items={items}
           />
@@ -76,7 +77,8 @@ export const AdminLayout = ({ setAuth, children }) => {
             }}
           >
             <Space>
-              <IdentityOption setAuth={setAuth}></IdentityOption>
+              <Notify></Notify>
+              <IdentityOption></IdentityOption>
             </Space>
           </Header>
           <Content
@@ -91,7 +93,9 @@ export const AdminLayout = ({ setAuth, children }) => {
                 minHeight: 360,
                 background: colorBgContainer,
               }}
-            ></div>
+            >
+              {children}
+            </div>
           </Content>
           <Footer
             style={{
