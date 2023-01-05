@@ -26,6 +26,91 @@ export const AdminDashboardPage = () => {
     setAddEmloyeeModalVisibility(!isAddEmloyeeModalVisible);
   };
 
+  const renderListEmployee = () => {
+    // if (!paymentAccountHistory) {
+    //     return <Skeleton />;
+    // } else {
+    //     // Nhan tien
+    //     const receiveBillings = paymentAccountHistory.filter(
+    //         (p) => p.type === 'receive'
+    //     );
+    //     const mappedReceiveBillingDataSource = receiveBillings.map((r, index) => {
+    //         return {
+    //             key: index,
+    //             senderAccountNumber: r.sender.accountNumber,
+    //             receiverAccountNumber: 'Tôi',
+    //             transferMoney: r.deposit,
+    //             description: r.description,
+    //             transferTime: r.transferTime,
+    //         };
+    //     });
+
+    //     // Chuyen tien
+    //     const transferBillings = paymentAccountHistory.filter(
+    //         (p) => p.type === 'transfer'
+    //     );
+    //     const mappedTransferBillingDataSource = transferBillings.map(
+    //         (t,index) => {
+    //             return {
+    //                 key: index,
+    //                 senderAccountNumber: 'Tôi',
+    //                 receiverAccountNumber: t.receiver.accountNumber,
+    //                 transferMoney: t.deposit,
+    //                 description: t.description,
+    //                 transferTime: t.transferTime,
+    //             };
+    //         }
+    //     );
+
+    //     // Nhac no
+    //     const debitBillings = paymentAccountHistory.filter(
+    //         (p) => p.type === 'debit'
+    //     );
+    //     const mappedDebitBillingDataSource = debitBillings.map((d,index) => {
+    //         return {
+    //             key: index,
+    //             senderAccountNumber: 'Tôi',
+    //             receiverAccountNumber: d.receiver.accountNumber,
+    //             transferMoney: d.deposit,
+    //             description: d.description,
+    //             transferTime: d.transferTime,
+    //         };
+    //     });
+
+        // return (
+        //     <>
+        //         <p>
+        //             <strong>
+        //                 <i>Giao dịch nhận tiền</i>
+        //             </strong>
+        //         </p>
+        //         <Table
+        //             columns={historyColumns}
+        //             dataSource={mappedReceiveBillingDataSource}
+        //         />
+        //         <p>
+        //             <strong>
+        //                 <i>Giao dịch chuyển tiền</i>
+        //             </strong>
+        //         </p>
+        //         <Table
+        //             columns={historyColumns}
+        //             dataSource={mappedTransferBillingDataSource}
+        //         />
+        //         <p>
+        //             <strong>
+        //                 <i>Giao dịch thanh toán nhắc nợ</i>
+        //             </strong>
+        //         </p>
+        //         <Table
+        //             columns={historyColumns}
+        //             dataSource={mappedDebitBillingDataSource}
+        //         />
+        //     </>
+        // );
+    }
+
+
   const ListEmployee = styled.div``;
 
   const settingItems = useMemo(
@@ -45,6 +130,7 @@ export const AdminDashboardPage = () => {
     <ContentLayout>
       <ListEmployee>
         <Title level={2}>Danh sách nhân viên</Title>
+        {renderListEmployee}
       </ListEmployee>
       <Button type="primary" onClick={handleAddEmloyeeClick}>
         Thêm nhân viên
