@@ -10,8 +10,8 @@ const initState = {
   profile: JSON.parse(localStorage.getItem("profile")),
   isAuth: localStorage.getItem("accessToken"),
   paymentAccountNumber: localStorage.getItem("payment-account-number"),
-  bankTypes: [],
-  transferMethods: [],
+  bankTypes: JSON.parse(localStorage.getItem("bank-types")),
+  transferMethods: JSON.parse(localStorage.getItem("transfer-methods")),
 };
 
 function reducer(state, action) {
