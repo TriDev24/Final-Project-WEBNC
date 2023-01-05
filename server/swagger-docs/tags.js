@@ -15,4 +15,8 @@ export default [
     name: ["Notify API"],
     description: "Các api về thông báo",
   },
+  {
+    name: ["User API"],
+    description: "Các api về user",
+  },
 ];

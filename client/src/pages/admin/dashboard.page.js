@@ -1,5 +1,5 @@
-import { Modal, Button } from "antd";
-import { useMemo, useState } from "react";
+import { useEffect, useState, useCallback, useMemo } from 'react';
+import { Button, Checkbox, message, Modal, Skeleton, Table } from 'antd';
 import { ManagementList } from "../../components/management-list.component.js";
 import { BankTransactionHistoryForm } from "../../components/bank-transaction-history-form.component.js";
 import styled from "@xstyled/styled-components";
@@ -7,7 +7,11 @@ import Title from "antd/es/typography/Title.js";
 import { CreateEmployeeForm } from "../../components/create-employee-form.component.js";
 import ContentLayout from "../../components/common/content-layout.component.js";
 
+
 export const AdminDashboardPage = () => {
+
+  const [listEmployee, setListEmployee] = useState(null);
+
   const [
     isBankTransactionHistoryModalVisible,
     setBankTransactionHistoryModalVisibility,
@@ -26,89 +30,83 @@ export const AdminDashboardPage = () => {
     setAddEmloyeeModalVisibility(!isAddEmloyeeModalVisible);
   };
 
+  const historyColumns = useMemo(
+    () => [
+        {
+            title: 'Email',
+            dataIndex: 'email',
+            key: 'email',
+        },
+        {
+            title: 'Tên',
+            dataIndex: 'firstName',
+            key: 'firstName',
+        },
+        {
+            title: 'Họ',
+            dataIndex: 'lastName',
+            key: 'lastName',
+        },
+        {
+            title: 'Số điện thoại',
+            dataIndex: 'phoneNumber',
+            key: 'phoneNumber',
+        }
+    ],
+    []
+);
+
+useEffect(() => {
+  getListEmployee();
+}, []);
+
+  const getListEmployee = useCallback(() => {
+    const url = `${process.env.REACT_APP_USER_API_URL_PATH}?role=employee`;
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: localStorage.getItem('accessToken'),
+            },
+        })
+            .then((response) => response.json())
+            .then((data) => setListEmployee(data));
+}, []);
+
   const renderListEmployee = () => {
-    // if (!paymentAccountHistory) {
-    //     return <Skeleton />;
-    // } else {
-    //     // Nhan tien
-    //     const receiveBillings = paymentAccountHistory.filter(
-    //         (p) => p.type === 'receive'
-    //     );
-    //     const mappedReceiveBillingDataSource = receiveBillings.map((r, index) => {
-    //         return {
-    //             key: index,
-    //             senderAccountNumber: r.sender.accountNumber,
-    //             receiverAccountNumber: 'Tôi',
-    //             transferMoney: r.deposit,
-    //             description: r.description,
-    //             transferTime: r.transferTime,
-    //         };
-    //     });
 
-    //     // Chuyen tien
-    //     const transferBillings = paymentAccountHistory.filter(
-    //         (p) => p.type === 'transfer'
-    //     );
-    //     const mappedTransferBillingDataSource = transferBillings.map(
-    //         (t,index) => {
-    //             return {
-    //                 key: index,
-    //                 senderAccountNumber: 'Tôi',
-    //                 receiverAccountNumber: t.receiver.accountNumber,
-    //                 transferMoney: t.deposit,
-    //                 description: t.description,
-    //                 transferTime: t.transferTime,
-    //             };
-    //         }
-    //     );
-
-    //     // Nhac no
-    //     const debitBillings = paymentAccountHistory.filter(
-    //         (p) => p.type === 'debit'
-    //     );
-    //     const mappedDebitBillingDataSource = debitBillings.map((d,index) => {
-    //         return {
-    //             key: index,
-    //             senderAccountNumber: 'Tôi',
-    //             receiverAccountNumber: d.receiver.accountNumber,
-    //             transferMoney: d.deposit,
-    //             description: d.description,
-    //             transferTime: d.transferTime,
-    //         };
-    //     });
-
-        // return (
-        //     <>
-        //         <p>
-        //             <strong>
-        //                 <i>Giao dịch nhận tiền</i>
-        //             </strong>
-        //         </p>
-        //         <Table
-        //             columns={historyColumns}
-        //             dataSource={mappedReceiveBillingDataSource}
-        //         />
-        //         <p>
-        //             <strong>
-        //                 <i>Giao dịch chuyển tiền</i>
-        //             </strong>
-        //         </p>
-        //         <Table
-        //             columns={historyColumns}
-        //             dataSource={mappedTransferBillingDataSource}
-        //         />
-        //         <p>
-        //             <strong>
-        //                 <i>Giao dịch thanh toán nhắc nợ</i>
-        //             </strong>
-        //         </p>
-        //         <Table
-        //             columns={historyColumns}
-        //             dataSource={mappedDebitBillingDataSource}
-        //         />
-        //     </>
+    if (!listEmployee) {
+        return <Skeleton />;
+    } else {
+        // Danh sách nhân viên
+        // const receiveBillings = paymentAccountHistory.filter(
+        //     (p) => p.type === 'receive'
         // );
+        const mappedListEmployee = listEmployee.map((r, index) => {
+            return {
+                key: index,
+                email: r.email,
+                firstName: r.firstName,
+                lastName: r.lastName,
+                phoneNumber: r.phoneNumber,
+            };
+        });
+
+        return (
+            <>
+                <p>
+                    <strong>
+                        <i>Danh sách nhân viên</i>
+                    </strong>
+                </p>
+                <Table
+                    columns={historyColumns}
+                    dataSource={mappedListEmployee}
+                />
+            </>
+        );
     }
+  }
 
 
   const ListEmployee = styled.div``;
@@ -130,7 +128,7 @@ export const AdminDashboardPage = () => {
     <ContentLayout>
       <ListEmployee>
         <Title level={2}>Danh sách nhân viên</Title>
-        {renderListEmployee}
+        {renderListEmployee()}
       </ListEmployee>
       <Button type="primary" onClick={handleAddEmloyeeClick}>
         Thêm nhân viên
