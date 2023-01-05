@@ -1,7 +1,6 @@
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { LoginPage } from "./pages/login.page.js";
 import { EmployeeDashboardPage } from "./pages/employee/dashboard.page.js";
-import { AdminDashboardPage } from "./pages/admin/dashboard.page.js";
 import { ForgotPasswordPage } from "./pages/forgot-password.page.js";
 import "antd/dist/reset.css";
 import { useEffect, useState } from "react";
@@ -9,6 +8,7 @@ import { Result, Spin, message } from "antd";
 import { styled } from "@xstyled/styled-components";
 import { useStore, actions } from "./store";
 import { CustomerLayout } from "./components/common/customer-layout.component.js";
+import { AdminLayout } from "./components/common/admin-layout.component.js";
 
 const PageScreen = styled.div`
   width: 100vw;
@@ -89,10 +89,7 @@ export const App = () => {
 
     return (
       <>
-        <Route
-          path={`${basePath}/dashboard`}
-          element={<AdminDashboardPage />}
-        ></Route>
+        <Route path={`${basePath}/*`} element={<AdminLayout />}></Route>
       </>
     );
   };

@@ -4,13 +4,15 @@ import {
   BankOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { Layout, Menu, theme, Image, Space } from "antd";
+import { Layout, Menu, theme, Image, Space, Typography } from "antd";
 import { Link, Route, Routes } from "react-router-dom";
 import Notify from "../dashboard/notify.component.js";
 import IdentityOption from "../identity-option.component.js";
 import DebitPage from "../../pages/customer/debit.page.js";
 import { CustomerDashBoardPage } from "../../pages/customer/dashboard.page.js";
+import { marginLeft } from "@xstyled/styled-components";
 
+const { Title } = Typography;
 const { Header, Footer, Sider } = Layout;
 
 const getItem = (label, key, icon, children) => {
@@ -74,12 +76,24 @@ export const CustomerLayout = () => {
           collapsed={collapsed}
           onCollapse={(value) => setCollapsed(value)}
         >
-          <div style={{ textAlign: "center", margin: "20px" }}>
+          <div
+            style={{
+              textAlign: "center",
+              marginTop: "20px",
+              marginBottom: "5px",
+            }}
+          >
             <Image height={40} width={40} src="/images/logo.png"></Image>
           </div>
+          <div style={{ textAlign: "center" }}>
+            <Title style={{ color: "white" }} italic level={4}>
+              Internet Banking
+            </Title>
+          </div>
+
           <Menu
             theme="dark"
-            defaultSelectedKeys={['1']}
+            defaultSelectedKeys={["1"]}
             mode="inline"
             items={items}
           />

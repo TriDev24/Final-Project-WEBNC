@@ -103,6 +103,7 @@ export const CustomerDashBoardPage = () => {
             })
                 .then((response) => response.json())
                 .then((data) => {
+                    localStorage.setItem('bank-types', JSON.stringify(data))
                     dispatch(actions.setBankTypes(data));
                 });
         };
@@ -117,6 +118,7 @@ export const CustomerDashBoardPage = () => {
             })
                 .then((response) => response.json())
                 .then((data) => {
+                    localStorage.setItem('transfer-methods', JSON.stringify(data))
                     dispatch(actions.setTransferMethods(data));
                 });
         };

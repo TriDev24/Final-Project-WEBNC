@@ -1,15 +1,12 @@
 import React, { useState } from "react";
-import {
-  CreditCardOutlined,
-  BankOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
-import { Layout, Menu, theme, Image, Space } from "antd";
-import { Link } from "react-router-dom";
-import Notify from "../dashboard/notify.component.js";
+import { CreditCardOutlined } from "@ant-design/icons";
+import { Layout, Menu, theme, Image, Space, Typography } from "antd";
+import { Link, Route, Routes } from "react-router-dom";
 import IdentityOption from "../identity-option.component.js";
+import { AdminDashboardPage } from "../../pages/admin/dashboard.page.js";
 
-const { Header, Content, Footer, Sider } = Layout;
+const { Title } = Typography;
+const { Header, Footer, Sider } = Layout;
 
 const getItem = (label, key, icon, children) => {
   return {
@@ -37,7 +34,7 @@ const items = [
   ),
 ];
 
-export const AdminLayout = ({ selected, children }) => {
+export const AdminLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
 
   const {
@@ -56,12 +53,23 @@ export const AdminLayout = ({ selected, children }) => {
           collapsed={collapsed}
           onCollapse={(value) => setCollapsed(value)}
         >
-          <div style={{ textAlign: "center", margin: "20px" }}>
+          <div
+            style={{
+              textAlign: "center",
+              marginTop: "20px",
+              marginBottom: "5px",
+            }}
+          >
             <Image height={40} width={40} src="/images/logo.png"></Image>
+          </div>
+          <div style={{ textAlign: "center" }}>
+            <Title style={{ color: "white" }} italic level={4}>
+              Internet Banking
+            </Title>
           </div>
           <Menu
             theme="dark"
-            defaultSelectedKeys={[`${selected}`]}
+            defaultSelectedKeys={["1"]}
             mode="inline"
             items={items}
           />
@@ -77,26 +85,12 @@ export const AdminLayout = ({ selected, children }) => {
             }}
           >
             <Space>
-              <Notify></Notify>
               <IdentityOption></IdentityOption>
             </Space>
           </Header>
-          <Content
-            style={{
-              margin: "0 16px",
-            }}
-          >
-            <div
-              style={{
-                margin: "16px 0",
-                padding: 24,
-                minHeight: 360,
-                background: colorBgContainer,
-              }}
-            >
-              {children}
-            </div>
-          </Content>
+          <Routes>
+            <Route path={`/dashboard`} element={<AdminDashboardPage />}></Route>
+          </Routes>
           <Footer
             style={{
               textAlign: "center",
