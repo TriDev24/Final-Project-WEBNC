@@ -36,56 +36,52 @@ export const CustomerDashBoardPage = () => {
         useState(false);
     const [moneyTransferModalVisibility, setMoneyTransferModalVisibility] =
         useState(false);
+    const [addReceiverModalVisibility, setAddReceiverModalVisibility] =
+        useState(false);
     const [otp, setOtp] = useState('');
     const [addReceiverForm] = Form.useForm();
 
-    const handleAddReceiver = () => {
-        Modal.confirm({
-            title: 'Thêm người nhận',
-            content: (
-                <Form layout='vertical'>
-                    <Form.Item
-                        name='receiverAccountNumber'
-                        label='Số tài khoản'>
-                        <Input placeholder='VD: 512315123' />
-                    </Form.Item>
-                    <Form.Item name='aliasName' label='Tên thường gọi'>
-                        <Input placeholder='VD: Văn A' />
-                    </Form.Item>
-                </Form>
-            ),
-            okText: 'Xác nhận',
-            cancelText: 'Huỷ',
-            onOk: () => {
-                const { aliasName, receiverAccountNumber } =
-                    addReceiverForm.getFieldsValue();
-                const payload = {
-                    senderAccountNumber: localStorage.getItem(
-                        'payment-account-number'
-                    ),
-                    receiverAccountNumber,
-                    aliasName,
-                };
+    const handleConfirmAddReceiver = () => {
+        const { aliasName, receiverAccountNumber } =
+            addReceiverForm.getFieldsValue();
+        console.log(
+            'addReceiverForm.getFieldsValue()',
+            addReceiverForm.getFieldsValue()
+        );
 
-                fetch(process.env.REACT_APP_RECEIVER_API_URL_PATH, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: localStorage.getItem('accessToken'),
-                    },
-                    body: JSON.stringify(payload),
-                })
-                    .then(() => {
-                        message.success('Thêm người nhận thành công');
-                    })
-                    .catch(() => {
-                        message.error('Thêm người nhận thất bại');
-                    });
+        if (receivers.accountNumber === receiverAccountNumber) {
+            message.error('Đã tồn tại người nhận này rồi');
+            return;
+        }
+
+        const payload = {
+            senderAccountNumber: localStorage.getItem('payment-account-number'),
+            receiverAccountNumber,
+            aliasName,
+        };
+
+        fetch(process.env.REACT_APP_RECEIVER_API_URL_PATH, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: localStorage.getItem('accessToken'),
             },
-        });
+            body: JSON.stringify(payload),
+        })
+            .then(() => {
+                message.success('Thêm người nhận thành công');
+            })
+            .catch(() => {
+                message.error('Thêm người nhận thất bại');
+            });
     };
 
     const toggleConfirmOtpModalVisibility = () => {
         setConfirmOtpModalVisibility(!confirmOtpModalVisibility);
+    };
+
+    const toggleAddReceiverModalVisibility = () => {
+        setAddReceiverModalVisibility(!addReceiverModalVisibility);
     };
 
     useEffect(() => {
@@ -103,7 +99,7 @@ export const CustomerDashBoardPage = () => {
             })
                 .then((response) => response.json())
                 .then((data) => {
-                    localStorage.setItem('bank-types', JSON.stringify(data))
+                    localStorage.setItem('bank-types', JSON.stringify(data));
                     dispatch(actions.setBankTypes(data));
                 });
         };
@@ -118,7 +114,10 @@ export const CustomerDashBoardPage = () => {
             })
                 .then((response) => response.json())
                 .then((data) => {
-                    localStorage.setItem('transfer-methods', JSON.stringify(data))
+                    localStorage.setItem(
+                        'transfer-methods',
+                        JSON.stringify(data)
+                    );
                     dispatch(actions.setTransferMethods(data));
                 });
         };
@@ -300,23 +299,25 @@ export const CustomerDashBoardPage = () => {
             const receiveBillings = paymentAccountHistory.filter(
                 (p) => p.type === 'receive'
             );
-            const mappedReceiveBillingDataSource = receiveBillings.map((r, index) => {
-                return {
-                    key: index,
-                    senderAccountNumber: r.sender.accountNumber,
-                    receiverAccountNumber: 'Tôi',
-                    transferMoney: r.deposit,
-                    description: r.description,
-                    transferTime: r.transferTime,
-                };
-            });
+            const mappedReceiveBillingDataSource = receiveBillings.map(
+                (r, index) => {
+                    return {
+                        key: index,
+                        senderAccountNumber: r.sender.accountNumber,
+                        receiverAccountNumber: 'Tôi',
+                        transferMoney: r.deposit,
+                        description: r.description,
+                        transferTime: r.transferTime,
+                    };
+                }
+            );
 
             // Chuyen tien
             const transferBillings = paymentAccountHistory.filter(
                 (p) => p.type === 'transfer'
             );
             const mappedTransferBillingDataSource = transferBillings.map(
-                (t,index) => {
+                (t, index) => {
                     return {
                         key: index,
                         senderAccountNumber: 'Tôi',
@@ -332,16 +333,18 @@ export const CustomerDashBoardPage = () => {
             const debitBillings = paymentAccountHistory.filter(
                 (p) => p.type === 'debit'
             );
-            const mappedDebitBillingDataSource = debitBillings.map((d,index) => {
-                return {
-                    key: index,
-                    senderAccountNumber: 'Tôi',
-                    receiverAccountNumber: d.receiver.accountNumber,
-                    transferMoney: d.deposit,
-                    description: d.description,
-                    transferTime: d.transferTime,
-                };
-            });
+            const mappedDebitBillingDataSource = debitBillings.map(
+                (d, index) => {
+                    return {
+                        key: index,
+                        senderAccountNumber: 'Tôi',
+                        receiverAccountNumber: d.receiver.accountNumber,
+                        transferMoney: d.deposit,
+                        description: d.description,
+                        transferTime: d.transferTime,
+                    };
+                }
+            );
 
             return (
                 <>
@@ -572,6 +575,32 @@ export const CustomerDashBoardPage = () => {
     return (
         <ContentLayout>
             <Modal
+                title='Thêm người nhận'
+                centered
+                okText='Xác nhận'
+                cancelText='Huỷ'
+                onOk={handleConfirmAddReceiver}
+                onCancel={toggleAddReceiverModalVisibility}
+                open={addReceiverModalVisibility}>
+                <Form layout='vertical' form={addReceiverForm}>
+                    <Form.Item
+                        name='receiverAccountNumber'
+                        label='Số tài khoản'
+                        rules={[
+                            {
+                                required: true,
+                                message: 'Mời bạn nhập số tài khoản!!!',
+                            },
+                        ]}>
+                        <Input placeholder='VD: 512315123' />
+                    </Form.Item>
+                    <Form.Item name='aliasName' label='Tên thường gọi'>
+                        <Input placeholder='VD: Văn A' />
+                    </Form.Item>
+                </Form>
+            </Modal>
+
+            <Modal
                 title='Xác nhận giao dịch'
                 centered
                 okText='Xác nhận'
@@ -611,7 +640,7 @@ export const CustomerDashBoardPage = () => {
                     form={moneyTransferForm}
                     receivers={receivers}
                     bankTypes={bankTypes}
-                    onAddReceiver={handleAddReceiver}
+                    onAddReceiver={toggleAddReceiverModalVisibility}
                     transferMethods={transferMethods}
                     onDeleteReceiverClick={handleDeleteReceiverClick}
                     onConfirmTransfer={handleConfirmTransfer}

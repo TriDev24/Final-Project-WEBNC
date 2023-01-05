@@ -52,9 +52,9 @@ export default {
             accountNumber: receiverAccountNumber,
         });
         if (!receiverBankAccount) {
-            return res
-                .status(401)
-                .json({ message: 'Không tìm thấy người nhận' });
+            return res.status(401).json({
+                message: `Không tìm thấy người nhận với tài khoản ${receiverBankAccount}`,
+            });
         }
 
         const receiverInformation = await Identity.findById(

@@ -1,7 +1,9 @@
 import { LockOutlined, UnlockOutlined } from '@ant-design/icons';
 import { styled } from '@xstyled/styled-components';
-import { Button, message, Space, Tooltip } from 'antd';
+import { Button, message, Space, Tooltip, Typography } from 'antd';
 import { useState } from 'react';
+
+const { Text } = Typography;
 
 const Container = styled.div`
     display: flex;
@@ -63,13 +65,21 @@ export const BankAccountItem = ({
 
     const renderSignIfIsPaymentAccountOrButtonIfContrast = () =>
         isPaymentAccount == true ? (
-            <i>Mặc định</i>
+            <Text strong italic>
+                Mặc định
+            </Text>
         ) : (
             <ActionFields direction='horizontal'>
                 {isLocked === false && (
                     <Button onClick={onChangeToPaymentAccountClick}>
                         Đặt làm mặc định
                     </Button>
+                )}
+
+                {isLocked && (
+                    <Text italic type='danger'>
+                        Tài khoản đã bị khoá
+                    </Text>
                 )}
 
                 <Button

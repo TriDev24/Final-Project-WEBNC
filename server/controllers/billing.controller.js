@@ -7,7 +7,7 @@ import TransferMethod from '../models/transfer-method.model.js';
 import { generateOtp } from '../utils/otp.util.js';
 import { sendVerifyOtpEmail } from '../utils/email.util.js';
 import Identity from '../models/identity.model.js';
-import { generateSignature } from '../utils/rsa.util.js';
+import { generateSignature, verifySignature } from '../utils/rsa.util.js';
 
 export default {
     async getHistory(req, res) {
@@ -433,30 +433,32 @@ export default {
         // Cross external bank.
         const generatedSignature = generateSignature();
 
-        const url = `${process.env.EXTERNAL_BANK_API_URL}`;
-        const payload = {
-            description,
-            deposit,
-            signature: generatedSignature,
-        };
+        console.log('verify signature', verifySignature(generatedSignature));
 
-        // Goi API cap nhat so du cua API lien ket
-        fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(payload),
-        })
-            .then(() => {
-                res.status(200).json('Thành công!!!');
-            })
-            .catch((error) =>
-                res.status(500).json(
-                    `Đã có lỗi xảy ra, vui lòng thử lại on transfer money to external bank:
-                        ${error}`
-                )
-            );
+        // const url = `${process.env.EXTERNAL_BANK_API_URL}`;
+        // const payload = {
+        //     description,
+        //     deposit,
+        //     signature: generatedSignature,
+        // };
+
+        // // Goi API cap nhat so du cua API lien ket
+        // fetch(url, {
+        //     method: 'POST',
+        //     headers: {
+        //         'Content-Type': 'application/json',
+        //     },
+        //     body: JSON.stringify(payload),
+        // })
+        //     .then(() => {
+        //         res.status(200).json('Thành công!!!');
+        //     })
+        //     .catch((error) =>
+        //         res.status(500).json(
+        //             `Đã có lỗi xảy ra, vui lòng thử lại on transfer money to external bank:
+        //                 ${error}`
+        //         )
+        //     );
     },
 
     async verifyOtp(req, res) {
