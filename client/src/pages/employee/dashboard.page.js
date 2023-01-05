@@ -170,7 +170,7 @@ export const EmployeeDashboardPage = ({ setAuth }) => {
     };
 
     return (
-        <EmployeeLayout setAuth={setAuth}>
+        <EmployeeLayout>
             <CreateIdentityModal
                 isVisible={isCreateIdentityModalVisible}
                 onToggleVisibilityChange={toggleCreateIdentityModalVisibility}

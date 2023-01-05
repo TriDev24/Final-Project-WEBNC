@@ -1,14 +1,12 @@
-import React, { useState } from "react";
-import { Layout, Menu, theme, Image, Space} from "antd";
+import React from "react";
+import { Layout, theme, Space, Image } from "antd";
 import IdentityOption from "../identity-option.component.js";
+import { Typography } from "antd";
 
-const { Header, Content, Footer, Sider } = Layout;
+const { Title } = Typography;
+const { Header, Content, Footer } = Layout;
 
-const items = [];
-
-export const EmployeeLayout = ({ setAuth, children }) => {
-  const [collapsed, setCollapsed] = useState(false);
-
+export const EmployeeLayout = ({ children }) => {
   const {
     token: { colorBgContainer },
   } = theme.useToken();
@@ -20,21 +18,6 @@ export const EmployeeLayout = ({ setAuth, children }) => {
           minHeight: "100vh",
         }}
       >
-        <Sider
-          collapsible
-          collapsed={collapsed}
-          onCollapse={(value) => setCollapsed(value)}
-        >
-          <div style={{ textAlign: "center", margin: "20px" }}>
-            <Image height={40} width={40} src="/images/logo.png"></Image>
-          </div>
-          <Menu
-            theme="dark"
-            defaultSelectedKeys={["1"]}
-            mode="inline"
-            items={items}
-          />
-        </Sider>
         <Layout className="site-layout">
           <Header
             style={{
@@ -45,8 +28,17 @@ export const EmployeeLayout = ({ setAuth, children }) => {
               background: colorBgContainer,
             }}
           >
-            <Space>
-              <IdentityOption setAuth={setAuth}></IdentityOption>
+            <Space size={1070}>
+              <Space>
+                <Image
+                  style={{ marginBottom: "5px" }}
+                  height={50}
+                  width={50}
+                  src="/images/logo.png"
+                ></Image>
+                <Title italic style={{ marginTop: "5px" }} type="secondary" level={3}>Internet Banking</Title>
+              </Space>
+              <IdentityOption></IdentityOption>
             </Space>
           </Header>
           <Content
