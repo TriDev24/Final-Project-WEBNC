@@ -15,17 +15,6 @@ const FlexLayout = styled.div`
 export const AdminDashboardPage = () => {
     const [listEmployee, setListEmployee] = useState(null);
 
-    const [
-        isBankTransactionHistoryModalVisible,
-        setBankTransactionHistoryModalVisibility,
-    ] = useState(false);
-
-    const toggleBankTransactionHistoryModalVisibility = () => {
-        setBankTransactionHistoryModalVisibility(
-            !isBankTransactionHistoryModalVisible
-        );
-    };
-
     const [isAddEmloyeeModalVisible, setAddEmloyeeModalVisibility] =
         useState(false);
 
@@ -112,19 +101,6 @@ export const AdminDashboardPage = () => {
 
     const ListEmployee = styled.div``;
 
-    const settingItems = useMemo(
-        () => [
-            {
-                title: 'Xem danh sách giao dịch trong tháng với các ngân hàng khác',
-                description:
-                    'Xem được các giao dịch: Xem trong khoảng thời gian. Xem theo từng ngân hàng, hoặc tất cả ngân hàng liên kết. Có thống kê tổng số tiền đã giao dịch',
-                actionTitle: 'Xem lịch sử',
-                onItemClick: toggleBankTransactionHistoryModalVisibility,
-            },
-        ],
-        []
-    );
-
     return (
         <ContentLayout>
             <ListEmployee>
@@ -145,15 +121,6 @@ export const AdminDashboardPage = () => {
                 onCancel={handleAddEmloyeeClick}>
                 <CreateEmployeeForm />
             </Modal>
-            <Modal
-                title='Theo dõi lịch sử giao dịch các ngân hàng'
-                centered
-                open={isBankTransactionHistoryModalVisible}
-                onOk={toggleBankTransactionHistoryModalVisibility}
-                onCancel={toggleBankTransactionHistoryModalVisibility}>
-                <BankTransactionHistoryForm />
-            </Modal>
-            <ManagementList sources={settingItems} />
         </ContentLayout>
     );
 };
