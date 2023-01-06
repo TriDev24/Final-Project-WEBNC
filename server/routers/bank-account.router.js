@@ -8,6 +8,8 @@ router.get('/all', auth(['employee']), controller.getAll);
 
 router.get('/', auth(['customer']), controller.getAllByUserId);
 
+router.get('/query-account', controller.queryAccount);
+
 router.get(
     '/by-account-number-and-bank-type',
     auth(['customer']),

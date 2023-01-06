@@ -26,14 +26,12 @@ export const generateHashString = (payload) => {
     }
 };
 
-export const verifySignature = (signature, payload) => {
+export const verifySignature = (signature) => {
     try {
-        const decrypted = jwt.verify(signature, publicKeyContent, {
+        return jwt.verify(signature, publicKeyContent, {
             algorithms: ['RS256'],
         });
-
-        return decrypted === payload;
     } catch (error) {
-        throw new Error(error);
+        throw new Error('Chữ ký không hợp lệ');
     }
 };

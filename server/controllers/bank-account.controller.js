@@ -43,6 +43,68 @@ export default {
         return res.status(200).json(responses);
     },
 
+    async queryAccount(req, res) {
+        try {
+            const {
+                accountNumber,
+                hashValue: requestHashValue,
+                signature,
+            } = req.body;
+
+            const partnerBankUrl = process.env.PARTNER_BANK_API_URL_PATH;
+            const requestHost = req.get('host');
+
+            // Is Not from Host
+            const isNotFromPartnerBankConnectedBefore =
+                !partnerBankUrl.includes(requestHost);
+            if (isNotFromPartnerBankConnectedBefore) {
+                return res.status(401).json({
+                    error: 'Xin lỗi domain của bạn không được truy cập vào nguồn tài nguyên này',
+                });
+            }
+
+            // Is Edited?
+            const payload = {
+                accountNumber,
+                signature,
+            };
+            const hashString = generateHashString(payload);
+            const isPayloadEdited = hashString !== requestHashValue;
+
+            if (isPayloadEdited) {
+                return res.status(401).json({
+                    error: 'Xin lỗi gói tin của bạn hình như đã bị chỉnh sửa, vui lòng xem lại',
+                });
+            }
+
+            // Is Not Valid Signature
+            verifySignature(signature);
+
+            const bankAccount = await BankAccount.findOne({ accountNumber });
+            if (!bankAccount) {
+                return res
+                    .status(401)
+                    .json({ error: 'Không tìm thấy tài khoản ngân hàng' });
+            }
+
+            const identity = await Identity.findById(bankAccount.identityId);
+            const response = {
+                id: bankAccount._id,
+                accountNumber,
+                user: {
+                    fullName: identity.firstName + ' ' + identity.lastName,
+                    aliasName: identity.aliasName,
+                    email: identity.email,
+                    phoneNumber: identity.phoneNumber,
+                },
+            };
+
+            return res.status(200).json(response);
+        } catch (error) {
+            return res.status(401).json({ error: error.message });
+        }
+    },
+
     async getAllByUserId(req, res) {
         const { isPayment } = req.query;
 
@@ -248,134 +310,123 @@ export default {
 
     // API for another bank to connect
     async rechargeMoney(req, res) {
-        const {
-            senderAccountNumber,
-            receiverAccountNumber,
-            deposit,
-            hashValue: requestHashValue,
-            signature,
-            description,
-            // Transfer method that other bank send
-            transferMethod,
-            transferTime,
-        } = req.body;
-        const now = Math.floor(Date.now() / 1000);
-        const partnerBankUrl = process.env.PARTNER_BANK_API_URL_PATH;
-        const requestHost = req.get('host');
+        try {
+            const {
+                senderAccountNumber,
+                receiverAccountNumber,
+                deposit,
+                hashValue: requestHashValue,
+                signature,
+                description,
+                // Transfer method that other bank send
+                transferMethod,
+                transferTime,
+            } = req.body;
+            const now = Math.floor(Date.now() / 1000);
+            const partnerBankUrl = process.env.PARTNER_BANK_API_URL_PATH;
+            const requestHost = req.get('host');
+            // ------- Check Security ------
 
-        // return res.status(200).json(
-        //     generateHashString({
-        //         senderAccountNumber: '123456',
-        //         receiverAccountNumber: '243275',
-        //         deposit: 2000,
-        //         signature:
-        //             'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50TnVtYmVyIjoiNjI4ODUiLCJjYXNoIjoyMDAwLCJpYXQiOjE2NzMwMDI4ODZ9.Bp7jwrXhyI94EtB2-lTF5MBmd_r_UFE7bJJh6aJFRFykwOZA6P3OqKpz2tgX5CRgluAnR_6F2CueGQ2cNEeKXeMaH3mUBxMy4IBc0NChhRxjx6gK3KzzdimDjGryw4KNaemtkM_Fn9SVp9zlbnRvz-OxCZfi1OVmRH-qYOKf8Y8',
-        //         transferTime: '1673027846',
-        //         transferMethod: 'receiver pay fee',
-        //     })
-        // );
-
-        // ------- Check Security ------
-
-        // Is Correct Host?
-        const isNotFromPartnerBankConnectedBefore =
-            !partnerBankUrl.includes(requestHost);
-        if (isNotFromPartnerBankConnectedBefore) {
-            return res.status(401).json({
-                error: 'Xin lỗi domain của bạn không được truy cập vào nguồn tài nguyên này',
-            });
-        }
-
-        // Is Timeout?
-        const onHourOnSecond = 3600;
-        const isTimeout = now - transferTime > onHourOnSecond;
-        if (isTimeout) {
-            return res.status(401).json({
-                error: 'Xin lỗi đã hết thời gian chuyển khoản.',
-            });
-        }
-
-        // Is Edited?
-        const payload = {
-            senderAccountNumber,
-            receiverAccountNumber,
-            deposit,
-            transferTime,
-            signature,
-            transferMethod,
-        };
-        const hashString = generateHashString(payload);
-        const isPayloadEdited = hashString !== requestHashValue;
-
-        if (isPayloadEdited) {
-            return res.status(401).json({
-                error: 'Xin lỗi gói tin của bạn hình như đã bị chỉnh sửa, vui lòng xem lại',
-            });
-        }
-
-        const isNotValidSignature = verifySignature(signature, payload);
-        if (isNotValidSignature) {
-            return res.status(401).json('Chữ ký không hợp lệ');
-        }
-
-        const receiverBankAccount = await BankAccount.findOne({
-            accountNumber: receiverAccountNumber,
-        });
-        if (!receiverBankAccount) {
-            return res
-                .status(404)
-                .json('Không tìm thấy tài khoản ngân hàng này');
-        }
-
-        const totalAmount =
-            transferMethod === 'Receiver pay'
-                ? deposit - TransferFee.External
-                : deposit;
-
-        const updatedReceiverBankAccount = await BankAccount.updateOne(
-            {
-                _id: receiverBankAccount._id,
-            },
-            {
-                overBalance: receiverBankAccount.overBalance + totalAmount,
+            // Is Correct Host?
+            const isNotFromPartnerBankConnectedBefore =
+                !partnerBankUrl.includes(requestHost);
+            if (isNotFromPartnerBankConnectedBefore) {
+                return res.status(401).json({
+                    error: 'Xin lỗi domain của bạn không được truy cập vào nguồn tài nguyên này',
+                });
             }
-        );
-        if (!updatedReceiverBankAccount) {
-            return res.status(500).json({ error: 'Đã có lỗi xảy ra!!!' });
+
+            // Is Timeout?
+            const onHourOnSecond = 3600;
+            const isTimeout = now - transferTime > onHourOnSecond;
+            if (isTimeout) {
+                return res.status(401).json({
+                    error: 'Xin lỗi đã hết thời gian chuyển khoản.',
+                });
+            }
+
+            // Is Edited?
+            const payload = {
+                senderAccountNumber,
+                receiverAccountNumber,
+                deposit,
+                transferTime,
+                signature,
+                transferMethod,
+            };
+            const hashString = generateHashString(payload);
+            const isPayloadEdited = hashString !== requestHashValue;
+
+            if (isPayloadEdited) {
+                return res.status(401).json({
+                    error: 'Xin lỗi gói tin của bạn hình như đã bị chỉnh sửa, vui lòng xem lại',
+                });
+            }
+
+            // Verify signature
+            verifySignature(signature);
+
+            const receiverBankAccount = await BankAccount.findOne({
+                accountNumber: receiverAccountNumber,
+            });
+            if (!receiverBankAccount) {
+                return res
+                    .status(404)
+                    .json('Không tìm thấy tài khoản ngân hàng này');
+            }
+
+            const totalAmount =
+                transferMethod === 'Receiver pay'
+                    ? deposit - TransferFee.External
+                    : deposit;
+
+            const updatedReceiverBankAccount = await BankAccount.updateOne(
+                {
+                    _id: receiverBankAccount._id,
+                },
+                {
+                    overBalance: receiverBankAccount.overBalance + totalAmount,
+                }
+            );
+            if (!updatedReceiverBankAccount) {
+                return res.status(500).json({ error: 'Đã có lỗi xảy ra!!!' });
+            }
+
+            // Save it billing.
+            const correspondTransferMethod =
+                transferMethod === 'Receiver pay'
+                    ? await TransferMethod.findOne({
+                          name: 'Receiver Pay Transfer Fee',
+                      })
+                    : await TransferMethod.findOne({
+                          name: 'Sender Pay Transfer Fee',
+                      });
+
+            const document = {
+                senderId: new ObjectID(),
+                receiverId: receiverBankAccount._id,
+                senderAccountNumber,
+                receiverAccountNumber,
+                deposit,
+                description: description ?? '',
+                transferType: TransferType.MoneyTransfer,
+                transferMethodId: correspondTransferMethod._id,
+                transferFee: TransferFee.External,
+                transferTime,
+                signature,
+
+                // Because the transaction was verified from sender side so receiver side don't need to do that again.
+                isVerified: true,
+            };
+
+            const insertedData = await Billing.create(document);
+            if (!insertedData) {
+                return res.status(500).json({ error: 'Đã có lỗi xảy ra!!!' });
+            }
+
+            return res.status(200).json({ billing: insertedData });
+        } catch (error) {
+            return res.status(401).json({ error: error.message });
         }
-
-        // Save it billing.
-        const correspondTransferMethod =
-            transferMethod === 'Receiver pay'
-                ? await TransferMethod.findOne({
-                      name: 'Receiver Pay Transfer Fee',
-                  })
-                : await TransferMethod.findOne({
-                      name: 'Sender Pay Transfer Fee',
-                  });
-
-        const document = {
-            senderId: new ObjectID(),
-            receiverId: receiverBankAccount._id,
-            senderAccountNumber,
-            receiverAccountNumber,
-            deposit,
-            description: description ?? '',
-            transferType: TransferType.MoneyTransfer,
-            transferMethodId: correspondTransferMethod._id,
-            transferFee: TransferFee.External,
-            transferTime,
-            signature,
-
-            // Because the transaction was verified from sender side so receiver side don't need to do that again.
-            isVerified: true,
-        };
-
-        const insertedData = await Billing.create(document);
-        if (!insertedData) {
-            return res.status(500).json({ error: 'Đã có lỗi xảy ra!!!' });
-        }
-
-        return res.status(200).json({ billing: insertedData });
     },
 };
