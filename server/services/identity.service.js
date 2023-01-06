@@ -87,6 +87,8 @@ export default {
 
     async create(data) {
         const { email, password, firstName, lastName, phoneNumber } = data;
+        console.log('hash', data);
+
         let { aliasName } = data;
         const isIdentityExist = await Identity.findOne({ email });
         const isPhoneExist = await Identity.findOne({ phoneNumber });
@@ -96,6 +98,7 @@ export default {
                     name: 'customer',
                 });
                 const hash = bcrypt.hashSync(password, 10);
+                console.log('hash', hash);
                 if (aliasName === '') {
                     aliasName = firstName + ' ' + lastName;
                 }

@@ -6,7 +6,8 @@ import {
     UserOutlined,
     ProfileOutlined,
     PhoneOutlined,
-  } from "@ant-design/icons";
+    MailOutlined,
+} from '@ant-design/icons';
 
 const { Option } = Select;
 
@@ -20,7 +21,7 @@ const BankAccountItem = styled.div`
 
 const StyledSelect = styled(Select)``;
 
-export const CreateEmployeeForm = ({ }) => {
+export const CreateEmployeeForm = ({}) => {
     return (
         <Form layout='vertical'>
             <Form.Item
@@ -29,13 +30,12 @@ export const CreateEmployeeForm = ({ }) => {
                 rules={[
                     {
                         required: true,
-                        message:
-                            'Mời bạn nhập email nhân viên mới!!!',
+                        message: 'Mời bạn nhập email nhân viên mới!!!',
                     },
                 ]}>
                 <Input
-                    prefix={<UserOutlined className="site-form-item-icon" />}
-                    placeholder="Email"
+                    prefix={<MailOutlined className='site-form-item-icon' />}
+                    placeholder='Email'
                 />
             </Form.Item>
             <Form.Item
@@ -44,13 +44,12 @@ export const CreateEmployeeForm = ({ }) => {
                 rules={[
                     {
                         required: true,
-                        message:
-                            'Mời bạn nhập password nhân viên mới!!!',
+                        message: 'Mời bạn nhập password nhân viên mới!!!',
                     },
                 ]}>
                 <Input
-                    prefix={<UserOutlined className="site-form-item-icon" />}
-                    placeholder="Password"
+                    prefix={<LockOutlined className='site-form-item-icon' />}
+                    placeholder='Password'
                 />
             </Form.Item>
             <Form.Item
@@ -59,13 +58,12 @@ export const CreateEmployeeForm = ({ }) => {
                 rules={[
                     {
                         required: true,
-                        message:
-                            'Mời bạn nhập tên nhân viên mới!!!',
+                        message: 'Mời bạn nhập tên nhân viên mới!!!',
                     },
                 ]}>
                 <Input
-                    prefix={<UserOutlined className="site-form-item-icon" />}
-                    placeholder="Tên nhân viên"
+                    prefix={<UserOutlined className='site-form-item-icon' />}
+                    placeholder='Tên nhân viên'
                 />
             </Form.Item>
             <Form.Item
@@ -74,13 +72,12 @@ export const CreateEmployeeForm = ({ }) => {
                 rules={[
                     {
                         required: true,
-                        message:
-                            'Mời bạn nhập họ nhân viên mới!!!',
+                        message: 'Mời bạn nhập họ nhân viên mới!!!',
                     },
                 ]}>
                 <Input
-                    prefix={<UserOutlined className="site-form-item-icon" />}
-                    placeholder="Họ nhân viên"
+                    prefix={<UserOutlined className='site-form-item-icon' />}
+                    placeholder='Họ nhân viên'
                 />
             </Form.Item>
             <Form.Item
@@ -89,13 +86,12 @@ export const CreateEmployeeForm = ({ }) => {
                 rules={[
                     {
                         required: true,
-                        message:
-                            'Mời bạn nhập số điện thoại nhân viên mới!!!',
+                        message: 'Mời bạn nhập số điện thoại nhân viên mới!!!',
                     },
                 ]}>
                 <Input
-                    prefix={<UserOutlined className="site-form-item-icon" />}
-                    placeholder="Số điện thoại"
+                    prefix={<PhoneOutlined className='site-form-item-icon' />}
+                    placeholder='Số điện thoại'
                 />
             </Form.Item>
         </Form>

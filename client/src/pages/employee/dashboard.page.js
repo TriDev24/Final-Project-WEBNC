@@ -123,7 +123,8 @@ export const EmployeeDashboardPage = ({ setAuth }) => {
             body: JSON.stringify(payload),
         })
             .then(() => {
-                message.success('Successfully');
+                message.success('Nạp tiền thành công!!!');
+                rechargeMoneyForm.resetFields();
                 getAllBankAccounts();
             })
             .catch((error) => message.error(error));
