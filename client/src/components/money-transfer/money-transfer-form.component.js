@@ -15,7 +15,7 @@ import {
     message,
     Typography,
 } from 'antd';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ReceiverItem } from './receiver-item.component.js';
 
 const { Panel } = Collapse;
@@ -66,6 +66,7 @@ export const MoneyTransferForm = ({
     onAddReceiver,
     onDeleteReceiverClick,
     onConfirmTransfer,
+    isConfirmTransferLoading,
 }) => {
     const [isValid, setIsValid] = useState(null);
     const [isLoadingCheckReceiver, setLoadingCheckReceiverStatus] =
@@ -102,6 +103,18 @@ export const MoneyTransferForm = ({
         setLoadingCheckReceiverStatus(true);
 
         const { receiverAccountNumber, bankTypeId } = form.getFieldsValue();
+        if (!receiverAccountNumber) {
+            message.error('Số tài khoản đang trống!!!');
+            setLoadingCheckReceiverStatus(false);
+            return;
+        }
+
+        if (!bankTypeId) {
+            message.error('Loại ngân hàng đang trống!!!');
+            setLoadingCheckReceiverStatus(false);
+            return;
+        }
+
         console.log('form.getFieldsValue()', form.getFieldsValue());
         const url = `${process.env.REACT_APP_BANK_ACCOUNT_API_URL_PATH}/by-account-number-and-bank-type?accountNumber=${receiverAccountNumber}&bankTypeId=${bankTypeId}`;
 
@@ -119,33 +132,36 @@ export const MoneyTransferForm = ({
                 if (value.message) {
                     setIsValid(false);
                     message.error(value.message);
-                    return;
+                } else {
+                    setIsValid(true);
+                    Modal.success({
+                        title: 'Tài khoản hợp lệ',
+                        content: (
+                            <strong>
+                                <p>
+                                    <strong>Số tài khoản: </strong>{' '}
+                                    {value.accountNumber}
+                                </p>
+                                <p>
+                                    <strong>Tên thường gọi: </strong>
+                                    {value.user.fullname}
+                                </p>
+                                <p>
+                                    <strong>Email: </strong>
+                                    {value.user.email}
+                                </p>
+                                <p>
+                                    <strong>Số điện thoại: </strong>
+                                    {value.user.phone}
+                                </p>
+                            </strong>
+                        ),
+                    });
                 }
 
-                setIsValid(true);
-                Modal.success({
-                    title: 'Tài khoản hợp lệ',
-                    content: (
-                        <>
-                            <p>
-                                <strong>Số tài khoản: </strong>{' '}
-                                {value.accountNumber}
-                            </p>
-                            <p>
-                                <strong>Tên thường gọi: </strong>
-                                {value.user.fullname}
-                            </p>
-                            <p>
-                                <strong>Email: </strong>
-                                {value.user.email}
-                            </p>
-                            <p>
-                                <strong>Số điện thoại: </strong>
-                                {value.user.phone}
-                            </p>
-                        </>
-                    ),
-                });
+                setTimeout(() => {
+                    setIsValid(null);
+                }, 5000);
             });
     };
 
@@ -168,15 +184,25 @@ export const MoneyTransferForm = ({
             ))
         );
 
+    console.log('isValid', isValid);
+
     return (
         <Container>
             <Form form={form} layout='vertical'>
                 <CenterText>
-                    {isValid && isValid === true ? (
-                        <Text type='success'>Tài khoản hợp lệ</Text>
-                    ) : (
-                        <Text type='danger'>Tài khoản chưa được xác minh</Text>
-                    )}
+                    {isValid !== null &&
+                        isValid !== undefined &&
+                        (isValid === true ? (
+                            <Text type='success'>
+                                Tài khoản hợp lệ (thông báo này sẽ tự biến mất
+                                sau 5s)
+                            </Text>
+                        ) : (
+                            <Text type='danger'>
+                                Tài khoản chưa được xác minh (thông báo này sẽ
+                                tự biến mất sau 5s)
+                            </Text>
+                        ))}
                 </CenterText>
 
                 <Form.Item
@@ -261,7 +287,11 @@ export const MoneyTransferForm = ({
                     <Input placeholder='Ví dụ: Tiền cà phê hôm trước' />
                 </Form.Item>
 
-                <Button type='primary' block onClick={onConfirmTransfer}>
+                <Button
+                    type='primary'
+                    block
+                    loading={isConfirmTransferLoading}
+                    onClick={onConfirmTransfer}>
                     Xác nhận
                 </Button>
             </Form>

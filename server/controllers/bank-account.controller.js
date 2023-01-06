@@ -1,10 +1,11 @@
 import BankAccount from '../models/bank-account.model.js';
-import { verifySignature } from '../utils/rsa.util.js';
+import { generateHashString, verifySignature } from '../utils/rsa.util.js';
 import { TransferFee } from '../models/transfer-fee.model.js';
 import TransferMethod from '../models/transfer-method.model.js';
 import BankType from '../models/bank-type.model.js';
 import fetch from 'node-fetch';
 import Identity from '../models/identity.model.js';
+import { ObjectID } from 'bson';
 
 export default {
     async getAll(req, res) {
@@ -241,23 +242,66 @@ export default {
 
     // API for another bank to connect
     async rechargeMoney(req, res) {
-        const { id: receiverBankAccountId } = req.params;
         const {
-            bankAccountId: senderBankAccountId,
+            senderAccountNumber,
+            receiverAccountNumber,
             deposit,
+            hashValue: requestHashValue,
             signature,
+            // Transfer method that other bank send
             transferMethod,
             transferTime,
         } = req.body;
+        const now = Math.floor(Date.now() / 1000);
+        const partnerBankUrl = process.env.PARTNER_BANK_API_URL_PATH;
+        const requestHost = req.get('host');
+
+        // ------- Check Security ------
+
+        // Is Correct Host?
+        const isNotFromPartnerBankConnectedBefore =
+            !partnerBankUrl.includes(requestHost);
+        if (isNotFromPartnerBankConnectedBefore) {
+            return res.status(401).json({
+                error: 'Xin lỗi domain của bạn không được truy cập vào nguồn tài nguyên này',
+            });
+        }
+
+        // Is Timeout?
+        const onHourOnSecond = 3600;
+        const isTimeout = now - transferTime > onHourOnSecond;
+        if (isTimeout) {
+            return res.status(401).json({
+                error: 'Xin lỗi đã hết thời gian chuyển khoản.',
+            });
+        }
+
+        // Is Edited?
+        const payload = {
+            senderAccountNumber,
+            receiverAccountNumber,
+            deposit,
+            transferTime,
+            signature,
+            transferMethod,
+        };
+        const hashString = generateHashString(payload);
+        const isPayloadEdited = hashString !== requestHashValue;
+
+        if (isPayloadEdited) {
+            return res.status(401).json({
+                error: 'Xin lỗi gói tin của bạn hình như đã bị chỉnh sửa, vui lòng xem lại',
+            });
+        }
 
         const isNotValidSignature = verifySignature(signature);
         if (isNotValidSignature) {
-            return res.status(403).json('Chữ ký không hợp lệ');
+            return res.status(401).json('Chữ ký không hợp lệ');
         }
 
-        const receiverBankAccount = await BankAccount.findById(
-            receiverBankAccountId
-        );
+        const receiverBankAccount = await BankAccount.findOne({
+            accountNumber: receiverAccountNumber,
+        });
         if (!receiverBankAccount) {
             return res
                 .status(404)
@@ -288,8 +332,10 @@ export default {
                 : await TransferMethod.findOne('Sender Pay Transfer Fee');
 
         const document = {
-            senderId: senderBankAccountId,
+            senderId: new ObjectID(),
             receiverId: receiverBankAccountId,
+            senderAccountNumber,
+            receiverAccountNumber,
             deposit,
             description,
             transferType: TransferType.MoneyTransfer,

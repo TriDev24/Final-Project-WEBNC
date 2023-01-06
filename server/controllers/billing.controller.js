@@ -8,6 +8,8 @@ import { generateOtp } from '../utils/otp.util.js';
 import { sendVerifyOtpEmail } from '../utils/email.util.js';
 import Identity from '../models/identity.model.js';
 import { generateSignature, verifySignature } from '../utils/rsa.util.js';
+import fetch from 'node-fetch';
+import { ObjectId, UUID } from 'bson';
 
 export default {
     async getHistory(req, res) {
@@ -232,233 +234,359 @@ export default {
     },
 
     async create(req, res) {
-        const {
-            senderAccountNumber,
-            receiverAccountNumber,
-            deposit,
-            description,
-            bankTypeId,
-            transferMethodId,
-            transferType,
-            transferTime,
-        } = req.body;
-        const generatedOtp = generateOtp();
+        try {
+            const {
+                senderAccountNumber,
+                receiverAccountNumber,
+                deposit,
+                description,
+                bankTypeId,
+                transferMethodId,
+                transferType,
+                transferTime,
+            } = req.body;
+            const generatedOtp = generateOtp();
 
-        const senderBankAccount = await BankAccount.findOne({
-            accountNumber: senderAccountNumber,
-        });
-        if (!senderBankAccount) {
-            return res.status(404).json('Số tài khoản người gửi không tồn tại');
-        }
-
-        const transferMethod = await TransferMethod.findById(transferMethodId);
-        if (!transferMethod) {
-            return res.status(404).json('Hình thưc chuyển khoản không tồn tại');
-        }
-        const isReceiverPayForTransferFee =
-            transferMethod.name === 'Receiver Pay Transfer Fee';
-
-        console.log('transfer type', transferType);
-
-        // Transfer ObjectId -> string using toString() method.
-        const internalBank = await BankType.findOne({ name: 'My Bank' });
-        const isInternalBank = internalBank._id.toString() === bankTypeId;
-
-        if (isInternalBank) {
-            // check if receiver existed
-            const receiverBankAccount = await BankAccount.findOne({
-                accountNumber: receiverAccountNumber,
+            const senderBankAccount = await BankAccount.findOne({
+                accountNumber: senderAccountNumber,
             });
-            if (!receiverBankAccount) {
+            if (!senderBankAccount) {
                 return res
                     .status(404)
-                    .json('Số tài khoản người nhận không tồn tại');
+                    .json('Số tài khoản người gửi không tồn tại');
             }
 
-            let insertedData;
+            const transferMethod = await TransferMethod.findById(
+                transferMethodId
+            );
+            if (!transferMethod) {
+                return res
+                    .status(404)
+                    .json('Hình thưc chuyển khoản không tồn tại');
+            }
+            const isReceiverPayForTransferFee =
+                transferMethod.name === 'Receiver Pay Transfer Fee';
 
-            // Update Bank Account OverBalance
-            if (isReceiverPayForTransferFee) {
-                const isSenderNotEnoughMoney =
-                    senderBankAccount.overBalance < deposit;
-                if (isSenderNotEnoughMoney) {
+            // Transfer ObjectId -> string using toString() method.
+            const internalBank = await BankType.findOne({ name: 'My Bank' });
+            const isInternalBank = internalBank._id.toString() === bankTypeId;
+
+            console.log('isInternalBank', isInternalBank);
+
+            if (isInternalBank) {
+                // check if receiver existed
+                const receiverBankAccount = await BankAccount.findOne({
+                    accountNumber: receiverAccountNumber,
+                });
+                if (!receiverBankAccount) {
                     return res
-                        .status(403)
-                        .json(
-                            'Tài khoản người nhận không đủ tiền để thực hiện hành động này'
+                        .status(404)
+                        .json('Số tài khoản người nhận không tồn tại');
+                }
+
+                let insertedData;
+
+                // Update Bank Account OverBalance
+                if (isReceiverPayForTransferFee) {
+                    const isSenderNotEnoughMoney =
+                        senderBankAccount.overBalance < deposit;
+                    if (isSenderNotEnoughMoney) {
+                        return res
+                            .status(403)
+                            .json(
+                                'Tài khoản người nhận không đủ tiền để thực hiện hành động này'
+                            );
+                    }
+
+                    // Decrease over balance of sender bank account
+                    const updatedSenderOverBalance =
+                        await BankAccount.updateOne(
+                            {
+                                _id: senderBankAccount._id,
+                            },
+                            {
+                                overBalance:
+                                    senderBankAccount.overBalance - deposit,
+                            }
                         );
-                }
-
-                // Decrease over balance of sender bank account
-                const updatedSenderOverBalance = await BankAccount.updateOne(
-                    {
-                        _id: senderBankAccount._id,
-                    },
-                    {
-                        overBalance: senderBankAccount.overBalance - deposit,
+                    if (!updatedSenderOverBalance) {
+                        return res
+                            .status(500)
+                            .json('Đã có lỗi xảy ra, vui lòng thử lại');
                     }
-                );
-                if (!updatedSenderOverBalance) {
-                    return res
-                        .status(500)
-                        .json('Đã có lỗi xảy ra, vui lòng thử lại');
-                }
 
-                // Increase over balance of receiver bank account
-                const isReceiverNotEnoughMoneyToPayTransferFee =
-                    receiverBankAccount.overBalance + deposit <
-                    TransferFee.Internal;
-                if (isReceiverNotEnoughMoneyToPayTransferFee) {
-                    res.status(403).json('Người nhận không đủ trả tiền phí');
-                }
-
-                const updatedReceiverOverBalance = await BankAccount.updateOne(
-                    {
-                        _id: receiverBankAccount._id,
-                    },
-                    {
-                        overBalance:
-                            receiverBankAccount.overBalance +
-                            deposit -
-                            TransferFee.Internal,
+                    // Increase over balance of receiver bank account
+                    const isReceiverNotEnoughMoneyToPayTransferFee =
+                        receiverBankAccount.overBalance + deposit <
+                        TransferFee.Internal;
+                    if (isReceiverNotEnoughMoneyToPayTransferFee) {
+                        res.status(403).json(
+                            'Người nhận không đủ trả tiền phí'
+                        );
                     }
-                );
-                if (!updatedReceiverOverBalance) {
-                    return res
-                        .status(500)
-                        .json('Đã có lỗi xảy ra, vui lòng thử lại');
+
+                    const updatedReceiverOverBalance =
+                        await BankAccount.updateOne(
+                            {
+                                _id: receiverBankAccount._id,
+                            },
+                            {
+                                overBalance:
+                                    receiverBankAccount.overBalance +
+                                    deposit -
+                                    TransferFee.Internal,
+                            }
+                        );
+                    if (!updatedReceiverOverBalance) {
+                        return res
+                            .status(500)
+                            .json('Đã có lỗi xảy ra, vui lòng thử lại');
+                    }
+
+                    // Create Billing
+                    const document = {
+                        senderId: senderBankAccount._id,
+                        receiverId: receiverBankAccount._id,
+                        senderAccountNumber,
+                        receiverAccountNumber,
+                        deposit,
+                        description,
+                        transferType:
+                            transferType ?? TransferType.MoneyTransfer,
+                        transferMethodId,
+                        transferFee: TransferFee.Internal,
+                        transferTime,
+                        otpCode: generatedOtp,
+                    };
+
+                    insertedData = await Billing.create(document);
+                    if (!insertedData) {
+                        return res
+                            .status(500)
+                            .json('Đã có lỗi xảy ra, vui lòng thử lại');
+                    }
+                } else {
+                    const totalAmount = deposit + TransferFee.Internal;
+                    const isSenderNotEnoughMoney =
+                        senderBankAccount.overBalance < totalAmount;
+                    if (isSenderNotEnoughMoney) {
+                        return res
+                            .status(403)
+                            .json('Bạn không đủ tiền để trả phí');
+                    }
+
+                    // Decrease over balance of sender bank account
+                    const updatedSenderOverBalance =
+                        await BankAccount.updateOne(
+                            {
+                                _id: senderBankAccount._id,
+                            },
+                            {
+                                overBalance:
+                                    senderBankAccount.overBalance - totalAmount,
+                            }
+                        );
+                    if (!updatedSenderOverBalance) {
+                        return res
+                            .status(500)
+                            .json('Đã có lỗi xảy ra, vui lòng thử lại');
+                    }
+
+                    // Increase over balance of receiver bank account
+                    const updatedReceiverOverBalance =
+                        await BankAccount.updateOne(
+                            {
+                                _id: receiverBankAccount._id,
+                            },
+                            {
+                                overBalance:
+                                    receiverBankAccount.overBalance +
+                                    totalAmount,
+                            }
+                        );
+                    if (!updatedReceiverOverBalance) {
+                        return res
+                            .status(500)
+                            .json('Đã có lỗi xảy ra, vui lòng thử lại');
+                    }
+
+                    // Create Billing
+                    const document = {
+                        senderId: senderBankAccount._id,
+                        senderAccountNumber,
+                        receiverAccountNumber,
+                        receiverId: receiverBankAccount._id,
+                        deposit,
+                        description,
+                        transferType:
+                            transferType ?? TransferType.MoneyTransfer,
+                        transferMethodId,
+                        transferFee: TransferFee.Internal,
+                        transferTime,
+                        otpCode: generatedOtp,
+                    };
+
+                    insertedData = await Billing.create(document);
+                    if (!insertedData) {
+                        return res
+                            .status(500)
+                            .json('Đã có lỗi xảy ra, vui lòng thử lại');
+                    }
                 }
 
-                // Create Billing
+                const sender = await Identity.findById(
+                    senderBankAccount.identityId
+                );
+
+                sendVerifyOtpEmail(sender.email, generatedOtp);
+
+                return res.status(200).json({
+                    _id: insertedData._id,
+                    isExternalTransaction: false,
+                });
+            }
+
+            // Verify that receiver bank account existed by receiver bank account number
+            const payload = {
+                path: '/partnerBank/queryAccount',
+            };
+            const response = await fetch(
+                process.env.PARTNER_BANK_GENERATE_TOKEN_URL_PATH,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload),
+                }
+            );
+
+            const { timestamp, encrypt } = await response.json();
+
+            // Get
+            const url = `${process.env.PARTNER_BANK_QUERY_ACCOUNT_URL_PATH}?timestamp=${timestamp}`;
+            const request = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${encrypt}`,
+                },
+            });
+
+            const dataResponse = await request.json();
+            if (!dataResponse) {
+                res.status(404).json({ message: 'Không tìm thấy tài khoản' });
+            }
+
+            const cash = isReceiverPayForTransferFee
+                ? deposit - TransferFee.External
+                : deposit;
+
+            // Lay account number can cap nhat so du
+            const requestPayload = {
+                accountNumber: receiverAccountNumber,
+                cash,
+            };
+            // Cross external bank.
+            const generatedSignature = generateSignature(requestPayload);
+
+            // // Goi API cap nhat so du cua API lien ket
+            // const transaction = await fetch(
+            //     process.env.PARTNER_BANK_TRANSACTION_URL_PATH,
+            //     {
+            //         method: 'POST',
+            //         headers: {
+            //             'Content-Type': 'application/json',
+            //             Authorization: `Bearer ${generatedSignature}`,
+            //         },
+            //         body: JSON.stringify(requestPayload),
+            //     }
+            // );
+            // console.log('transaction', transaction.status !== 200);
+            // if (transaction.status !== 200) {
+            //     console.log('tai sao vay dm');
+            //     return res.status(500).json({ message: 'Đã có lỗi xảy ra' });
+            // }
+
+            // Save receiver to DB
+            let receiverBankAccount;
+            const isExistReceiver = await BankAccount.findOne({
+                accountNumber: receiverAccountNumber,
+            });
+
+            if (!isExistReceiver) {
+                const externalBank = await BankType.findOne({
+                    name: 'Another Bank',
+                });
+
                 const document = {
-                    senderId: senderBankAccount._id,
-                    receiverId: receiverBankAccount._id,
-                    deposit,
-                    description,
-                    transferType: transferType ?? TransferType.MoneyTransfer,
-                    transferMethodId,
-                    transferFee: TransferFee.Internal,
-                    transferTime,
-                    otpCode: generatedOtp,
+                    accountNumber: receiverAccountNumber,
+                    overBalance: 0,
+                    isPayment: false,
+                    identityId: new ObjectId(),
+                    bankTypeId: externalBank._id,
                 };
 
-                insertedData = await Billing.create(document);
-                if (!insertedData) {
+                receiverBankAccount = await BankAccount.create(document);
+                if (!receiverBankAccount) {
                     return res
                         .status(500)
-                        .json('Đã có lỗi xảy ra, vui lòng thử lại');
+                        .json({ message: 'Đã có lỗi xảy ra' });
                 }
-            } else {
-                const totalAmount = deposit + TransferFee.Internal;
-                const isSenderNotEnoughMoney =
-                    senderBankAccount.overBalance < totalAmount;
-                if (isSenderNotEnoughMoney) {
-                    return res.status(403).json('Bạn không đủ tiền để trả phí');
-                }
+            }
 
-                // Decrease over balance of sender bank account
-                const updatedSenderOverBalance = await BankAccount.updateOne(
-                    {
-                        _id: senderBankAccount._id,
-                    },
-                    {
-                        overBalance:
-                            senderBankAccount.overBalance - totalAmount,
-                    }
-                );
-                if (!updatedSenderOverBalance) {
-                    return res
-                        .status(500)
-                        .json('Đã có lỗi xảy ra, vui lòng thử lại');
-                }
+            // Create Billing
+            const document = {
+                senderId: senderBankAccount._id,
+                receiverId: receiverBankAccount._id,
+                senderAccountNumber,
+                receiverAccountNumber,
+                deposit,
+                description,
+                transferType: TransferType.MoneyTransfer,
+                transferMethodId,
+                transferFee: TransferFee.External,
+                transferTime,
+                otpCode: generatedOtp,
+            };
 
-                // Increase over balance of receiver bank account
-                const updatedReceiverOverBalance = await BankAccount.updateOne(
-                    {
-                        _id: receiverBankAccount._id,
-                    },
-                    {
-                        overBalance:
-                            receiverBankAccount.overBalance + totalAmount,
-                    }
-                );
-                if (!updatedReceiverOverBalance) {
-                    return res
-                        .status(500)
-                        .json('Đã có lỗi xảy ra, vui lòng thử lại');
-                }
+            const insertedData = await Billing.create(document);
+            if (!insertedData) {
+                return res.status(500).json('Không thể thêm được hoá đơn');
+            }
 
-                // Create Billing
-                const document = {
-                    senderId: senderBankAccount._id,
-                    receiverId: receiverBankAccount._id,
-                    deposit,
-                    description,
-                    transferType: transferType ?? TransferType.MoneyTransfer,
-                    transferMethodId,
-                    transferFee: TransferFee.Internal,
-                    transferTime,
-                    otpCode: generatedOtp,
-                };
-
-                insertedData = await Billing.create(document);
-                if (!insertedData) {
-                    return res
-                        .status(500)
-                        .json('Đã có lỗi xảy ra, vui lòng thử lại');
+            const moneyToPay = isReceiverPayForTransferFee
+                ? deposit
+                : deposit + TransferFee.External;
+            console.log('moneyToPay', moneyToPay);
+            const updatedSenderOverBalance = await BankAccount.updateOne(
+                {
+                    _id: senderBankAccount._id,
+                },
+                {
+                    overBalance: senderBankAccount.overBalance - moneyToPay,
                 }
+            );
+            if (!updatedSenderOverBalance) {
+                return res
+                    .status(500)
+                    .json('Đã có lỗi xảy ra, vui lòng thử lại');
             }
 
             const sender = await Identity.findById(
                 senderBankAccount.identityId
             );
-            console.log('sender.email', sender.email);
-            console.log('generatedOtp', generatedOtp);
+            console.log('toi day r', sender);
 
             sendVerifyOtpEmail(sender.email, generatedOtp);
 
             return res.status(200).json({
                 _id: insertedData._id,
+                isExternalTransaction: true,
             });
+        } catch (error) {
+            return res.status(500).json({ message: 'Đã có lỗi xảy ra' });
         }
-
-        // Verify that receiver bank account existed by receiver bank account number
-        // fetch(url, {
-        //     method: 'GET',
-        //     headers: {
-        //         'Content-Type': 'application/json',
-        //     },
-        // });
-
-        // Cross external bank.
-        const generatedSignature = generateSignature();
-
-        console.log('verify signature', verifySignature(generatedSignature));
-
-        // const url = `${process.env.EXTERNAL_BANK_API_URL}`;
-        // const payload = {
-        //     description,
-        //     deposit,
-        //     signature: generatedSignature,
-        // };
-
-        // // Goi API cap nhat so du cua API lien ket
-        // fetch(url, {
-        //     method: 'POST',
-        //     headers: {
-        //         'Content-Type': 'application/json',
-        //     },
-        //     body: JSON.stringify(payload),
-        // })
-        //     .then(() => {
-        //         res.status(200).json('Thành công!!!');
-        //     })
-        //     .catch((error) =>
-        //         res.status(500).json(
-        //             `Đã có lỗi xảy ra, vui lòng thử lại on transfer money to external bank:
-        //                 ${error}`
-        //         )
-        //     );
     },
 
     async verifyOtp(req, res) {
@@ -474,7 +602,7 @@ export default {
 
         const isNotMatchOtp = billing.otpCode !== otp;
         if (isNotMatchOtp) {
-            return res.status(403).json('Mã OTP không đúng');
+            return res.status(403).json({ message: 'Mã OTP không đúng' });
         }
 
         const updatedBilling = await Billing.updateOne(

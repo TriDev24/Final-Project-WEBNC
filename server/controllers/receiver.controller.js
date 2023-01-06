@@ -46,8 +46,28 @@ export default {
         return res.status(200).json(receiver);
     },
     async create(req, res) {
-        const { senderAccountNumber, receiverAccountNumber, aliasName } =
-            req.body;
+        const {
+            senderAccountNumber,
+            receiverAccountNumber,
+            isExternalTransaction,
+            aliasName,
+        } = req.body;
+
+        if (isExternalTransaction) {
+            const document = {
+                senderAccountNumber,
+                receiverAccountNumber,
+                aliasName,
+            };
+
+            const insertedData = await Receiver.create(document);
+            if (!insertedData) {
+                return res.status(500).json({ message: 'Đã có lỗi xảy ra!!!' });
+            }
+
+            return res.status(200).json(insertedData);
+        }
+
         const receiverBankAccount = await BankAccount.findOne({
             accountNumber: receiverAccountNumber,
         });

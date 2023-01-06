@@ -3,7 +3,9 @@ import mongoose from 'mongoose';
 
 const schema = {
     senderId: { type: mongoose.Types.ObjectId, ref: 'Bank-Accounts' },
+    senderAccountNumber: String,
     receiverId: { type: mongoose.Types.ObjectId, ref: 'Bank-Accounts' },
+    receiverAccountNumber: String,
     transferMethodId: {
         type: mongoose.Types.ObjectId,
         ref: 'Transfer-Methods',

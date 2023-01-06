@@ -1,8 +1,17 @@
 import Title from 'antd/es/typography/Title.js';
 import styled from '@xstyled/styled-components';
-import { Button, Checkbox, message, Modal, Input, Skeleton, Table } from 'antd';
+import {
+    Button,
+    Checkbox,
+    message,
+    Modal,
+    Input,
+    Skeleton,
+    Table,
+    Space,
+} from 'antd';
 import { ServiceList } from '../../components/dashboard/service-list.component.js';
-import { SwapOutlined } from '@ant-design/icons';
+import { ReloadOutlined, SwapOutlined } from '@ant-design/icons';
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { BankAccountList } from '../../components/dashboard/bank-account-list.component.js';
 import { MoneyTransferForm } from '../../components/money-transfer/money-transfer-form.component.js';
@@ -39,15 +48,16 @@ export const CustomerDashBoardPage = () => {
     const [addReceiverModalVisibility, setAddReceiverModalVisibility] =
         useState(false);
     const [otp, setOtp] = useState('');
+    const [isReloadGeneralInformation, setReloadStatus] = useState(false);
+    const [isConfirmTransferLoading, setConfirmTransferLoading] =
+        useState(false);
+    const [isConfirmOtpLoading, setConfirmOtpLoading] = useState(false);
+
     const [addReceiverForm] = Form.useForm();
 
     const handleConfirmAddReceiver = () => {
         const { aliasName, receiverAccountNumber } =
             addReceiverForm.getFieldsValue();
-        console.log(
-            'addReceiverForm.getFieldsValue()',
-            addReceiverForm.getFieldsValue()
-        );
 
         if (receivers.accountNumber === receiverAccountNumber) {
             message.error('Đã tồn tại người nhận này rồi');
@@ -401,13 +411,30 @@ export const CustomerDashBoardPage = () => {
         getPaymentBankAccount();
     };
 
+    const reloadGeneralInformation = () => {
+        setReloadStatus(false);
+        setPaymentAccount(null);
+
+        getPaymentBankAccount();
+        setReloadStatus(true);
+    };
+
     const renderGeneralInformation = () =>
         paymentAccountInfo === null ? (
             <Skeleton />
         ) : (
             <>
                 <div>
-                    <Title level={2}>Thông tin chung</Title>
+                    <Space size='middle'>
+                        <Title level={2}>
+                            <span>Thông tin chung</span>
+                        </Title>
+                        <Button
+                            icon={<ReloadOutlined />}
+                            loading={isReloadGeneralInformation}
+                            onClick={reloadGeneralInformation}
+                        />
+                    </Space>
                     <p>Số tài khoản: {paymentAccountInfo.accountNumber}</p>
                     <p>Chủ tài khoản: {profile.aliasName}</p>
                     <p>Số dư: {paymentAccountInfo.overBalance} (VNĐ)</p>
@@ -426,6 +453,36 @@ export const CustomerDashBoardPage = () => {
             transferMethodId,
             description,
         } = moneyTransferForm.getFieldsValue();
+
+        setConfirmTransferLoading(true);
+
+        if (!receiverAccountNumber) {
+            message.error('Vui lòng nhập số tài khoản người nhận');
+            setConfirmTransferLoading(false);
+
+            return;
+        }
+
+        if (!bankTypeId) {
+            message.error('Vui lòng chọn loại ngân hàng');
+            setConfirmTransferLoading(false);
+
+            return;
+        }
+
+        if (!deposit) {
+            message.error('Vui lòng nhập số tiền');
+            setConfirmTransferLoading(false);
+
+            return;
+        }
+
+        if (!transferMethodId) {
+            message.error('Vui lòng chọn phương thức thanh toán');
+            setConfirmTransferLoading(false);
+
+            return;
+        }
 
         // validate.
         const payload = {
@@ -448,7 +505,12 @@ export const CustomerDashBoardPage = () => {
         })
             .then((response) => response.json())
             .then((data) => {
-                message.success('Successfully!!!');
+                if (data.message) {
+                    message.error(data.message);
+                    return;
+                }
+
+                message.success('Thành công!!!');
 
                 const isNotSavedReceiverBefore = receivers.every((value) => {
                     return value.accountNumber !== receiverAccountNumber;
@@ -465,8 +527,16 @@ export const CustomerDashBoardPage = () => {
 
                 toggleConfirmOtpModalVisibility();
                 localStorage.setItem('billing-id', data._id);
+                localStorage.setItem(
+                    'is-external-transaction',
+                    data.isExternalTransaction
+                );
+                setConfirmTransferLoading(false);
             })
-            .catch((error) => message.error(error));
+            .catch((error) => {
+                message.error(error);
+                setConfirmTransferLoading(false);
+            });
     };
 
     const handleConfirmOtp = () => {
@@ -485,8 +555,14 @@ export const CustomerDashBoardPage = () => {
             },
             body: JSON.stringify(payload),
         })
-            .then(() => {
-                message.success('Successfully');
+            .then((response) => response.json())
+            .then((value) => {
+                if (value.message) {
+                    message.error(value.message);
+                    return;
+                }
+
+                message.success('Giao dịch thành công');
                 toggleConfirmOtpModalVisibility();
                 getPaymentBankAccountHistory();
 
@@ -528,6 +604,12 @@ export const CustomerDashBoardPage = () => {
                                     receiverAccountNumber: localStorage.getItem(
                                         'current-receiver-account-number'
                                     ),
+                                    isExternalTransaction: JSON.parse(
+                                        localStorage.getItem(
+                                            'is-external-transaction'
+                                        )
+                                    ),
+                                    alias: 'Người dùng ngân hàng khác',
                                 };
                                 fetch(
                                     process.env.REACT_APP_RECEIVER_API_URL_PATH,
@@ -548,6 +630,8 @@ export const CustomerDashBoardPage = () => {
                                             'Lưu người nhận thành công'
                                         );
                                         getReceivers();
+                                        getPaymentBankAccount();
+                                        getPaymentBankAccountHistory();
                                     })
                                     .catch((error) =>
                                         message.error('Lưu người nhận thất bại')
@@ -646,6 +730,7 @@ export const CustomerDashBoardPage = () => {
                     transferMethods={transferMethods}
                     onDeleteReceiverClick={handleDeleteReceiverClick}
                     onConfirmTransfer={handleConfirmTransfer}
+                    isConfirmTransferLoading={isConfirmTransferLoading}
                 />
             </Modal>
 
