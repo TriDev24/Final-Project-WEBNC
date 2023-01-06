@@ -3,6 +3,7 @@ import { verifySignature } from '../utils/rsa.util.js';
 import { TransferFee } from '../models/transfer-fee.model.js';
 import TransferMethod from '../models/transfer-method.model.js';
 import BankType from '../models/bank-type.model.js';
+import fetch from 'node-fetch';
 
 export default {
     async getAll(req, res) {
@@ -53,6 +54,26 @@ export default {
         const record = await BankAccount.findById(id);
 
         res.status(200).json(record);
+    },
+
+    async getByAccountNumberAndBankType(req, res) {
+        const { accountNumber, bankTypeId } = req.query;
+
+        const internalBankType = await BankType.findOne({ name: 'My Bank' });
+        const isInternalBank = internalBankType._id === bankTypeId;
+
+        if (isInternalBank) {
+            const bankAccount = await BankAccount.findOne({ accountNumber });
+            if (!bankAccount) {
+                return res
+                    .status(404)
+                    .json({ message: 'Không tìm thấy tài khoản ngân hàng' });
+            }
+
+            return res.status(200).json(bankAccount);
+        } else {
+            const bankAccount = await fetch();
+        }
     },
 
     async create(req, res) {
@@ -182,14 +203,16 @@ export default {
 
         const isNotValidSignature = verifySignature(signature);
         if (isNotValidSignature) {
-            return res.status(403).json('Not valid signature');
+            return res.status(403).json('Chữ ký không hợp lệ');
         }
 
         const receiverBankAccount = await BankAccount.findById(
             receiverBankAccountId
         );
         if (!receiverBankAccount) {
-            return res.status(404).json('Cannot find this Bank Account');
+            return res
+                .status(404)
+                .json('Không tìm thấy tài khoản ngân hàng này');
         }
 
         const totalAmount =
