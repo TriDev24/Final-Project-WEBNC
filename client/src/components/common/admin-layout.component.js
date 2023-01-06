@@ -4,7 +4,6 @@ import { Layout, Menu, theme, Image, Space, Typography } from "antd";
 import { Link, Route, Routes } from "react-router-dom";
 import IdentityOption from "../identity-option.component.js";
 import { AdminDashboardPage } from "../../pages/admin/dashboard.page.js";
-import { EmployeeDashboardPage } from "../../pages/employee/dashboard.page.js";
 import { TransactionPage } from "../../pages/admin/transaction.page.js";
 
 const { Title } = Typography;

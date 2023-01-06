@@ -1,7 +1,5 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { Button, Checkbox, message, Modal, Skeleton, Table } from 'antd';
-import { ManagementList } from '../../components/management-list.component.js';
-import { BankTransactionHistoryForm } from '../../components/bank-transaction-history-form.component.js';
 import styled from '@xstyled/styled-components';
 import Title from 'antd/es/typography/Title.js';
 import { CreateEmployeeForm } from '../../components/create-employee-form.component.js';
