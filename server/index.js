@@ -31,10 +31,10 @@ app.listen(port, async () => {
         await db();
         console.log(`Server running on port ${port} ...`);
 
-        console.log(`WebSocket Server is running at ws://localhost:${WS_PORT}`);
-        socketServer.on('connection', function (client) {
-            console.log('Client connects successfully.');
-        });
+        // console.log(`WebSocket Server is running at ws://localhost:${WS_PORT}`);
+        // socketServer.on('connection', function (client) {
+        //     console.log('Client connects successfully.');
+        // });
     } catch (error) {
         console.log('Error: ', error);
     }
