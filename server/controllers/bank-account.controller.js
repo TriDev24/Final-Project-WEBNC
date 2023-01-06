@@ -1,11 +1,17 @@
 import BankAccount from '../models/bank-account.model.js';
-import { generateHashString, verifySignature } from '../utils/rsa.util.js';
+import {
+    generateHashString,
+    generateSignature,
+    verifySignature,
+} from '../utils/rsa.util.js';
 import { TransferFee } from '../models/transfer-fee.model.js';
 import TransferMethod from '../models/transfer-method.model.js';
 import BankType from '../models/bank-type.model.js';
 import fetch from 'node-fetch';
 import Identity from '../models/identity.model.js';
 import { ObjectID } from 'bson';
+import { TransferType } from '../models/transfer-type.model.js';
+import Billing from '../models/billing.model.js';
 
 export default {
     async getAll(req, res) {
@@ -248,6 +254,7 @@ export default {
             deposit,
             hashValue: requestHashValue,
             signature,
+            description,
             // Transfer method that other bank send
             transferMethod,
             transferTime,
@@ -255,6 +262,18 @@ export default {
         const now = Math.floor(Date.now() / 1000);
         const partnerBankUrl = process.env.PARTNER_BANK_API_URL_PATH;
         const requestHost = req.get('host');
+
+        // return res.status(200).json(
+        //     generateHashString({
+        //         senderAccountNumber: '123456',
+        //         receiverAccountNumber: '243275',
+        //         deposit: 2000,
+        //         signature:
+        //             'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50TnVtYmVyIjoiNjI4ODUiLCJjYXNoIjoyMDAwLCJpYXQiOjE2NzMwMDI4ODZ9.Bp7jwrXhyI94EtB2-lTF5MBmd_r_UFE7bJJh6aJFRFykwOZA6P3OqKpz2tgX5CRgluAnR_6F2CueGQ2cNEeKXeMaH3mUBxMy4IBc0NChhRxjx6gK3KzzdimDjGryw4KNaemtkM_Fn9SVp9zlbnRvz-OxCZfi1OVmRH-qYOKf8Y8',
+        //         transferTime: '1673027846',
+        //         transferMethod: 'receiver pay fee',
+        //     })
+        // );
 
         // ------- Check Security ------
 
@@ -294,7 +313,7 @@ export default {
             });
         }
 
-        const isNotValidSignature = verifySignature(signature);
+        const isNotValidSignature = verifySignature(signature, payload);
         if (isNotValidSignature) {
             return res.status(401).json('Chữ ký không hợp lệ');
         }
@@ -313,43 +332,50 @@ export default {
                 ? deposit - TransferFee.External
                 : deposit;
 
-        const updatedBankAccount = await BankAccount.updateOne(
+        const updatedReceiverBankAccount = await BankAccount.updateOne(
             {
-                _id: id,
+                _id: receiverBankAccount._id,
             },
             {
                 overBalance: receiverBankAccount.overBalance + totalAmount,
             }
         );
-        if (!updatedBankAccount) {
-            return res.status(500).json('Something error');
+        if (!updatedReceiverBankAccount) {
+            return res.status(500).json({ error: 'Đã có lỗi xảy ra!!!' });
         }
 
         // Save it billing.
         const correspondTransferMethod =
             transferMethod === 'Receiver pay'
-                ? await TransferMethod.findOne('Receiver Pay Transfer Fee')
-                : await TransferMethod.findOne('Sender Pay Transfer Fee');
+                ? await TransferMethod.findOne({
+                      name: 'Receiver Pay Transfer Fee',
+                  })
+                : await TransferMethod.findOne({
+                      name: 'Sender Pay Transfer Fee',
+                  });
 
         const document = {
             senderId: new ObjectID(),
-            receiverId: receiverBankAccountId,
+            receiverId: receiverBankAccount._id,
             senderAccountNumber,
             receiverAccountNumber,
             deposit,
-            description,
+            description: description ?? '',
             transferType: TransferType.MoneyTransfer,
             transferMethodId: correspondTransferMethod._id,
             transferFee: TransferFee.External,
             transferTime,
             signature,
+
+            // Because the transaction was verified from sender side so receiver side don't need to do that again.
+            isVerified: true,
         };
 
-        insertedData = await Billing.create(document);
+        const insertedData = await Billing.create(document);
         if (!insertedData) {
-            return res.status(500).json('Something error');
+            return res.status(500).json({ error: 'Đã có lỗi xảy ra!!!' });
         }
 
-        return res.status(200).json('Recharge successfully');
+        return res.status(200).json({ billing: insertedData });
     },
 };

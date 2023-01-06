@@ -19,7 +19,7 @@ router.get('/:id', auth(['customer']), controller.getById);
 router.post('/', auth(['employee']), controller.create);
 
 // API for other bank
-router.put('/:id/payment', controller.rechargeMoney);
+router.post('/payment-transaction', controller.rechargeMoney);
 
 router.patch('/:id', auth(['employee', 'customer']), controller.update);
 
