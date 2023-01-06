@@ -58,7 +58,7 @@ export const CreateIdentityModal = ({
             if (!result.message) {
                 messageApi.open({
                     type: 'success',
-                    content: 'Tạo tài khoản thanh toán thành công!',
+                    content: 'Tạo tài khoản khách hàng thành công!',
                 });
                 form.resetFields();
                 setLoading(false);
