@@ -40,6 +40,20 @@ export default {
         return res.json(result);
     },
 
+    async createEmployee(req, res) {
+        const result = await service.create(req.body);
+        if (result === -1) {
+            return res.json({
+                message: 'Số điện thoại đã tồn tại!',
+            });
+        } else if (result === -2) {
+            return res.json({
+                message: 'Email đã tồn tại!',
+            });
+        }
+        return res.json(result);
+    },
+
     async generateAccessToken(req, res) {
         const result = await service.generateAccessToken(req.body);
         if (result === -1) {

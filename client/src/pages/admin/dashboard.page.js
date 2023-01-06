@@ -18,6 +18,14 @@ export const AdminDashboardPage = () => {
 
     const handleAddEmloyeeClick = () => {
         setAddEmloyeeModalVisibility(!isAddEmloyeeModalVisible);
+        toggleCreateEmployeeFormVisibility();
+    };
+
+    const [isCreateEmployeeFormVisible, setCreateEmployeeFormVisibility] =
+        useState(false);
+    
+    const toggleCreateEmployeeFormVisibility = () => {
+        setCreateEmployeeFormVisibility(!isCreateEmployeeFormVisible);
     };
 
     const historyColumns = useMemo(
@@ -111,14 +119,10 @@ export const AdminDashboardPage = () => {
                 {renderListEmployee()}
             </ListEmployee>
 
-            <Modal
-                title='Thêm nhân viên'
-                centered
-                open={isAddEmloyeeModalVisible}
-                onOk={handleAddEmloyeeClick}
-                onCancel={handleAddEmloyeeClick}>
-                <CreateEmployeeForm />
-            </Modal>
+            <CreateEmployeeForm
+                isVisible={isCreateEmployeeFormVisible}
+                onToggleVisibilityChange={toggleCreateEmployeeFormVisibility}
+            />
         </ContentLayout>
     );
 };

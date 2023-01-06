@@ -133,6 +133,54 @@ export default {
         }
     },
 
+    async createEmployee(data) {
+        const { emailEmployee, passwordEmployee, firstNameEmployee, lastNameEmployee, phoneNumberEmployee } = data;
+        console.log('hash', data);
+
+        let { aliasNameEmployee } = data;
+        const isIdentityExist = await Identity.findOne({ emailEmployee });
+        const isPhoneExist = await Identity.findOne({ phoneNumberEmployee });
+        if (!isIdentityExist) {
+            if (!isPhoneExist) {
+                const permission = await Permission.findOne({
+                    name: 'employee',
+                });
+                const hash = bcrypt.hashSync(passwordEmployee, 10);
+                console.log('hash', hash);
+                if (aliasNameEmployee === '') {
+                    aliasNameEmployee = firstNameEmployee + ' ' + lastNameEmployee;
+                }
+                const newIdentity = {
+                    emailEmployee,
+                    passwordEmployee: hash,
+                    firstNameEmployee,
+                    lastNameEmployee,
+                    phoneNumberEmployee,
+                    refreshToken: null,
+                    permissionId: permission._id,
+                    aliasNameEmployee,
+                };
+                const identityInserted = await Identity.create(newIdentity);
+                const bankType = await BankType.findOne({ name: 'My Bank' });
+                const newBankAccount = {
+                    accountNumber: Math.floor(Math.random() * 1000000),
+                    overBalance: 0,
+                    isPayment: true,
+                    identityId: identityInserted._id,
+                    bankTypeId: bankType._id,
+                };
+                const bankAccountInserted = await BankAccount.create(
+                    newBankAccount
+                );
+                return bankAccountInserted;
+            } else {
+                return -1;
+            }
+        } else {
+            return -2;
+        }
+    },
+
     async generateAccessToken({ refreshToken }) {
         try {
             const isTokenExist = await Identity.findOne({ refreshToken });

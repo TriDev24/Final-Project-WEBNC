@@ -16,4 +16,6 @@ router.get('/', auth(['customer']), controller.getAll);
 
 router.post('/', auth(['employee']), controller.create);
 
+router.post('/', auth(['admin']), controller.createEmployee);
+
 export default router;
