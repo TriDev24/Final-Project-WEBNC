@@ -12,12 +12,17 @@ import {
     Space,
     Collapse,
     Tooltip,
+    message,
+    Typography,
 } from 'antd';
+import { useState } from 'react';
 import { ReceiverItem } from './receiver-item.component.js';
 
 const { Panel } = Collapse;
 
 const { Option } = Select;
+
+const { Text } = Typography;
 
 const Container = styled.div`
     margin: 20px 10px;
@@ -27,10 +32,12 @@ const StyledDepositInput = styled(InputNumber)`
     width: 100%;
 `;
 
-const FlexLayout = styled.div`
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+const FloatRight = styled.div`
+    float: right;
+`;
+
+const CenterText = styled.div`
+    text-align: center;
 `;
 
 const ReceiverItemContainer = styled.div`
@@ -60,6 +67,9 @@ export const MoneyTransferForm = ({
     onDeleteReceiverClick,
     onConfirmTransfer,
 }) => {
+    const [isValid, setIsValid] = useState(null);
+    const [isLoadingCheckReceiver, setLoadingCheckReceiverStatus] =
+        useState(false);
     const handleReceiverItemClick = (receiver) => {
         form.setFieldsValue({
             receiverAccountNumber: receiver.accountNumber,
@@ -88,6 +98,57 @@ export const MoneyTransferForm = ({
             ))
         );
 
+    const handleCheckReceiverExist = () => {
+        setLoadingCheckReceiverStatus(true);
+
+        const { receiverAccountNumber, bankTypeId } = form.getFieldsValue();
+        console.log('form.getFieldsValue()', form.getFieldsValue());
+        const url = `${process.env.REACT_APP_BANK_ACCOUNT_API_URL_PATH}/by-account-number-and-bank-type?accountNumber=${receiverAccountNumber}&bankTypeId=${bankTypeId}`;
+
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: localStorage.getItem('accessToken'),
+            },
+        })
+            .then((response) => response.json())
+            .then((value) => {
+                setLoadingCheckReceiverStatus(false);
+
+                if (value.message) {
+                    setIsValid(false);
+                    message.error(value.message);
+                    return;
+                }
+
+                setIsValid(true);
+                Modal.success({
+                    title: 'Tài khoản hợp lệ',
+                    content: (
+                        <>
+                            <p>
+                                <strong>Số tài khoản: </strong>{' '}
+                                {value.accountNumber}
+                            </p>
+                            <p>
+                                <strong>Tên thường gọi: </strong>
+                                {value.user.fullname}
+                            </p>
+                            <p>
+                                <strong>Email: </strong>
+                                {value.user.email}
+                            </p>
+                            <p>
+                                <strong>Số điện thoại: </strong>
+                                {value.user.phone}
+                            </p>
+                        </>
+                    ),
+                });
+            });
+    };
+
     const renderBankTypeOptions = () =>
         bankTypes === null ? (
             <Skeleton />
@@ -109,8 +170,15 @@ export const MoneyTransferForm = ({
 
     return (
         <Container>
-            <Modal></Modal>
             <Form form={form} layout='vertical'>
+                <CenterText>
+                    {isValid && isValid === true ? (
+                        <Text type='success'>Tài khoản hợp lệ</Text>
+                    ) : (
+                        <Text type='danger'>Tài khoản chưa được xác minh</Text>
+                    )}
+                </CenterText>
+
                 <Form.Item
                     name='receiverAccountNumber'
                     label='Số tài khoản người nhận'
@@ -134,6 +202,16 @@ export const MoneyTransferForm = ({
                     <Select placeholder='Vui lòng chọn 1 ngân hàng cần chuyển'>
                         {renderBankTypeOptions()}
                     </Select>
+                </Form.Item>
+                <Form.Item>
+                    <FloatRight>
+                        <Button
+                            type='default'
+                            onClick={handleCheckReceiverExist}
+                            loading={isLoadingCheckReceiver}>
+                            Kiểm tra người nhận
+                        </Button>
+                    </FloatRight>
                 </Form.Item>
                 <Form.Item>
                     <Collapse defaultActiveKey={['1']}>

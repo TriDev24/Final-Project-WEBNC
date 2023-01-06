@@ -4,6 +4,7 @@ import { TransferFee } from '../models/transfer-fee.model.js';
 import TransferMethod from '../models/transfer-method.model.js';
 import BankType from '../models/bank-type.model.js';
 import fetch from 'node-fetch';
+import Identity from '../models/identity.model.js';
 
 export default {
     async getAll(req, res) {
@@ -60,28 +61,76 @@ export default {
         const { accountNumber, bankTypeId } = req.query;
 
         const internalBankType = await BankType.findOne({ name: 'My Bank' });
-        const isInternalBank = internalBankType._id === bankTypeId;
+        const isInternalBank = internalBankType._id.toString() === bankTypeId;
+
+        console.log('isInternalBank', isInternalBank);
 
         if (isInternalBank) {
             const bankAccount = await BankAccount.findOne({ accountNumber });
+            console.log('bankAccount ne', bankAccount);
             if (!bankAccount) {
                 return res
                     .status(404)
                     .json({ message: 'Không tìm thấy tài khoản ngân hàng' });
             }
 
-            return res.status(200).json(bankAccount);
+            const identity = await Identity.findById(bankAccount.identityId);
+            const response = {
+                id: bankAccount._id,
+                accountNumber: bankAccount.accountNumber,
+                user: {
+                    id: identity._id,
+                    email: identity.email,
+                    fullname: identity.aliasName,
+                    phone: identity.phoneNumber,
+                },
+            };
+
+            return res.status(200).json(response);
         } else {
-            const bankAccount = await fetch();
+            const payload = {
+                path: '/partnerBank/queryAccount',
+            };
+            const response = await fetch(
+                process.env.PARTNER_BANK_GENERATE_TOKEN_URL_PATH,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload),
+                }
+            );
+
+            const { timestamp, encrypt } = await response.json();
+
+            // Get
+            const url = `${process.env.PARTNER_BANK_QUERY_ACCOUNT_URL_PATH}?timestamp=${timestamp}`;
+            const request = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${encrypt}`,
+                },
+            });
+
+            const dataResponse = await request.json();
+            const { accountNumber: externalBankAccountNumber } = dataResponse;
+
+            if (externalBankAccountNumber !== accountNumber) {
+                return res
+                    .status(404)
+                    .json({ message: 'Không tìm thấy tài khoản ngân hàng' });
+            }
+
+            return res.status(200).json(dataResponse);
         }
     },
 
     async create(req, res) {
         const { identityId } = req.body;
-        console.log('identityId', identityId);
 
         const defaultBank = await BankType.findOne({ name: 'My Bank' });
-        console.log('identityId', identityId);
         const defaultBankAccount = {
             accountNumber: Math.floor(Math.random() * 1000000),
             overBalance: 0,

@@ -618,6 +618,7 @@ export const CustomerDashBoardPage = () => {
             </Modal>
 
             <Modal
+                centered
                 footer={null}
                 title='Tài khoản ngân hàng'
                 open={changeAccountModalVisibility}
@@ -632,6 +633,7 @@ export const CustomerDashBoardPage = () => {
             </Modal>
 
             <Modal
+                centered
                 footer={null}
                 title='Chuyển khoản'
                 open={moneyTransferModalVisibility}
