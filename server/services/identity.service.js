@@ -138,8 +138,8 @@ export default {
         console.log('hash', data);
 
         let { aliasNameEmployee } = data;
-        const isIdentityExist = await Identity.findOne({ emailEmployee });
-        const isPhoneExist = await Identity.findOne({ phoneNumberEmployee });
+        const isIdentityExist = await Identity.findOne({ email:emailEmployee });
+        const isPhoneExist = await Identity.findOne({ phoneNumber:phoneNumberEmployee });
         if (!isIdentityExist) {
             if (!isPhoneExist) {
                 const permission = await Permission.findOne({
@@ -151,28 +151,17 @@ export default {
                     aliasNameEmployee = firstNameEmployee + ' ' + lastNameEmployee;
                 }
                 const newIdentity = {
-                    emailEmployee,
-                    passwordEmployee: hash,
-                    firstNameEmployee,
-                    lastNameEmployee,
-                    phoneNumberEmployee,
+                    email:emailEmployee,
+                    password: hash,
+                    firstName:firstNameEmployee,
+                    lastName:lastNameEmployee,
+                    phoneNumber:phoneNumberEmployee,
                     refreshToken: null,
                     permissionId: permission._id,
-                    aliasNameEmployee,
+                    aliasName:aliasNameEmployee,
                 };
                 const identityInserted = await Identity.create(newIdentity);
-                const bankType = await BankType.findOne({ name: 'My Bank' });
-                const newBankAccount = {
-                    accountNumber: Math.floor(Math.random() * 1000000),
-                    overBalance: 0,
-                    isPayment: true,
-                    identityId: identityInserted._id,
-                    bankTypeId: bankType._id,
-                };
-                const bankAccountInserted = await BankAccount.create(
-                    newBankAccount
-                );
-                return bankAccountInserted;
+                return identityInserted;
             } else {
                 return -1;
             }

@@ -41,7 +41,7 @@ export default {
     },
 
     async createEmployee(req, res) {
-        const result = await service.create(req.body);
+        const result = await service.createEmployee(req.body);
         if (result === -1) {
             return res.json({
                 message: 'Số điện thoại đã tồn tại!',

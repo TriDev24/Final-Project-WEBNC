@@ -122,6 +122,7 @@ export const AdminDashboardPage = () => {
             <CreateEmployeeForm
                 isVisible={isCreateEmployeeFormVisible}
                 onToggleVisibilityChange={toggleCreateEmployeeFormVisibility}
+                getListEmployee= {getListEmployee}
             />
         </ContentLayout>
     );

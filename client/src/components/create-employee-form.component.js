@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button, Modal, Form, Input, Avatar, message } from 'antd';
 import {
     LockOutlined,
@@ -10,10 +10,14 @@ import {
 export const CreateEmployeeForm = ({
     isVisible,
     onToggleVisibilityChange,
+    getListEmployee
 }) => {
     const [messageApi, contextHolder] = message.useMessage();
     const [loading, setLoading] = useState(false);
     const [form] = Form.useForm();
+    useEffect(() => {
+        getListEmployee();
+    }, []);
 
     const onFinish = async (values) => {
         setLoading(true);
@@ -26,6 +30,7 @@ export const CreateEmployeeForm = ({
             aliasNameEmployee,
             confirmEmployee,
         } = form.getFieldsValue();
+        console.log(form.getFieldValue());
         if (confirmEmployee !== passwordEmployee) {
             messageApi.open({
                 type: 'error',
@@ -60,6 +65,7 @@ export const CreateEmployeeForm = ({
                     type: 'success',
                     content: 'Tạo tài khoản thanh toán thành công!',
                 });
+                getListEmployee();
                 form.resetFields();
                 setLoading(false);
             } else {
