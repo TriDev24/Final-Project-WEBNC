@@ -528,29 +528,13 @@ export default {
             }
 
             // Verify that receiver bank account existed by receiver bank account number
-            const payload = {
-                path: '/partnerBank/queryAccount',
-            };
-            const response = await fetch(
-                process.env.PARTNER_BANK_GENERATE_TOKEN_URL_PATH,
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(payload),
-                }
-            );
-
-            const { timestamp, encrypt } = await response.json();
-
             // Get
-            const url = `${process.env.PARTNER_BANK_QUERY_ACCOUNT_URL_PATH}?timestamp=${timestamp}`;
+            const url = `https://backend.cloudvscode.com/account/getInfoAccountPartner?accountNumber=317348370&bankCode=BIDV`;
             const request = await fetch(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: `Bearer ${encrypt}`,
+                    Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InR1eWVuYnVpMzAzMEBnbWFpbC5jb20iLCJmdWxsbmFtZSI6IkJ1aSBRdWFuZyBUdXllbiIsImlkIjoxLCJpYXQiOjE2NzI4NTAwMzksImV4cCI6MTY3NDY1MDAzOX0.TO4xn2lxK7DF0XoY_ISZ39NOSAx7Os8OZbvhfvVW_K4`,
                 },
             });
 
