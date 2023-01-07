@@ -147,8 +147,6 @@ export default {
                 );
         }
 
-        const internalBank = await BankType.findOne({ name: 'My Bank' });
-
         const receiveBillings = await Billing.find({
             receiverAccountNumber: accountNumber,
             transferType: TransferType.MoneyTransfer,
@@ -162,9 +160,6 @@ export default {
         const parseReceiveBillings = [];
         for (const r of receiveBillings) {
             const sender = await BankAccount.findById(r.senderId);
-            const isInternalTransaction =
-                sender.bankTypeId === internalBank._id;
-            const bankType = await BankType.findById(sender.bankTypeId);
 
             parseReceiveBillings.push({
                 deposit: r.deposit,
@@ -172,12 +167,8 @@ export default {
                 transferTime: r.transferTime,
                 sender: {
                     accountNumber: sender.accountNumber,
-                    bankType: {
-                        name: bankType.name,
-                    },
                 },
                 type: 'receive',
-                isInternalTransaction,
             });
         }
 
@@ -193,10 +184,8 @@ export default {
 
         const parseTransferBillings = [];
         for (const t of transferBillings) {
+            console.log('t.receiverId', t.receiverId);
             const receiver = await BankAccount.findById(t.receiverId);
-            const isInternalTransaction =
-                receiver.bankTypeId === internalBank._id;
-            const bankType = await BankType.findById(receiver.bankTypeId);
 
             parseTransferBillings.push({
                 deposit: t.deposit,
@@ -204,12 +193,8 @@ export default {
                 transferTime: t.transferTime,
                 receiver: {
                     accountNumber: receiver.accountNumber,
-                    bankType: {
-                        name: bankType.name,
-                    },
                 },
                 type: 'transfer',
-                isInternalTransaction,
             });
         }
 
@@ -531,7 +516,7 @@ export default {
             // Get
             const url = `https://backend.cloudvscode.com/account/getInfoAccountPartner?accountNumber=317348370&bankCode=BIDV`;
             const request = await fetch(url, {
-                method: 'POST',
+                method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InR1eWVuYnVpMzAzMEBnbWFpbC5jb20iLCJmdWxsbmFtZSI6IkJ1aSBRdWFuZyBUdXllbiIsImlkIjoxLCJpYXQiOjE2NzI4NTAwMzksImV4cCI6MTY3NDY1MDAzOX0.TO4xn2lxK7DF0XoY_ISZ39NOSAx7Os8OZbvhfvVW_K4`,
@@ -603,6 +588,7 @@ export default {
                         message: 'Không tạo được tài khoản cho người nhận',
                     });
                 }
+                console.log('receiverAccountNumber', receiverAccountNumber);
 
                 const document = {
                     accountNumber: receiverAccountNumber,
@@ -611,6 +597,8 @@ export default {
                     identityId: receiverInfo._id,
                     bankTypeId: externalBank._id,
                 };
+
+                console.log('document', document);
 
                 receiverBankAccount = await BankAccount.create(document);
                 if (!receiverBankAccount) {
