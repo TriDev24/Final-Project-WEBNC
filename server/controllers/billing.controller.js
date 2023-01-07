@@ -147,8 +147,6 @@ export default {
                 );
         }
 
-        const internalBank = await BankType.findOne({ name: 'My Bank' });
-
         const receiveBillings = await Billing.find({
             receiverAccountNumber: accountNumber,
             transferType: TransferType.MoneyTransfer,
@@ -162,9 +160,6 @@ export default {
         const parseReceiveBillings = [];
         for (const r of receiveBillings) {
             const sender = await BankAccount.findById(r.senderId);
-            const isInternalTransaction =
-                sender.bankTypeId === internalBank._id;
-            const bankType = await BankType.findById(sender.bankTypeId);
 
             parseReceiveBillings.push({
                 deposit: r.deposit,
@@ -172,12 +167,8 @@ export default {
                 transferTime: r.transferTime,
                 sender: {
                     accountNumber: sender.accountNumber,
-                    bankType: {
-                        name: bankType.name,
-                    },
                 },
                 type: 'receive',
-                isInternalTransaction,
             });
         }
 
@@ -193,10 +184,8 @@ export default {
 
         const parseTransferBillings = [];
         for (const t of transferBillings) {
+            console.log('t.receiverId', t.receiverId);
             const receiver = await BankAccount.findById(t.receiverId);
-            const isInternalTransaction =
-                receiver.bankTypeId === internalBank._id;
-            const bankType = await BankType.findById(receiver.bankTypeId);
 
             parseTransferBillings.push({
                 deposit: t.deposit,
@@ -204,12 +193,8 @@ export default {
                 transferTime: t.transferTime,
                 receiver: {
                     accountNumber: receiver.accountNumber,
-                    bankType: {
-                        name: bankType.name,
-                    },
                 },
                 type: 'transfer',
-                isInternalTransaction,
             });
         }
 
@@ -557,22 +542,22 @@ export default {
             const generatedSignature = generateSignature(requestPayload);
 
             // // Goi API cap nhat so du cua API lien ket
-            const transaction = await fetch(
-                process.env.PARTNER_BANK_TRANSACTION_URL_PATH,
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${generatedSignature}`,
-                    },
-                    body: JSON.stringify(requestPayload),
-                }
-            );
-            console.log('transaction', transaction.status !== 200);
-            if (transaction.status !== 200) {
-                console.log('tai sao vay dm');
-                return res.status(500).json({ message: 'Đã có lỗi xảy ra' });
-            }
+            // const transaction = await fetch(
+            //     process.env.PARTNER_BANK_TRANSACTION_URL_PATH,
+            //     {
+            //         method: 'POST',
+            //         headers: {
+            //             'Content-Type': 'application/json',
+            //             Authorization: `Bearer ${generatedSignature}`,
+            //         },
+            //         body: JSON.stringify(requestPayload),
+            //     }
+            // );
+            // console.log('transaction', transaction.status !== 200);
+            // if (transaction.status !== 200) {
+            //     console.log('tai sao vay dm');
+            //     return res.status(500).json({ message: 'Đã có lỗi xảy ra' });
+            // }
 
             // Save receiver to DB
             let receiverBankAccount;

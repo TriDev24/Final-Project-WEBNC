@@ -320,7 +320,6 @@ export const CustomerDashBoardPage = () => {
                         transferMoney: r.deposit,
                         description: r.description,
                         transferTime: r.transferTime,
-                        isInternalTransaction: r.isInternalTransaction,
                     };
                 }
             );
@@ -338,7 +337,6 @@ export const CustomerDashBoardPage = () => {
                         transferMoney: t.deposit,
                         description: t.description,
                         transferTime: t.transferTime,
-                        isInternalTransaction: t.isInternalTransaction,
                     };
                 }
             );
