@@ -35,6 +35,15 @@ export default {
               },
             },
           },
+          400: {
+            description: "Bad request"
+          },
+          404: {
+            description: "Không tìm thấy thông tin người dùng"
+          },
+          500: {
+            description: "Lỗi hệ thống"
+          },
         },
       },
     },
@@ -72,6 +81,15 @@ export default {
               },
             },
           },
+          400: {
+            description: "Bad request"
+          },
+          404: {
+            description: "Không tìm thấy thông tin người dùng"
+          },
+          500: {
+            description: "Lỗi hệ thống"
+          },
         },
       },
     },
@@ -100,8 +118,14 @@ export default {
           200: {
             description: "Cập nhật thông tin user thành công",
           },
+          400: {
+            description: "Bad request"
+          },
           404: {
-            description: "Không tìm thấy người dùng",
+            description: "Không tìm thấy thông tin người dùng"
+          },
+          500: {
+            description: "Lỗi hệ thống"
           },
         },
       },
