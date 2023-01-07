@@ -92,8 +92,6 @@ export default {
           },
         },
       },
-    },
-    "/user/{id}": {
       patch: {
         tags: ["User API"],
         description: "Cập nhật thông tin user",

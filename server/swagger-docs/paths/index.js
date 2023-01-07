@@ -4,12 +4,14 @@ import debtorPath from "./debtor.path.js";
 import notifyPath from "./notify.path.js";
 import userPath from "./user.path.js";
 import changePassword from "./change-password.path.js";
+import bankAccount from "./bank-account.path.js";
 
 export default {
   ...debitPath,
   ...identityPath,
   ...debtorPath,
   ...notifyPath,
+  ...bankAccount,
   ...userPath,
   ...changePassword
 };

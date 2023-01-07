@@ -75,6 +75,52 @@ export default {
         },
     },
     '/bank-accounts/{id}': {
+        get: {
+            tags: ['Bank Account API'],
+            description: 'Lấy thông tin chi tiết tài khoản',
+            operationId: 'getById',
+            parameters: [
+                {
+                  name: "id",
+                  in: "path",
+                  schema: {
+                    type: "string",
+                  },
+                  required: true,
+                  description: "Id account",
+                  example: "63b3d2a6d6026c3974342879",
+                },
+            ],
+            security: [
+                {
+                    Authorization: [],
+                },
+            ],
+            responses: {
+                200: {
+                    description: 'Lấy thông tin chi tiết tài khoản thành công',
+                    content: {
+                        'application/json': {
+                            schema: {
+                                type: 'array',
+                                items: {
+                                    $ref: '#components/schemas/BankAccount',
+                                },
+                            },
+                        },
+                    },
+                },
+                400: {
+                    description: "Bad request"
+                  },
+                  404: {
+                    description: "Không tìm thấy thông tin tài khoản"
+                  },
+                  500: {
+                    description: "Lỗi hệ thống"
+                  },
+            },
+        },
         patch: {
             tags: ['Bank Account API'],
             description: 'Cập nhật tài khoản ngân hàng',
