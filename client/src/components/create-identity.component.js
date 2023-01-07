@@ -10,6 +10,7 @@ import {
 export const CreateIdentityModal = ({
     isVisible,
     onToggleVisibilityChange,
+    onGetAllBankAccounts,
 }) => {
     const [messageApi, contextHolder] = message.useMessage();
     const [loading, setLoading] = useState(false);
@@ -53,7 +54,26 @@ export const CreateIdentityModal = ({
                 }
             )
                 .then((response) => response.json())
-                .then((data) => data);
+                .then((data) => {
+                    if (data.message) {
+                        message.error(data.message);
+                        return;
+                    }
+
+                    console.log('data ne: ', data);
+                    Modal.success({
+                        title: 'Tạo tài khoản người dùng thành công',
+                        content: (
+                            <div>
+                                <strong>Số tài khoản ngân hàng: </strong>{' '}
+                                {data.bankAccount.accountNumber}
+                            </div>
+                        ),
+                    });
+
+                    form.resetFields();
+                    onGetAllBankAccounts();
+                });
 
             if (!result.message) {
                 messageApi.open({

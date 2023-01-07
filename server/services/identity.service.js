@@ -124,7 +124,13 @@ export default {
                 const bankAccountInserted = await BankAccount.create(
                     newBankAccount
                 );
-                return bankAccountInserted;
+
+                return {
+                    bankAccount: {
+                        id: bankAccountInserted._id,
+                        accountNumber: bankAccountInserted.accountNumber,
+                    },
+                };
             } else {
                 return -1;
             }
@@ -134,12 +140,22 @@ export default {
     },
 
     async createEmployee(data) {
-        const { emailEmployee, passwordEmployee, firstNameEmployee, lastNameEmployee, phoneNumberEmployee } = data;
+        const {
+            emailEmployee,
+            passwordEmployee,
+            firstNameEmployee,
+            lastNameEmployee,
+            phoneNumberEmployee,
+        } = data;
         console.log('hash', data);
 
         let { aliasNameEmployee } = data;
-        const isIdentityExist = await Identity.findOne({ email:emailEmployee });
-        const isPhoneExist = await Identity.findOne({ phoneNumber:phoneNumberEmployee });
+        const isIdentityExist = await Identity.findOne({
+            email: emailEmployee,
+        });
+        const isPhoneExist = await Identity.findOne({
+            phoneNumber: phoneNumberEmployee,
+        });
         if (!isIdentityExist) {
             if (!isPhoneExist) {
                 const permission = await Permission.findOne({
@@ -148,17 +164,18 @@ export default {
                 const hash = bcrypt.hashSync(passwordEmployee, 10);
                 console.log('hash', hash);
                 if (aliasNameEmployee === '') {
-                    aliasNameEmployee = firstNameEmployee + ' ' + lastNameEmployee;
+                    aliasNameEmployee =
+                        firstNameEmployee + ' ' + lastNameEmployee;
                 }
                 const newIdentity = {
-                    email:emailEmployee,
+                    email: emailEmployee,
                     password: hash,
-                    firstName:firstNameEmployee,
-                    lastName:lastNameEmployee,
-                    phoneNumber:phoneNumberEmployee,
+                    firstName: firstNameEmployee,
+                    lastName: lastNameEmployee,
+                    phoneNumber: phoneNumberEmployee,
                     refreshToken: null,
                     permissionId: permission._id,
-                    aliasName:aliasNameEmployee,
+                    aliasName: aliasNameEmployee,
                 };
                 const identityInserted = await Identity.create(newIdentity);
                 return identityInserted;

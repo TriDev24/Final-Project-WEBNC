@@ -10,6 +10,7 @@ import Identity from '../models/identity.model.js';
 import { generateSignature, verifySignature } from '../utils/rsa.util.js';
 import fetch from 'node-fetch';
 import { ObjectId, UUID } from 'bson';
+import Permission from '../models/permission.model.js';
 
 export default {
     async getHistory(req, res) {
@@ -515,6 +516,7 @@ export default {
             if (!dataResponse) {
                 res.status(404).json({ message: 'Không tìm thấy tài khoản' });
             }
+            const { user } = dataResponse;
 
             const cash = isReceiverPayForTransferFee
                 ? deposit - TransferFee.External
@@ -557,11 +559,30 @@ export default {
                     name: 'Another Bank',
                 });
 
+                const customerPermission = await Permission.findOne({
+                    name: 'customer',
+                });
+
+                const receiverInfo = await Identity.create({
+                    email: user.email,
+                    firstName: '',
+                    lastName: '',
+                    aliasName: user.fullname,
+                    phoneNumber: user.phone,
+                    password: '',
+                    permissionId: customerPermission._id,
+                });
+                if (!receiverInfo) {
+                    return res.status(500).json({
+                        message: 'Không tạo được tài khoản cho người nhận',
+                    });
+                }
+
                 const document = {
                     accountNumber: receiverAccountNumber,
                     overBalance: 0,
                     isPayment: false,
-                    identityId: new ObjectId(),
+                    identityId: receiverInfo._id,
                     bankTypeId: externalBank._id,
                 };
 
@@ -590,7 +611,9 @@ export default {
 
             const insertedData = await Billing.create(document);
             if (!insertedData) {
-                return res.status(500).json('Không thể thêm được hoá đơn');
+                return res
+                    .status(500)
+                    .json({ message: 'Không thể thêm được hoá đơn' });
             }
 
             const moneyToPay = isReceiverPayForTransferFee

@@ -48,7 +48,7 @@ export default {
             ],
             responses: {
                 200: {
-                    description: 'Tạo nhắc nợ thành công',
+                    description: 'Tạo tài khoản thành công',
                     content: {
                         'application/json': {
                             schema: {
