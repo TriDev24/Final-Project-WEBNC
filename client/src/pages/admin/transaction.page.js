@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
-import { Button, Checkbox, message, Modal, Skeleton, Table } from 'antd';
+import { Button, Checkbox, message, Modal, Skeleton, Table, Select } from 'antd';
 import styled from '@xstyled/styled-components';
 import Title from 'antd/es/typography/Title.js';
 import { CreateEmployeeForm } from '../../components/create-employee-form.component.js';
@@ -12,6 +12,7 @@ const FlexLayout = styled.div`
 
 export const TransactionPage = () => {
     const [listBilling, setListBilling] = useState(null);
+    const [listBillingAll, setListBillingAll] = useState(null);
 
     const historyColumns = useMemo(
         () => [
@@ -42,10 +43,10 @@ export const TransactionPage = () => {
     );
 
     useEffect(() => {
-        getListBilling();
+        getListBillingAll();
     }, []);
 
-    const getListBilling = useCallback(() => {
+    const getListBillingAll = useCallback(() => {
         const url = `${process.env.REACT_APP_BILLING_API_URL_PATH}/payment-history`;
         fetch(url, {
             method: 'GET',
@@ -55,8 +56,71 @@ export const TransactionPage = () => {
             },
         })
             .then((response) => response.json())
-            .then((data) => setListBilling(data));
+            .then((data) => setListBillingAll(data));
+        setListBilling(listBillingAll);
+        console.log(listBilling);
     }, []);
+
+    const onChange = (value) => {
+        if (value === "All"){
+            setListBilling(listBillingAll);
+        }
+        else{
+            console.log({listBillingAll});
+            if (value === "My Bank"){
+                console.log({value});
+                const listBillingFilter = listBillingAll.filter(
+                    (p) => p.senderName === value && p.receiveName === value
+                );
+                setListBilling(listBillingFilter);
+            }
+            else {
+                const listBillingFilter = listBillingAll.filter(
+                    (p) => p.senderName === value || p.receiveName === value
+                );
+                setListBilling(listBillingFilter);
+            }
+            
+        }
+      };
+
+    const onSearch = (value) => {
+    console.log('search:', value);
+    };
+
+  const renderListFilter = () => {
+        return (
+            <Select
+            name="filter"
+            showSearch
+            placeholder="Select a type"
+            optionFilterProp="children"
+            style={{
+                width: 160,
+              }}
+            onChange={onChange}
+            onSearch={onSearch}
+            filterOption={(input, option) =>
+            (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+            }
+            options={[
+            {
+                value: 'All',
+                label: 'Tất cả',
+            },
+            {
+                value: 'My Bank',
+                label: 'Nội bộ',
+            },
+            {
+                value: 'Another Bank',
+                label: 'Liên ngân hàng',
+            }
+            ]}
+        />
+        
+        );
+    };
 
     const renderListBilling = () => {
         if (!listBilling) {
@@ -97,6 +161,11 @@ export const TransactionPage = () => {
     return (
         <ContentLayout>
             <ListEmployee>
+            <FlexLayout>
+                    <Title level={3}>Lựa chọn xem giao dịch</Title>
+                </FlexLayout>
+                {renderListFilter()}
+                
                 <FlexLayout>
                     <Title level={2}>Danh sách giao dịch các ngân hàng</Title>
                 </FlexLayout>
