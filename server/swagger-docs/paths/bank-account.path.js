@@ -17,7 +17,7 @@ export default {
                             schema: {
                                 type: 'array',
                                 items: {
-                                    $ref: '#components/schemas/Debit',
+                                    $ref: '#components/schemas/BankAccount',
                                 },
                             },
                         },
@@ -102,10 +102,7 @@ export default {
                     content: {
                         'application/json': {
                             schema: {
-                                type: 'array',
-                                items: {
-                                    $ref: '#components/schemas/BankAccount',
-                                },
+                                $ref: '#components/schemas/BankAccount',
                             },
                         },
                     },
@@ -185,5 +182,187 @@ export default {
                 },
             },
         },
+    },
+    '/bank-accounts/all': {
+        get: {
+            tags: ['Bank Account API'],
+            description: 'Lấy tất cả các tài khoản ngân hàng',
+            operationId: 'getAll',
+            security: [
+                {
+                    Authorization: [],
+                },
+            ],
+            responses: {
+                200: {
+                    description: 'Lấy danh sách tài khoản ngân hàng thành công',
+                    content: {
+                        'application/json': {
+                            schema: {
+                                type: 'array',
+                                items: {
+                                    $ref: '#components/schemas/BankAccount',
+                                },
+                            },
+                        },
+                    },
+                },
+                400: {
+                    description: "Bad request"
+                  },
+                  404: {
+                    description: "Không tìm thấy thông tin tài khoản"
+                  },
+                  500: {
+                    description: "Lỗi hệ thống"
+                  },
+            },
+        }
+    },
+    '/bank-accounts/query-account': {
+        get: {
+            tags: ['Bank Account API'],
+            description: 'Lấy thông tin tài khoản thanh toán',
+            operationId: 'queryAccount',
+            requestBody: {
+                description: 'Thông tin nhắc nợ mới',
+                content: {
+                    'application/json': {
+                        schema: {
+                            $ref: '#components/schemas/BankAccountQueryInput',
+                        },
+                    },
+                },
+                required: true,
+            },
+            security: [
+                {
+                    Authorization: [],
+                },
+            ],
+            responses: {
+                200: {
+                    description: 'Lấy thông tin tài khoản thanh toán thành công',
+                    content: {
+                        'application/json': {
+                            schema: {
+                                $ref: '#components/schemas/BankAccountQueryOutput',
+                            },
+                        },
+                    },
+                },
+                400: {
+                    description: "Bad request"
+                  },
+                  404: {
+                    description: "Không tìm thấy thông tin tài khoản"
+                  },
+                  500: {
+                    description: "Lỗi hệ thống"
+                  },
+            },
+        }
+    },
+    '/by-account-number-and-bank-type': {
+        get: {
+            tags: ['Bank Account API'],
+            description: 'Lấy thông tin tài khoản và thông tin ngân hàng',
+            operationId: 'getByAccountNumberAndBankType',
+            parameters: [
+                {
+                    name: 'accountNumber',
+                    in: 'path',
+                    schema: {
+                        type: 'string',
+                    },
+                    required: true,
+                    description: 'Số tài khoản của tài khoản ngân hàng',
+                    example: '63b3d2a5d6026c3974342876',
+                },
+                {
+                    name: 'bankTypeId',
+                    in: 'path',
+                    schema: {
+                        type: 'string',
+                    },
+                    required: true,
+                    description: 'Mã loại ngân hàng',
+                    example: '63b3d2a5d6026c3974342346',
+                },
+            ],
+            security: [
+                {
+                    Authorization: [],
+                },
+            ],
+            responses: {
+                200: {
+                    description: 'Lấy thông tin tài khoản và ngân hàng thành công',
+                    content: {
+                        'application/json': {
+                            schema: {
+                                $ref: '#components/schemas/BankAccountAndBankType',
+                            },
+                        },
+                    },
+                },
+                400: {
+                    description: "Bad request"
+                  },
+                  404: {
+                    description: "Không tìm thấy thông tin tài khoản"
+                  },
+                  500: {
+                    description: "Lỗi hệ thống"
+                  },
+            },
+        }
+    },
+    '/payment-transaction': {
+        post: {
+            tags: ['Bank Account API'],
+            description: 'Chuyển tiền',
+            operationId: 'rechargeMoney',
+            requestBody: {
+                description: 'Chuyển tiền',
+                content: {
+                    'application/json': {
+                        schema: {
+                            $ref: '#components/schemas/RechargeMoneyInput',
+                        },
+                    },
+                },
+                required: true,
+            },
+            security: [
+                {
+                    Authorization: [],
+                },
+            ],
+            responses: {
+                200: {
+                    description: 'Giao dịch thành công',
+                    content: {
+                        'application/json': {
+                            schema: {
+                                $ref: '#components/schemas/RechargeMoneyOutput',
+                            },
+                        },
+                    },
+                },
+                400: {
+                    description: "Bad request"
+                  },
+                  401: {
+                    description: "Xin lỗi đã hết thời gian chuyển khoản."
+                  },
+                  404: {
+                    description: "Không tìm thấy tài khoản ngân hàng này"
+                  },
+                  500: {
+                    description: "Lỗi hệ thống"
+                  },
+            },
+        }
     },
 };
