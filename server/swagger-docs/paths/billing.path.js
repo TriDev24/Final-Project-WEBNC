@@ -46,6 +46,200 @@ export default {
             },
         },
     },
+    '/billings/payment-account-history': {
+        get: {
+            tags: ['Billing API'],
+            description:
+                'Lấy tất cả những hoá đơn của tài khoản',
+            operationId: 'getPaymentAccountHistory',
+            parameters: [
+                {
+                    name: 'email',
+                    in: 'path',
+                    schema: {
+                        type: 'string',
+                    },
+                    required: true,
+                    description: 'Email của tài khoản khách hàng',
+                    example: 'trantai@crossfitcoastal.com',
+                },
+            ],
+            responses: {
+                200: {
+                    description: 'Gửi mail thành công',
+                    content: {
+                        'application/json': {
+                            schema: {
+                                type: 'object',
+                                properties: {
+                                    status: {
+                                        type: 'string',
+                                        description:
+                                            'Trạng thái kết quả thực thi',
+                                        example: 'success',
+                                    },
+                                    message: {
+                                        type: 'string',
+                                        description:
+                                            'Thông báo kết quả thực thi',
+                                        example:
+                                            'Chúng tôi đã gửi đến email của bạn mã OTP, mong bạn kiểm tra và xác nhận mã OTP',
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    },
+    '/billings/payment-history': {
+        get: {
+            tags: ['Billing API'],
+            description:
+                'Lấy tất cả những hoá đơn được sort theo ngày và phân loại',
+            operationId: 'getPaymentHistory',
+            parameters: [
+                {
+                    name: 'email',
+                    in: 'path',
+                    schema: {
+                        type: 'string',
+                    },
+                    required: true,
+                    description: 'Email của tài khoản khách hàng',
+                    example: 'trantai@crossfitcoastal.com',
+                },
+            ],
+            responses: {
+                200: {
+                    description: 'Gửi mail thành công',
+                    content: {
+                        'application/json': {
+                            schema: {
+                                type: 'object',
+                                properties: {
+                                    status: {
+                                        type: 'string',
+                                        description:
+                                            'Trạng thái kết quả thực thi',
+                                        example: 'success',
+                                    },
+                                    message: {
+                                        type: 'string',
+                                        description:
+                                            'Thông báo kết quả thực thi',
+                                        example:
+                                            'Chúng tôi đã gửi đến email của bạn mã OTP, mong bạn kiểm tra và xác nhận mã OTP',
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    },
+    '/billings': {
+        post: {
+            tags: ["Billing API"],
+            description: "Tạo bill",
+            operationId: "createDocument",
+            requestBody: {
+                description: "Thông tin",
+                content: {
+                "application/json": {
+                    schema: {
+                    $ref: "#components/schemas/CreateBilling",
+                    },
+                },
+                },
+                required: true,
+            },
+            security: [
+                {
+                Authorization: [],
+                },
+            ],
+            responses: {
+                200: {
+                    description: 'Gửi mail thành công',
+                    content: {
+                        'application/json': {
+                            schema: {
+                                type: 'object',
+                                properties: {
+                                    status: {
+                                        type: 'string',
+                                        description:
+                                            'Trạng thái kết quả thực thi',
+                                        example: 'success',
+                                    },
+                                    message: {
+                                        type: 'string',
+                                        description:
+                                            'Thông báo kết quả thực thi',
+                                        example:
+                                            'Chúng tôi đã gửi đến email của bạn mã OTP, mong bạn kiểm tra và xác nhận mã OTP',
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    },
+    '/billings/{id}/verify-otp': {
+        post: {
+            tags: ["Billing API"],
+            description: "OTP",
+            operationId: "createOtp",
+            requestBody: {
+                description: "Thông tin",
+                content: {
+                "application/json": {
+                    schema: {
+                    $ref: "#components/schemas/OTPCode",
+                    },
+                },
+                },
+                required: true,
+            },
+            security: [
+                {
+                Authorization: [],
+                },
+            ],
+            responses: {
+                200: {
+                    description: 'Gửi mail thành công',
+                    content: {
+                        'application/json': {
+                            schema: {
+                                type: 'object',
+                                properties: {
+                                    status: {
+                                        type: 'string',
+                                        description:
+                                            'Trạng thái kết quả thực thi',
+                                        example: 'success',
+                                    },
+                                    message: {
+                                        type: 'string',
+                                        description:
+                                            'Thông báo kết quả thực thi',
+                                        example:
+                                            'Chúng tôi đã gửi đến email của bạn mã OTP, mong bạn kiểm tra và xác nhận mã OTP',
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    },
     '/identities/verify': {
         post: {
             tags: ['Identity API'],
