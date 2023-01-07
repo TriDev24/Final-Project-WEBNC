@@ -184,7 +184,6 @@ export default {
 
         const parseTransferBillings = [];
         for (const t of transferBillings) {
-            console.log('t.receiverId', t.receiverId);
             const receiver = await BankAccount.findById(t.receiverId);
 
             parseTransferBillings.push({
@@ -542,22 +541,22 @@ export default {
             const generatedSignature = generateSignature(requestPayload);
 
             // // Goi API cap nhat so du cua API lien ket
-            // const transaction = await fetch(
-            //     process.env.PARTNER_BANK_TRANSACTION_URL_PATH,
-            //     {
-            //         method: 'POST',
-            //         headers: {
-            //             'Content-Type': 'application/json',
-            //             Authorization: `Bearer ${generatedSignature}`,
-            //         },
-            //         body: JSON.stringify(requestPayload),
-            //     }
-            // );
-            // console.log('transaction', transaction.status !== 200);
-            // if (transaction.status !== 200) {
-            //     console.log('tai sao vay dm');
-            //     return res.status(500).json({ message: 'Đã có lỗi xảy ra' });
-            // }
+            const transaction = await fetch(
+                process.env.PARTNER_BANK_TRANSACTION_URL_PATH,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${generatedSignature}`,
+                    },
+                    body: JSON.stringify(requestPayload),
+                }
+            );
+            console.log('transaction', transaction.status !== 200);
+            if (transaction.status !== 200) {
+                console.log('tai sao vay dm');
+                return res.status(500).json({ message: 'Đã có lỗi xảy ra' });
+            }
 
             // Save receiver to DB
             let receiverBankAccount;
