@@ -1,5 +1,5 @@
 export default {
-    '/billings/get-history': {
+    '/billings/history': {
         get: {
             tags: ['Billing API'],
             description:

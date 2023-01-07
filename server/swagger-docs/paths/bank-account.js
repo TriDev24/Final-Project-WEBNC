@@ -92,7 +92,7 @@ export default {
                 },
             ],
             requestBody: {
-                description: 'Thông tin nhắc nợ được cập nhập',
+                description: 'Thông tin tài khoản cập nhập',
                 content: {
                     'application/json': {
                         schema: {
@@ -104,7 +104,7 @@ export default {
                                         'Chuyển thành tài khoản thanh toán',
                                     example: true,
                                 },
-                                isLocked: {
+                                isLockActionTrigger: {
                                     type: 'boolean',
                                     description: 'Đã thanh toán hay chưa',
                                     example: true,
@@ -133,79 +133,6 @@ export default {
                             schema: {
                                 type: 'string',
                                 example: 'Cập nhập thành công!',
-                            },
-                        },
-                    },
-                },
-            },
-        },
-    },
-    '/debits/{id}/{side}': {
-        put: {
-            tags: ['Debit API'],
-            description: 'Hủy nhắc nợ',
-            operationId: 'deleteDebit',
-            parameters: [
-                {
-                    name: 'id',
-                    in: 'path',
-                    schema: {
-                        type: 'string',
-                    },
-                    required: true,
-                    description: 'Id của nhắc nợ',
-                    example: '63b3d2a5d6026c3974342876',
-                },
-                {
-                    name: 'side',
-                    in: 'path',
-                    schema: {
-                        type: 'string',
-                    },
-                    required: true,
-                    description:
-                        'Nhắc nợ của một phía (bản thân hoặc người khác)',
-                    example: 'personal',
-                },
-            ],
-            requestBody: {
-                description: 'Nội dung hủy nhắc nợ',
-                content: {
-                    'application/json': {
-                        schema: {
-                            type: 'object',
-                            properties: {
-                                content: {
-                                    type: 'string',
-                                    description: 'Nội dung hủy nhắc nợ',
-                                    example: 'Nợ tôi trả lâu rồi',
-                                },
-                            },
-                        },
-                    },
-                },
-                required: true,
-            },
-            security: [
-                {
-                    Authorization: [],
-                },
-            ],
-            responses: {
-                200: {
-                    description: 'Hủy nợ thành công',
-                    content: {
-                        'application/json': {
-                            schema: {
-                                type: 'object',
-                                properties: {
-                                    message: {
-                                        type: 'string',
-                                        description:
-                                            'Thông báo kết quả thực thi',
-                                        example: 'Nhắc nợ đã bị hủy',
-                                    },
-                                },
                             },
                         },
                     },
