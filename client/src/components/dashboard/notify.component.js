@@ -106,7 +106,7 @@ function Notify() {
 
   useEffect(() => {
     const paymentAccount = paymentAccountNumber;
-    const ws = new WebSocket("ws://localhost:40567");
+    const ws = new WebSocket(`${process.env.REACT_APP_WS_URL_PATH}`);
     if (paymentAccount) {
       fetchApi();
 
