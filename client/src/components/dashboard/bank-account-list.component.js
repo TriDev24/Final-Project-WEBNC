@@ -10,14 +10,17 @@ export const BankAccountList = ({
     paymentAccount,
     onSelectPaymentAccountClick,
     bankAccounts,
+    onGetBankAccounts,
 }) => {
     return (
         <Container>
             {bankAccounts.map((b, index) => (
-                <BankAccountItem key={index}
+                <BankAccountItem
+                    key={index}
                     paymentAccount={paymentAccount}
                     onSelectPaymentAccountClick={onSelectPaymentAccountClick}
                     bankAccount={b}
+                    onGetBankAccounts={onGetBankAccounts}
                 />
             ))}
         </Container>

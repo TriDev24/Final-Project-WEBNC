@@ -33,6 +33,7 @@ export const BankAccountItem = ({
     paymentAccount,
     onSelectPaymentAccountClick,
     bankAccount,
+    onGetBankAccounts,
 }) => {
     const [isLocked, setLockStatus] = useState(bankAccount.isLocked);
     const isPaymentAccount = bankAccount._id === paymentAccount._id;
@@ -57,6 +58,7 @@ export const BankAccountItem = ({
             .then(() => {
                 message.success('Khoá tài khoản thành công');
                 setLockStatus(!bankAccount.isLocked);
+                onGetBankAccounts();
             })
             .catch((error) => {
                 message.error('Khoá tài khoản thất bại');

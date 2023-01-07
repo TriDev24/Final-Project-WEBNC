@@ -713,6 +713,7 @@ export const CustomerDashBoardPage = () => {
                         handleSelectPaymentAccountClick
                     }
                     bankAccounts={bankAccounts}
+                    onGetBankAccounts={getBankAccounts}
                 />
             </Modal>
 
