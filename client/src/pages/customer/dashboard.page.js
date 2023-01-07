@@ -346,7 +346,6 @@ export const CustomerDashBoardPage = () => {
                     };
                 }
             );
-
             // Nhac no
             const debitBillings = paymentAccountHistory.filter(
                 (p) => p.type === 'debit'
