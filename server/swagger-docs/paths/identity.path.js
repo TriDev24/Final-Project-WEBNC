@@ -224,5 +224,40 @@ export default {
         },
       },
     },
-  }
+  },
+  "/identities/create-employee": {
+    post: {
+      tags: ["Identity API"],
+      description: "Thêm nhân viên mới",
+      operationId: "createEmployee",
+      requestBody: {
+        description: "Thông tin nhân viên",
+        content: {
+          "application/json": {
+            schema: {
+              $ref: "#components/schemas/IdentityInputCreateEmployee",
+            },
+          },
+        },
+        required: true,
+      },
+      security: [
+        {
+          Authorization: [],
+        },
+      ],
+      responses: {
+        200: {
+          description: "Thêm nhân viên thành công",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#components/schemas/IdentityCreateEmployee",
+              },
+            },
+          },
+        },
+      },
+    },
+  },
 };
