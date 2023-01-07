@@ -281,10 +281,6 @@ export const CustomerDashBoardPage = () => {
                 title: 'Số tài khoản nhận',
                 dataIndex: 'receiverAccountNumber',
                 key: 'receiverAccountNumber',
-                render: (isInternalTransaction, receiverAccountNumber) =>
-                    isInternalTransaction && (
-                        <p style={{ color: 'blue' }}>{receiverAccountNumber}</p>
-                    ),
             },
             {
                 title: 'Số tiền(VNĐ)',
