@@ -234,6 +234,44 @@ export default {
         return res.status(200).json(sortedBillings);
     },
 
+    async getPaymentHistory(req, res) {
+
+        const billings = await Billing.find();
+        const array = [];
+
+        billings.forEach(function(billing) {
+            const item = {
+                senderName: "My Bank",
+                receiveName: "My Bank",
+                deposit: billing.deposit,
+                transferTime: billing.transferTime
+            }
+            array.push(item);
+          });
+        
+          billings.forEach(function(billing) {
+            const item = {
+                senderName: "My Bank",
+                receiveName: "Another Bank",
+                deposit: billing.deposit,
+                transferTime: billing.transferTime
+            }
+            array.push(item);
+          });
+
+          billings.forEach(function(billing) {
+            const item = {
+                senderName: "Another Bank",
+                receiveName: "My bank",
+                deposit: billing.deposit,
+                transferTime: billing.transferTime
+            }
+            array.push(item);
+          });
+
+        return res.status(200).json(array);
+    },
+
     async create(req, res) {
         try {
             const {
