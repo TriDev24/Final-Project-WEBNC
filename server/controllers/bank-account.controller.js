@@ -55,47 +55,17 @@ export default {
             } = req.body;
             const now = Math.floor(Date.now() / 1000);
 
-            // const generatedSignature = generateSignature({
-            //     accountNumber: '243275',
-            //     timestamp: '1673090839',
-            // });
-
-            // const hashStringA = generateHashString({
-            //     accountNumber: '243275',
-            //     timestamp: '1673090839',
-            //     signature:
-            //         'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50TnVtYmVyIjoiMjQzMjc1IiwidGltZXN0YW1wIjoiMTY3MzA5MDgzOSIsImlhdCI6MTY3MzA5MDgzOX0.p0F7yt586PqNt_f8jyBNIHKWb2orEj3imqcGE0lxiEYbVGHQFcUxiKJnoYIlCrcqOwbguakmG11QpmbykY5PZpBZa0nS9U8KcgPiIy0UgJzD7AZOrFQ06y05I4Z2GiqF8ZCtio-JkmhG3yNMDQqTz3kMSGfbYIJWX_PpWZ8zFQsBUCIxMsAmUeKVVXfRbgh76pXmV2g7ajStHlf5a2Y2CVvqaQQHic1aaPGFpOXYah0i5y_VYadvgZSsqsWmxsRY-9gMjNpFbiUrDFbqbWsWgbgcctGxnHaK6fClwE6vnAbdvZRNYIlR5ZzS2vU_gU99W4YNCZcVei-57N8_4qfHzQ',
-            // });
-            // console.log('hashStringA', hashStringA);
-
-            // const verify = verifySignature(generatedSignature);
-            // console.log('verify', verify);
-
-            // return res.status(200).json({
-            //     signature: generatedSignature,
-            //     hash: hashStringA,
-            // });
-
-            // return res.status(200).json(
-            //     generateHashString({
-            //         accountNumber: '243275',
-            //         timestamp: '1673065057',
-            //         signature:
-            //             'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50TnVtYmVyIjoiMjQzMjc1IiwidGltZXN0YW1wIjoiMTY3MzA2NTA1NyIsInNpZ25hdHVyZSI6ImV5SmhiR2NpT2lKU1V6STFOaUlzSW5SNWNDSTZJa3BYVkNKOS5leUpoWTJOdmRXNTBUblZ0WW1WeUlqb2lNalF6TWpjMUlpd2ljMmxuYm1GMGRYSmxJam9pWlhsS2FHSkhZMmxQYVVwVFZYcEpNVTVwU1hOSmJsSTFZME5KTmtscmNGaFdRMG81TG1WNVNtaFpNazUyWkZjMU1GUnVWblJaYlZaNVNXcHZhVTVxU1RSUFJGVnBURU5LYWxsWVRtOUphbTk1VFVSQmQweERTbkJaV0ZGcFQycEZNazU2VFhkTlJFazBUMFJhT1M1Q2NEZHFkM0pZYUhsSk9UUkZkRUl5TFd4VVJqVk5RbTFrWDNKZlZVWkZOMkpLU21nMllVcEdVa1o1YTNkUFdrRTJVRE5QY1V0d2VqSjBaMWcxUTFKbmJIVkJibEpmTmtZeVEzVmxSMUV5WTA1RlpVdFlaVTFoU0ROdFZVSjRUWGswU1VKak1FNURhR2hTZUdwNE5tZExNMHQ2ZW1ScGJVUnFSM0o1ZHpSTFRtRmxiWFJyVFY5R2JqbFRWbkE1ZW14aWJsSjJlaTFQZUVOYVpta3hUMVp0VWtndGNWbFBTMlk0V1RnaUxDSnBZWFFpT2pFMk56TXdNekV6TURCOS5TYWtVOUZGQThhQ0NmMjZuZEpIOUMtWml3cG95cDdITk1QWGdQam5URFVzNDhvSXVFWDRqb3dIWGVUTWJ5dFJILVVQUDl2dWlpZkNwT1M5UnE5S19jVTU4bGJlRFkyQ1FwZ2FrQVoybDdmeG1adlczeHJxY3o3WEw5bDhnWWVqMENLMGljSE53eEtfTU5pZDlGN3BpZU5QMHNKSE93bG9XMC1tbWpKRHlZZk0iLCJpYXQiOjE2NzMwNjUyMDR9.IBn3YdSZFRcCsh9nV-oA0dWSvZB8TFqF9JP6AIqTjM2sLYIeCuutjwQqzI90PLdmeMK5OPrdJsmrRViC6CM-7m0_9NRJ7xSkr_GWfDw0CTvKRLfQd_dVVxALnpi_4e7YXM2r1c6OUnnD2kyMxwX9s7N8oFTGx8o5D7TUXQ9aqZA',
-            //     })
-            // );
-
             const partnerBankUrl = process.env.PARTNER_BANK_API_URL_PATH;
             const requestHost = req.get('host');
 
             // Is Not from Host
-            // const isNotFromPartnerBankConnectedBefore =
-            //     !partnerBankUrl.includes(requestHost);
-            // if (isNotFromPartnerBankConnectedBefore) {
-            //     return res.status(401).json({
-            //         error: 'Xin lỗi domain của bạn không được truy cập vào nguồn tài nguyên này',
-            //     });
-            // }
+            const isNotFromPartnerBankConnectedBefore =
+                !partnerBankUrl.includes(requestHost);
+            if (isNotFromPartnerBankConnectedBefore) {
+                return res.status(401).json({
+                    error: 'Xin lỗi domain của bạn không được truy cập vào nguồn tài nguyên này',
+                });
+            }
 
             // Is Edited?
             const payload = {
@@ -103,27 +73,26 @@ export default {
                 timestamp,
                 signature,
             };
+            const hashString = generateHashString(payload);
+            const isPayloadEdited = hashString !== requestHashValue;
 
-            // const hashString = generateHashString(payload);
-            // const isPayloadEdited = hashString !== requestHashValue;
-
-            // if (isPayloadEdited) {
-            //     return res.status(401).json({
-            //         error: 'Xin lỗi gói tin của bạn hình như đã bị chỉnh sửa, vui lòng xem lại',
-            //     });
-            // }
+            if (isPayloadEdited) {
+                return res.status(401).json({
+                    error: 'Xin lỗi gói tin của bạn hình như đã bị chỉnh sửa, vui lòng xem lại',
+                });
+            }
 
             // Is Timeout?
-            // const oneDayOnSecond = 86400;
-            // const isTimeout = now - timestamp > oneDayOnSecond;
-            // if (isTimeout) {
-            //     return res.status(401).json({
-            //         error: 'Xin lỗi đã hết thời gian truy vấn tài khoản.',
-            //     });
-            // }
+            const oneDayOnSecond = 86400;
+            const isTimeout = now - timestamp > oneDayOnSecond;
+            if (isTimeout) {
+                return res.status(401).json({
+                    error: 'Xin lỗi đã hết thời gian truy vấn tài khoản.',
+                });
+            }
 
             // Is Not Valid Signature
-            // verifySignature(signature);
+            verifySignature(signature);
 
             const bankAccount = await BankAccount.findOne({ accountNumber });
             if (!bankAccount) {
@@ -377,43 +346,23 @@ export default {
             const requestHost = req.get('host');
             // ------- Check Security ------
 
-            // return res.status(200).json(
-            //     generateSignature({
-            //         senderAccountNumber: '123456',
-            //         receiverAccountNumber: '243275',
-            //         deposit: 2000,
-            //         transferTime: '1673065057',
-            //     })
-            // );
-
-            // return res.status(200).json(
-            //     generateHashString({
-            //         senderAccountNumber: '123456',
-            //         receiverAccountNumber: '243275',
-            //         deposit: 2000,
-            //         signature:
-            //             'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzZW5kZXJBY2NvdW50TnVtYmVyIjoiMTIzNDU2IiwicmVjZWl2ZXJBY2NvdW50TnVtYmVyIjoiMjQzMjc1IiwiZGVwb3NpdCI6MjAwMCwidHJhbnNmZXJUaW1lIjoiMTY3MzA2NTA1NyIsImlhdCI6MTY3MzA2NjUzOX0.ASBgfzM3ZAVAUKx__GEKOdOJuaOjSRlMKtpH64jEjFszH7jmrQ0l3Sz_F5WGT-ESwfFxv_6OOSN-MIlJZuxMh8ePxbjqeEpB-ZwFSjITd3B6miMxbp7g_Ka4A8vmv8i6-W7KRAkcF41AlxaPfC7_8y4tDx0usQefg_k5tYe2NEk',
-            //         transferTime: '1673065057',
-            //     })
-            // );
-
             // Is Correct Host?
-            // const isNotFromPartnerBankConnectedBefore =
-            //     !partnerBankUrl.includes(requestHost);
-            // if (isNotFromPartnerBankConnectedBefore) {
-            //     return res.status(401).json({
-            //         error: 'Xin lỗi domain của bạn không được truy cập vào nguồn tài nguyên này',
-            //     });
-            // }
+            const isNotFromPartnerBankConnectedBefore =
+                !partnerBankUrl.includes(requestHost);
+            if (isNotFromPartnerBankConnectedBefore) {
+                return res.status(401).json({
+                    error: 'Xin lỗi domain của bạn không được truy cập vào nguồn tài nguyên này',
+                });
+            }
 
             // Is Timeout?
-            // const oneDayOnSecond = 86400;
-            // const isTimeout = now - transferTime > oneDayOnSecond;
-            // if (isTimeout) {
-            //     return res.status(401).json({
-            //         error: 'Xin lỗi đã hết thời gian chuyển khoản.',
-            //     });
-            // }
+            const oneDayOnSecond = 86400;
+            const isTimeout = now - transferTime > oneDayOnSecond;
+            if (isTimeout) {
+                return res.status(401).json({
+                    error: 'Xin lỗi đã hết thời gian chuyển khoản.',
+                });
+            }
 
             // Is Edited?
             const payload = {
@@ -423,17 +372,17 @@ export default {
                 transferTime,
                 signature,
             };
-            // const hashString = generateHashString(payload);
-            // const isPayloadEdited = hashString !== requestHashValue;
+            const hashString = generateHashString(payload);
+            const isPayloadEdited = hashString !== requestHashValue;
 
-            // if (isPayloadEdited) {
-            //     return res.status(401).json({
-            //         error: 'Xin lỗi gói tin của bạn hình như đã bị chỉnh sửa, vui lòng xem lại',
-            //     });
-            // }
+            if (isPayloadEdited) {
+                return res.status(401).json({
+                    error: 'Xin lỗi gói tin của bạn hình như đã bị chỉnh sửa, vui lòng xem lại',
+                });
+            }
 
             // Verify signature
-            // verifySignature(signature);
+            verifySignature(signature);
 
             const receiverBankAccount = await BankAccount.findOne({
                 accountNumber: receiverAccountNumber,
