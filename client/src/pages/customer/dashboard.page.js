@@ -283,7 +283,7 @@ export const CustomerDashBoardPage = () => {
                 key: 'receiverAccountNumber',
                 render: (isInternalTransaction, receiverAccountNumber) =>
                     isInternalTransaction && (
-                        <p style={{ color: blue }}>{receiverAccountNumber}</p>
+                        <p style={{ color: 'blue' }}>{receiverAccountNumber}</p>
                     ),
             },
             {
@@ -324,7 +324,7 @@ export const CustomerDashBoardPage = () => {
                         transferMoney: r.deposit,
                         description: r.description,
                         transferTime: r.transferTime,
-                        isInternalTransaction: t.isInternalTransaction,
+                        isInternalTransaction: r.isInternalTransaction,
                     };
                 }
             );
