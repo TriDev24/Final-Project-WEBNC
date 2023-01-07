@@ -31,4 +31,12 @@ export default [
         name: ['User API'],
         description: 'Các api về user',
     },
+    {
+        name: ['Transfer Method API'],
+        description: 'Các api về hình thức thanh toán',
+    },
+    {
+        name: ['Bank Type API'],
+        description: 'Các api về loại ngân hàng',
+    },
 ];

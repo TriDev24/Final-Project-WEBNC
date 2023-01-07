@@ -3,6 +3,7 @@ import Debit from './debit.component.js';
 import Debtor from './debtor.component.js';
 import Notify from './notify.component.js';
 import User from './user.component.js';
+import ChangePassword from './change-password.component.js';
 import Billing from './billing.component.js';
 import BankAccount from './bank-account.component.js';
 import Receiver from './receiver.component.js';
@@ -22,6 +23,7 @@ export default {
         ...Billing,
         ...BankAccount,
         ...Receiver,
+        ...ChangePassword
     },
     securitySchemes: {
         Authorization: {
