@@ -68,13 +68,13 @@ export default {
             const requestHost = req.get('host');
 
             // Is Not from Host
-            const isNotFromPartnerBankConnectedBefore =
-                !partnerBankUrl.includes(requestHost);
-            if (isNotFromPartnerBankConnectedBefore) {
-                return res.status(401).json({
-                    error: 'Xin lỗi domain của bạn không được truy cập vào nguồn tài nguyên này',
-                });
-            }
+            // const isNotFromPartnerBankConnectedBefore =
+            //     !partnerBankUrl.includes(requestHost);
+            // if (isNotFromPartnerBankConnectedBefore) {
+            //     return res.status(401).json({
+            //         error: 'Xin lỗi domain của bạn không được truy cập vào nguồn tài nguyên này',
+            //     });
+            // }
 
             // Is Edited?
             const payload = {
@@ -376,13 +376,13 @@ export default {
             // );
 
             // Is Correct Host?
-            const isNotFromPartnerBankConnectedBefore =
-                !partnerBankUrl.includes(requestHost);
-            if (isNotFromPartnerBankConnectedBefore) {
-                return res.status(401).json({
-                    error: 'Xin lỗi domain của bạn không được truy cập vào nguồn tài nguyên này',
-                });
-            }
+            // const isNotFromPartnerBankConnectedBefore =
+            //     !partnerBankUrl.includes(requestHost);
+            // if (isNotFromPartnerBankConnectedBefore) {
+            //     return res.status(401).json({
+            //         error: 'Xin lỗi domain của bạn không được truy cập vào nguồn tài nguyên này',
+            //     });
+            // }
 
             // Is Timeout?
             const oneDayOnSecond = 86400;
