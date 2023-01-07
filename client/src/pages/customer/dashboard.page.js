@@ -311,6 +311,7 @@ export const CustomerDashBoardPage = () => {
             const receiveBillings = paymentAccountHistory.filter(
                 (p) => p.type === 'receive'
             );
+            
             const mappedReceiveBillingDataSource = receiveBillings.map(
                 (r, index) => {
                     return {
@@ -344,11 +345,12 @@ export const CustomerDashBoardPage = () => {
             const debitBillings = paymentAccountHistory.filter(
                 (p) => p.type === 'debit'
             );
+            console.log(debitBillings)
             const mappedDebitBillingDataSource = debitBillings.map(
                 (d, index) => {
                     return {
                         key: index,
-                        senderAccountNumber: 'Tôi',
+                        senderAccountNumber: d.sender.accountNumber,
                         receiverAccountNumber: d.receiver.accountNumber,
                         transferMoney: d.deposit,
                         description: d.description,
