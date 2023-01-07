@@ -281,6 +281,10 @@ export const CustomerDashBoardPage = () => {
                 title: 'Số tài khoản nhận',
                 dataIndex: 'receiverAccountNumber',
                 key: 'receiverAccountNumber',
+                render: (isInternalTransaction, receiverAccountNumber) =>
+                    isInternalTransaction && (
+                        <p style={{ color: blue }}>{receiverAccountNumber}</p>
+                    ),
             },
             {
                 title: 'Số tiền(VNĐ)',
@@ -320,6 +324,7 @@ export const CustomerDashBoardPage = () => {
                         transferMoney: r.deposit,
                         description: r.description,
                         transferTime: r.transferTime,
+                        isInternalTransaction: t.isInternalTransaction,
                     };
                 }
             );
@@ -337,6 +342,7 @@ export const CustomerDashBoardPage = () => {
                         transferMoney: t.deposit,
                         description: t.description,
                         transferTime: t.transferTime,
+                        isInternalTransaction: t.isInternalTransaction,
                     };
                 }
             );

@@ -103,8 +103,6 @@ export default {
                 timestamp,
                 signature,
             };
-            console.log('signature', signature);
-            console.log('hashString', hashString);
 
             const hashString = generateHashString(payload);
             const isPayloadEdited = hashString !== requestHashValue;

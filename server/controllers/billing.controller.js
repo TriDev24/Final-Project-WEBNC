@@ -162,7 +162,8 @@ export default {
         const parseReceiveBillings = [];
         for (const r of receiveBillings) {
             const sender = await BankAccount.findById(r.senderId);
-            const isInternalBank = sender.bankTypeId === internalBank._id;
+            const isInternalTransaction =
+                sender.bankTypeId === internalBank._id;
             const bankType = await BankType.findById(sender.bankTypeId);
 
             parseReceiveBillings.push({
@@ -176,7 +177,7 @@ export default {
                     },
                 },
                 type: 'receive',
-                isInternalBank,
+                isInternalTransaction,
             });
         }
 
@@ -193,7 +194,8 @@ export default {
         const parseTransferBillings = [];
         for (const t of transferBillings) {
             const receiver = await BankAccount.findById(t.receiverId);
-            const isInternalBank = receiver.bankTypeId === internalBank._id;
+            const isInternalTransaction =
+                receiver.bankTypeId === internalBank._id;
             const bankType = await BankType.findById(receiver.bankTypeId);
 
             parseTransferBillings.push({
@@ -207,7 +209,7 @@ export default {
                     },
                 },
                 type: 'transfer',
-                isInternalBank,
+                isInternalTransaction,
             });
         }
 
