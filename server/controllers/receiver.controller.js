@@ -57,7 +57,7 @@ export default {
             const document = {
                 senderAccountNumber,
                 receiverAccountNumber,
-                aliasName,
+                aliasName: 'Người nhận ngoài ngân hàng',
             };
 
             const insertedData = await Receiver.create(document);
