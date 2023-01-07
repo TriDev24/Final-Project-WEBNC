@@ -55,6 +55,27 @@ export default {
             } = req.body;
             const now = Math.floor(Date.now() / 1000);
 
+            // const generatedSignature = generateSignature({
+            //     accountNumber: '243275',
+            //     timestamp: '1673090839',
+            // });
+
+            // const hashStringA = generateHashString({
+            //     accountNumber: '243275',
+            //     timestamp: '1673090839',
+            //     signature:
+            //         'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50TnVtYmVyIjoiMjQzMjc1IiwidGltZXN0YW1wIjoiMTY3MzA5MDgzOSIsImlhdCI6MTY3MzA5MDgzOX0.p0F7yt586PqNt_f8jyBNIHKWb2orEj3imqcGE0lxiEYbVGHQFcUxiKJnoYIlCrcqOwbguakmG11QpmbykY5PZpBZa0nS9U8KcgPiIy0UgJzD7AZOrFQ06y05I4Z2GiqF8ZCtio-JkmhG3yNMDQqTz3kMSGfbYIJWX_PpWZ8zFQsBUCIxMsAmUeKVVXfRbgh76pXmV2g7ajStHlf5a2Y2CVvqaQQHic1aaPGFpOXYah0i5y_VYadvgZSsqsWmxsRY-9gMjNpFbiUrDFbqbWsWgbgcctGxnHaK6fClwE6vnAbdvZRNYIlR5ZzS2vU_gU99W4YNCZcVei-57N8_4qfHzQ',
+            // });
+            // console.log('hashStringA', hashStringA);
+
+            // const verify = verifySignature(generatedSignature);
+            // console.log('verify', verify);
+
+            // return res.status(200).json({
+            //     signature: generatedSignature,
+            //     hash: hashStringA,
+            // });
+
             // return res.status(200).json(
             //     generateHashString({
             //         accountNumber: '243275',
@@ -82,6 +103,9 @@ export default {
                 timestamp,
                 signature,
             };
+            console.log('signature', signature);
+            console.log('hashString', hashString);
+
             const hashString = generateHashString(payload);
             const isPayloadEdited = hashString !== requestHashValue;
 

@@ -1,4 +1,3 @@
-import BankType from '../models/bank-type.model.js';
 import Billing from '../models/billing.model.js';
 import { TransferFee } from '../models/transfer-fee.model.js';
 import BankAccount from '../models/bank-account.model.js';
@@ -7,10 +6,10 @@ import TransferMethod from '../models/transfer-method.model.js';
 import { generateOtp } from '../utils/otp.util.js';
 import { sendVerifyOtpEmail } from '../utils/email.util.js';
 import Identity from '../models/identity.model.js';
-import { generateSignature, verifySignature } from '../utils/rsa.util.js';
+import { generateSignature } from '../utils/rsa.util.js';
 import fetch from 'node-fetch';
-import { ObjectId, UUID } from 'bson';
 import Permission from '../models/permission.model.js';
+import BankType from '../models/bank-type.model.js';
 
 export default {
     async getHistory(req, res) {
@@ -146,8 +145,10 @@ export default {
                 );
         }
 
+        const internalBank = await BankType.findOne({ name: 'My Bank' });
+
         const receiveBillings = await Billing.find({
-            receiverId: bankAccount._id,
+            receiverAccountNumber: accountNumber,
             transferType: TransferType.MoneyTransfer,
             isVerified: true,
             createdAt: {
@@ -159,6 +160,8 @@ export default {
         const parseReceiveBillings = [];
         for (const r of receiveBillings) {
             const sender = await BankAccount.findById(r.senderId);
+            const isInternalBank = sender.bankTypeId === internalBank._id;
+            const bankType = await BankType.findById(sender.bankTypeId);
 
             parseReceiveBillings.push({
                 deposit: r.deposit,
@@ -166,13 +169,17 @@ export default {
                 transferTime: r.transferTime,
                 sender: {
                     accountNumber: sender.accountNumber,
+                    bankType: {
+                        name: bankType.name,
+                    },
                 },
                 type: 'receive',
+                isInternalBank,
             });
         }
 
         const transferBillings = await Billing.find({
-            senderId: bankAccount._id,
+            senderAccountNumber: accountNumber,
             transferType: TransferType.MoneyTransfer,
             isVerified: true,
             createdAt: {
@@ -184,6 +191,8 @@ export default {
         const parseTransferBillings = [];
         for (const t of transferBillings) {
             const receiver = await BankAccount.findById(t.receiverId);
+            const isInternalBank = receiver.bankTypeId === internalBank._id;
+            const bankType = await BankType.findById(receiver.bankTypeId);
 
             parseTransferBillings.push({
                 deposit: t.deposit,
@@ -191,14 +200,21 @@ export default {
                 transferTime: t.transferTime,
                 receiver: {
                     accountNumber: receiver.accountNumber,
+                    bankType: {
+                        name: bankType.name,
+                    },
                 },
                 type: 'transfer',
+                isInternalBank,
             });
         }
 
         // Debit
         const debitBillings = await Billing.find({
-            senderId: bankAccount._id,
+            $or: [
+                { senderAccountNumber: accountNumber },
+                { receiverAccountNumber: accountNumber },
+            ],
             transferType: TransferType.Debit,
             isVerified: true,
             createdAt: {
@@ -209,12 +225,18 @@ export default {
 
         const parseDebitBillings = [];
         for (const d of debitBillings) {
+            const sender = await BankAccount.findOne({
+                accountNumber: d.senderAccountNumber,
+            });
             const receiver = await BankAccount.findById(d.receiverId);
 
             parseDebitBillings.push({
                 deposit: d.deposit,
                 description: d.description,
                 transferTime: d.transferTime,
+                sender: {
+                    accountNumber: sender.accountNumber,
+                },
                 receiver: {
                     accountNumber: receiver.accountNumber,
                 },
@@ -235,39 +257,38 @@ export default {
     },
 
     async getPaymentHistory(req, res) {
-
         const billings = await Billing.find();
         const array = [];
 
-        billings.forEach(function(billing) {
+        billings.forEach(function (billing) {
             const item = {
-                senderName: "My Bank",
-                receiveName: "My Bank",
+                senderName: 'My Bank',
+                receiveName: 'My Bank',
                 deposit: billing.deposit,
-                transferTime: billing.transferTime
-            }
+                transferTime: billing.transferTime,
+            };
             array.push(item);
-          });
-        
-          billings.forEach(function(billing) {
-            const item = {
-                senderName: "My Bank",
-                receiveName: "Another Bank",
-                deposit: billing.deposit,
-                transferTime: billing.transferTime
-            }
-            array.push(item);
-          });
+        });
 
-          billings.forEach(function(billing) {
+        billings.forEach(function (billing) {
             const item = {
-                senderName: "Another Bank",
-                receiveName: "My bank",
+                senderName: 'My Bank',
+                receiveName: 'Another Bank',
                 deposit: billing.deposit,
-                transferTime: billing.transferTime
-            }
+                transferTime: billing.transferTime,
+            };
             array.push(item);
-          });
+        });
+
+        billings.forEach(function (billing) {
+            const item = {
+                senderName: 'Another Bank',
+                receiveName: 'My bank',
+                deposit: billing.deposit,
+                transferTime: billing.transferTime,
+            };
+            array.push(item);
+        });
 
         return res.status(200).json(array);
     },
