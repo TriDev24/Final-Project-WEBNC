@@ -5,7 +5,7 @@ const schema = {
     accountNumber: String,
     overBalance: Number,
     isPayment: Boolean,
-    identityId: { type: mongoose.Types.ObjectId },
+    identityId: { type: mongoose.Types.ObjectId, ref: 'Identities' },
     bankTypeId: { type: mongoose.Types.ObjectId, ref: 'Bank-Types' },
     isLocked: { type: Boolean, default: false },
 };
