@@ -53,7 +53,7 @@ export const App = () => {
 
   useEffect(() => {
     setLoadingStatus(false);
-    fetchToken();
+    
     const timeId = setInterval(() => {
       fetchToken();
     }, 50 * 1000);

@@ -6,6 +6,36 @@ import {
   SET_TRANSFER_METHODS,
 } from "./constants.js";
 
+const fetchToken = async () => {
+  const url = window.location.protocol + "//" + window.location.host + "/login";
+  const refreshToken = localStorage.getItem("refreshToken");
+  if (refreshToken) {
+    const data = JSON.stringify({
+      refreshToken,
+    });
+    const result = await fetch(
+      `${process.env.REACT_APP_IDENTITY_API_URL_PATH}/refresh-token`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: data,
+      }
+    )
+      .then((response) => response.json())
+      .then((data) => data);
+    if (result.accessToken) {
+      localStorage.setItem("accessToken", result.accessToken);
+    } else {
+      localStorage.clear();
+      window.location.replace(url);
+    }
+  }
+};
+
+fetchToken();
+
 const initState = {
   profile: JSON.parse(localStorage.getItem("profile")),
   isAuth: localStorage.getItem("accessToken"),

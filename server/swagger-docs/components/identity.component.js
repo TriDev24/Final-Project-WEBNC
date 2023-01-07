@@ -70,4 +70,39 @@ export default {
       },
     },
   },
+  IdentityOutputLogin:{
+    type: "object",
+    properties: {
+      email: {
+        type: "string",
+        description: "Email của tài khoản",
+        example: "trantai@chantellegribbon.com",
+      },
+      firstName: {
+        type: "string",
+        description: "Tên",
+        example: "Tài",
+      },
+      lastName: {
+        type: "string",
+        description: "Tên",
+        example: "Trần",
+      },
+      phoneNumber: {
+        type: "string",
+        description: "Số điện thoại",
+        example: "0793677776",
+      },
+      aliasName: {
+        type: "string",
+        description: "Tên gợi nhớ",
+        example: "Trần Tài",
+      },
+      role:{
+        type:"string",
+        description: "Role của tài khoản",
+        example: "customer",
+      }
+    },
+  }
 };

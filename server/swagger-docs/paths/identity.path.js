@@ -183,4 +183,46 @@ export default {
       },
     },
   },
+  "/identities/login":{
+    post: {
+      tags: ["Identity API"],
+      description: "Đăng nhập tài khoản",
+      operationId: "login",
+      requestBody: {
+        description: "Thông tin đăng nhập",
+        content: {
+          "application/json": {
+            schema: {
+              type:"object",
+              properties:{
+                email:{
+                  type:"string",
+                  example:"trantai@chantellegribbon.com"
+                }, password:{
+                  type:"string",
+                  example:"12345678"
+                }, g_token:{
+                  type:"string",
+                  example:"09AJ4Tk-4NMFhY0RP54Tr_ujIGv_bWjxIJKx1vOr8GK5Uf-VvHlzC2gRKuPAi7-2aTFnMqmHUGl47XMLGzWPCNxphJ-orPY-TFOVk"
+                }
+              }
+            },
+          },
+        },
+        required: true,
+      },
+      responses: {
+        200: {
+          description: "Đăng nhập thành công",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#components/schemas/IdentityOutputLogin",
+              },
+            },
+          },
+        },
+      },
+    },
+  }
 };
