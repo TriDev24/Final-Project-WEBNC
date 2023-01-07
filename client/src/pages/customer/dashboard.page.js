@@ -80,6 +80,8 @@ export const CustomerDashBoardPage = () => {
         })
             .then(() => {
                 message.success('Thêm người nhận thành công');
+                addReceiverForm.resetFields();
+                getReceivers();
             })
             .catch(() => {
                 message.error('Thêm người nhận thất bại');
@@ -642,7 +644,7 @@ export const CustomerDashBoardPage = () => {
                         }
 
                         moneyTransferForm.resetFields();
-                        setOtp('');
+                        setOtp([]);
                     },
                 });
             })
@@ -695,6 +697,7 @@ export const CustomerDashBoardPage = () => {
                 <OTPInput
                     autoFocus
                     length={4}
+                    value={otp}
                     onChangeOTP={(value) => {
                         setOtp(value);
                     }}
