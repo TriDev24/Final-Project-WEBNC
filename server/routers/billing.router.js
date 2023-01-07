@@ -12,6 +12,12 @@ router.get(
     controller.getPaymentAccountHistory
 );
 
+router.get(
+    '/payment-history',
+    auth(['admin']),
+    controller.getPaymentHistory
+);
+
 router.post('/', auth(['customer']), controller.create);
 
 router.post('/:id/verify-otp', auth(['customer']), controller.verifyOtp);

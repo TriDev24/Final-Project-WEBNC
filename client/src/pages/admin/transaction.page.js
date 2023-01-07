@@ -11,40 +11,42 @@ const FlexLayout = styled.div`
 `;
 
 export const TransactionPage = () => {
-    const [listEmployee, setListEmployee] = useState(null);
+    const [listBilling, setListBilling] = useState(null);
 
     const historyColumns = useMemo(
         () => [
             {
                 title: 'Ngân hàng gửi',
-                dataIndex: 'email',
-                key: 'email',
+                dataIndex: 'senderName',
+                key: 'senderName',
             },
             {
                 title: 'Ngân hàng nhận',
-                dataIndex: 'firstName',
-                key: 'firstName',
+                dataIndex: 'receiveName',
+                key: 'receiveName',
             },
             {
                 title: 'Tổng số tiền',
-                dataIndex: 'lastName',
-                key: 'lastName',
+                dataIndex: 'deposit',
+                key: 'deposit',
             },
             {
                 title: 'Thời điểm giao dịch',
-                dataIndex: 'phoneNumber',
-                key: 'phoneNumber',
+                dataIndex: 'transferTime',
+                key: 'transferTime',
+                render: (transferTime) =>
+                    new Date(parseInt(transferTime)).toLocaleString(),
             },
         ],
         []
     );
 
     useEffect(() => {
-        getListEmployee();
+        getListBilling();
     }, []);
 
-    const getListEmployee = useCallback(() => {
-        const url = `${process.env.REACT_APP_USER_API_URL_PATH}?role=employee`;
+    const getListBilling = useCallback(() => {
+        const url = `${process.env.REACT_APP_BILLING_API_URL_PATH}/payment-history`;
         fetch(url, {
             method: 'GET',
             headers: {
@@ -53,24 +55,24 @@ export const TransactionPage = () => {
             },
         })
             .then((response) => response.json())
-            .then((data) => setListEmployee(data));
+            .then((data) => setListBilling(data));
     }, []);
 
-    const renderListEmployee = () => {
-        if (!listEmployee) {
+    const renderListBilling = () => {
+        if (!listBilling) {
             return <Skeleton />;
         } else {
             // Danh sách nhân viên
             // const receiveBillings = paymentAccountHistory.filter(
             //     (p) => p.type === 'receive'
             // );
-            const mappedListEmployee = listEmployee.map((r, index) => {
+            const mappedListBilling = listBilling.map((r, index) => {
                 return {
                     key: index,
-                    email: r.email,
-                    firstName: r.firstName,
-                    lastName: r.lastName,
-                    phoneNumber: r.phoneNumber,
+                    senderName: r.senderName,
+                    receiveName: r.receiveName,
+                    deposit: r.deposit,
+                    transferTime: r.transferTime,
                 };
             });
 
@@ -83,7 +85,7 @@ export const TransactionPage = () => {
                     </p>
                     <Table
                         columns={historyColumns}
-                        dataSource={mappedListEmployee}
+                        dataSource={mappedListBilling}
                     />
                 </>
             );
@@ -98,7 +100,7 @@ export const TransactionPage = () => {
                 <FlexLayout>
                     <Title level={2}>Danh sách giao dịch các ngân hàng</Title>
                 </FlexLayout>
-                {renderListEmployee()}
+                {renderListBilling()}
             </ListEmployee>
         </ContentLayout>
     );
