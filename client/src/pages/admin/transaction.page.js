@@ -1,9 +1,12 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
-import { Button, Checkbox, message, Modal, Skeleton, Table, Select, DatePicker } from 'antd';
+import { Button, Checkbox, message, Modal, Skeleton, Table, Select, DatePicker, Image } from 'antd';
 import styled from '@xstyled/styled-components';
 import Title from 'antd/es/typography/Title.js';
 import { CreateEmployeeForm } from '../../components/create-employee-form.component.js';
 import ContentLayout from '../../components/common/content-layout.component.js';
+import { QrcodeOutlined } from '@ant-design/icons';
+
+
 
 const FlexLayout = styled.div`
     display: flex;
@@ -53,6 +56,16 @@ export const TransactionPage = () => {
                 key: 'transferTime',
                 render: (transferTime) =>
                     new Date(parseInt(transferTime)).toLocaleString(),
+            },
+            {
+                title: 'QR code',
+                dataIndex: 'qrCode',
+                key: 'qrCode',
+                render: function(qrCode) {
+                    return (
+                        <img src= {qrCode} width="100px" height="100px" />
+                    );
+                  }
             },
         ],
         []
@@ -112,7 +125,7 @@ export const TransactionPage = () => {
             placeholder="Select a type"
             optionFilterProp="children"
             style={{
-                width: 160,
+                width: 200,
               }}
             onChange={onChange}
             onSearch={onSearch}
@@ -129,8 +142,8 @@ export const TransactionPage = () => {
                 label: 'Nội bộ',
             },
             {
-                value: 'Another Bank',
-                label: 'Liên ngân hàng',
+                value: 'Ngân hàng Thương Mại',
+                label: 'Ngân hàng Thương Mại',
             }
             ]}
         />
@@ -167,6 +180,7 @@ export const TransactionPage = () => {
                     receiveName: r.receiveName,
                     deposit: r.deposit,
                     transferTime: r.transferTime,
+                    qrCode: r.qrCode
                 };
             });
 

@@ -12,6 +12,8 @@ import fetch from 'node-fetch';
 import { ObjectId, UUID } from 'bson';
 import Permission from '../models/permission.model.js';
 
+import QRCode from 'qrcode';
+
 export default {
     async getHistory(req, res) {
         const { bankAccountId } = req.query;
@@ -239,32 +241,51 @@ export default {
         const billings = await Billing.find();
         const array = [];
 
-        billings.forEach(function(billing) {
+        console.log("test");
+        const sign ="eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzZW5kZXJBY2NvdW50TnVtYmVyIjoiMTIzNDU2IiwicmVjZWl2ZXJBY2NvdW50TnVtYmVyIjoiMjQzMjc1IiwiZGVwb3NpdCI6MjAwMCwidHJhbnNmZXJUaW1lIjoiMTY3MzA2NTA1NyIsImlhdCI6MTY3MzA2NjUzOX0.ASBgfzM3ZAVAUKx__GEKOdOJuaOjSRlMKtpH64jEjFszH7jmrQ0l3Sz_F5WGT-ESwfFxv_6OOSN-MIlJZuxMh8ePxbjqeEpB-ZwFSjITd3B6miMxbp7g_Ka4A8vmv8i6-W7KRAkcF41AlxaPfC7_8y4tDx0usQefg_k5tYe2NEk"
+        let qrcode = await QRCode.toDataURL(sign);
+
+        
+
+        billings.forEach(async function(billing) {
+            if (billing.signature){
+                qrcode = await QRCode.toDataURL(billing.signature);
+            }
             const item = {
                 senderName: "My Bank",
                 receiveName: "My Bank",
                 deposit: billing.deposit,
-                transferTime: billing.transferTime
+                transferTime: billing.transferTime,
+                qrCode: qrcode
             }
             array.push(item);
           });
         
-          billings.forEach(function(billing) {
+          billings.forEach( async function(billing) {
+
+            if (billing.signature){
+                qrcode = await QRCode.toDataURL(billing.signature);
+            }
             const item = {
                 senderName: "My Bank",
-                receiveName: "Another Bank",
+                receiveName: "Ngân hàng Thương Mại",
                 deposit: billing.deposit,
-                transferTime: billing.transferTime
+                transferTime: billing.transferTime,
+                qrCode: qrcode
             }
             array.push(item);
           });
 
-          billings.forEach(function(billing) {
+          billings.forEach(async function(billing) {
+            if (billing.signature){
+                qrcode = await QRCode.toDataURL(billing.signature);
+            }
             const item = {
-                senderName: "Another Bank",
+                senderName: "Ngân hàng Thương Mại",
                 receiveName: "My bank",
                 deposit: billing.deposit,
-                transferTime: billing.transferTime
+                transferTime: billing.transferTime,
+                qrCode: qrcode
             }
             array.push(item);
           });

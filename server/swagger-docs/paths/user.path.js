@@ -39,10 +39,10 @@ export default {
       },
     },
     "/user/{id}": {
-      delete: {
+      get: {
         tags: ["User API"],
-        description: "Xóa thông báo",
-        operationId: "deleteNotify",
+        description: "Lấy thông tin chi tiết user",
+        operationId: "getUserDetail",
         parameters: [
           {
             name: "id",
@@ -51,7 +51,7 @@ export default {
               type: "string",
             },
             required: true,
-            description: "Id thông báo",
+            description: "Id user",
             example: "63b3d2a6d6026c3974342879",
           },
         ],
@@ -61,18 +61,13 @@ export default {
           },
         ],
         responses: {
-          204: {
-            description: "Xóa thành công",
+          200: {
+            description: "Lấy thông tin chi tiết user thành công",
             content: {
               "application/json": {
                 schema: {
                   type: "object",
-                  properties: {
-                    message: {
-                      type: "string",
-                      example: "Xóa thành công!",
-                    },
-                  },
+                  $ref: "#components/schemas/User"
                 },
               },
             },
