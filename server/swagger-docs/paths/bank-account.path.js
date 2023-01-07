@@ -263,7 +263,7 @@ export default {
             },
         }
     },
-    '/by-account-number-and-bank-type': {
+    '/bank-accounts/by-account-number-and-bank-type': {
         get: {
             tags: ['Bank Account API'],
             description: 'Lấy thông tin tài khoản và thông tin ngân hàng',
@@ -318,7 +318,7 @@ export default {
             },
         }
     },
-    '/payment-transaction': {
+    '/bank-accounts/payment-transaction': {
         post: {
             tags: ['Bank Account API'],
             description: 'Chuyển tiền',
