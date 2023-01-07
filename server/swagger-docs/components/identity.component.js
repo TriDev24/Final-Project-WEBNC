@@ -104,5 +104,77 @@ export default {
         example: "customer",
       }
     },
-  }
+  },
+  
+  IdentityCreateEmployee: {
+    type: "object",
+    properties: {
+      email: {
+        type: "string",
+        description: "Email của nhân viên",
+        example: "employee@gmail.com",
+      },
+      password: {
+        type: "string",
+        description: "Mật khẩu của nhân viên",
+        example: "12345678",
+      },
+      firstName: {
+        type: "string",
+        description: "Tên",
+        example: "Tài",
+      },
+      lastName: {
+        type: "string",
+        description: "Tên",
+        example: "Trần",
+      },
+      phoneNumber: {
+        type: "string",
+        description: "Số điện thoại",
+        example: "079158632111",
+      },
+      aliasName: {
+        type: "string",
+        description: "Tên gợi nhớ",
+        example: "Trần Tài",
+      },
+    },
+  },
+
+  IdentityInputCreateEmployee: {
+    type: "object",
+    properties: {
+      email: {
+        type: "string",
+        description: "Email của nhân viên",
+        example: "employee@gmail.com",
+      },
+      password: {
+        type: "string",
+        description: "Mật khẩu của nhân viên",
+        example: "12345678",
+      },
+      firstName: {
+        type: "string",
+        description: "Tên",
+        example: "Tài",
+      },
+      lastName: {
+        type: "string",
+        description: "Tên",
+        example: "Trần",
+      },
+      phoneNumber: {
+        type: "string",
+        description: "Số điện thoại",
+        example: "079158632111",
+      },
+      aliasName: {
+        type: "string",
+        description: "Tên gợi nhớ",
+        example: "Trần Tài",
+      },
+    },
+  },
 };
