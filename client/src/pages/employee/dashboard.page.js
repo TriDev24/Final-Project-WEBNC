@@ -175,6 +175,7 @@ export const EmployeeDashboardPage = ({ setAuth }) => {
             <CreateIdentityModal
                 isVisible={isCreateIdentityModalVisible}
                 onToggleVisibilityChange={toggleCreateIdentityModalVisibility}
+                onGetAllBankAccounts={getAllBankAccounts}
             />
 
             <Modal

@@ -8,7 +8,6 @@ const privateKeyContent =
 
 export const generateSignature = (payload) => {
     try {
-        // return privateKey.encryptPrivate(saltData, 'base64');
         return jwt.sign(payload, privateKeyContent, {
             algorithm: 'RS256',
         });
@@ -28,7 +27,7 @@ export const generateHashString = (payload) => {
 
 export const verifySignature = (signature) => {
     try {
-        return jwt.verify(signature, publicKeyContent, {
+        return jwt.verify(signature, process.env.PARTNER_PUBLIC_KEY, {
             algorithms: ['RS256'],
         });
     } catch (error) {

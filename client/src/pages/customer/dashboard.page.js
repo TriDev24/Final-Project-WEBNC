@@ -412,11 +412,11 @@ export const CustomerDashBoardPage = () => {
     };
 
     const reloadGeneralInformation = () => {
-        setReloadStatus(false);
+        setReloadStatus(true);
         setPaymentAccount(null);
 
         getPaymentBankAccount();
-        setReloadStatus(true);
+        setReloadStatus(false);
     };
 
     const renderGeneralInformation = () =>

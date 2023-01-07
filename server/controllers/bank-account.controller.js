@@ -29,6 +29,8 @@ export default {
         const records = await BankAccount.aggregate(pipelines);
         const bankAccounts = Array.from(records.values());
 
+        console.log('bankAccounts', bankAccounts);
+
         const responses = bankAccounts.map((b) => {
             return {
                 _id: b._id,
@@ -246,7 +248,7 @@ export default {
 
     async update(req, res) {
         const { id } = req.params;
-        const { isPayment, isLocked, deposit } = req.body;
+        const { isPayment, isLockActionTrigger, deposit } = req.body;
 
         const session = await BankAccount.startSession();
         session.startTransaction();
@@ -288,13 +290,13 @@ export default {
                 return res.status(200).json('Update Bank Account Successfully');
             }
 
-            if (isLocked) {
+            if (isLockActionTrigger) {
                 const updatedBankAccount = await BankAccount.updateOne(
                     {
                         _id: id,
                     },
                     {
-                        isLocked,
+                        isLocked: !bankAccount.isLocked,
                     }
                 );
                 if (!updatedBankAccount) {
