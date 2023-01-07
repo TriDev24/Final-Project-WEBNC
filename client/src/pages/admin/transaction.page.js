@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
-import { Button, Checkbox, message, Modal, Skeleton, Table, Select } from 'antd';
+import { Button, Checkbox, message, Modal, Skeleton, Table, Select, DatePicker } from 'antd';
 import styled from '@xstyled/styled-components';
 import Title from 'antd/es/typography/Title.js';
 import { CreateEmployeeForm } from '../../components/create-employee-form.component.js';
@@ -10,9 +10,25 @@ const FlexLayout = styled.div`
     justify-content: space-between;
 `;
 
+
+
 export const TransactionPage = () => {
     const [listBilling, setListBilling] = useState(null);
     const [listBillingAll, setListBillingAll] = useState(null);
+
+    const { RangePicker } = DatePicker;
+
+    function onChangeTime(value, dateString) {
+        const listBillingFilter = listBillingAll.filter(
+            (p) => p.transferTime >= value[0] && p.transferTime <= value[1]
+        );
+        console.log({listBillingFilter});
+        setListBilling(listBillingFilter);        
+      };
+
+      function onOk(value) {
+        console.log('onOk: ', value);
+      };
 
     const historyColumns = useMemo(
         () => [
@@ -122,6 +138,20 @@ export const TransactionPage = () => {
         );
     };
 
+    const renderListFilterTime = () => {
+        return (
+            <div>
+                <RangePicker
+                showTime={{ format: 'HH:mm' }}
+                format="YYYY-MM-DD HH:mm"
+                placeholder={['Start Time', 'End Time']}
+                onChange={onChangeTime}
+                onOk={onOk}
+                />
+            </div>
+        );
+    };
+
     const renderListBilling = () => {
         if (!listBilling) {
             return <Skeleton />;
@@ -165,6 +195,11 @@ export const TransactionPage = () => {
                     <Title level={3}>Lựa chọn xem giao dịch</Title>
                 </FlexLayout>
                 {renderListFilter()}
+
+                <FlexLayout>
+                    <Title level={3}>Lựa chọn thời gian giao dịch</Title>
+                </FlexLayout>
+                {renderListFilterTime()}
                 
                 <FlexLayout>
                     <Title level={2}>Danh sách giao dịch các ngân hàng</Title>
