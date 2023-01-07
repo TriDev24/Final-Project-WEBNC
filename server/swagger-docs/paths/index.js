@@ -3,11 +3,17 @@ import identityPath from "./identity.path.js"
 import debtorPath from "./debtor.path.js";
 import notifyPath from "./notify.path.js";
 import userPath from "./user.path.js";
+import transferMethodPath from "./transfer-method.js"
+import bankTypePath from "./bank-type.js";
+import receiverPath from "./receiver.js"
 
 export default {
   ...debitPath,
   ...identityPath,
   ...debtorPath,
   ...notifyPath,
-  ...userPath
+  ...userPath,
+  ...transferMethodPath,
+  ...bankTypePath,
+  ...receiverPath
 };

@@ -93,7 +93,7 @@ export default {
     },
     async update(req, res) {
         const { id } = req.params;
-        const { receiverName } = req.body;
+        const { aliasName } = req.body;
 
         const receiver = await Receiver.findById(id);
         if (!receiver) {
@@ -107,7 +107,7 @@ export default {
                 _id: id,
             },
             {
-                receiverName,
+                aliasName,
             }
         );
         if (!updatedReceiver) {
