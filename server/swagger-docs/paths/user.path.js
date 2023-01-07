@@ -75,5 +75,36 @@ export default {
         },
       },
     },
+    "/user/{id}": {
+      patch: {
+        tags: ["User API"],
+        description: "Cập nhật thông tin user",
+        operationId: "updateUser",
+        requestBody: {
+          description: "Thông tin user",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#components/schemas/User",
+              },
+            },
+          },
+          required: true,
+        },
+        security: [
+          {
+            Authorization: [],
+          },
+        ],
+        responses: {
+          200: {
+            description: "Cập nhật thông tin user thành công",
+          },
+          404: {
+            description: "Không tìm thấy người dùng",
+          },
+        },
+      },
+    },
   };
   
