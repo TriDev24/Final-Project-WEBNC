@@ -56,9 +56,16 @@ export const BankAccountItem = ({
             body: JSON.stringify(payload),
         })
             .then(() => {
-                message.success('Khoá tài khoản thành công');
                 setLockStatus(!bankAccount.isLocked);
                 onGetBankAccounts();
+
+                if (bankAccount.isLocked === true) {
+                    message.success('Mở khoá tài khoản thành công');
+                    return;
+                } else {
+                    message.success('Khoá tài khoản thành công');
+                    return;
+                }
             })
             .catch((error) => {
                 message.error('Khoá tài khoản thất bại');
