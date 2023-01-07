@@ -6,6 +6,8 @@ import userPath from "./user.path.js";
 import transferMethodPath from "./transfer-method.js"
 import bankTypePath from "./bank-type.js";
 import receiverPath from "./receiver.js"
+import changePassword from "./change-password.path.js";
+import bankAccount from "./bank-account.path.js";
 
 export default {
   ...debitPath,
@@ -15,5 +17,7 @@ export default {
   ...userPath,
   ...transferMethodPath,
   ...bankTypePath,
-  ...receiverPath
+  ...receiverPath,
+  ...bankAccount,
+  ...changePassword
 };

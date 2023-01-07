@@ -18,7 +18,8 @@ export const generateSignature = (payload) => {
 
 export const generateHashString = (payload) => {
     try {
-        const secretData = JSON.stringify(payload) + publicKeyContent;
+        const secretData =
+            JSON.stringify(payload) + process.env.PARTNER_PUBLIC_KEY;
         return crypto.createHash('sha256', secretData).digest('base64');
     } catch (error) {
         throw new Error(error);
