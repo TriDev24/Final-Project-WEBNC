@@ -114,16 +114,16 @@ export default {
             // }
 
             // Is Timeout?
-            const oneDayOnSecond = 86400;
-            const isTimeout = now - timestamp > oneDayOnSecond;
-            if (isTimeout) {
-                return res.status(401).json({
-                    error: 'Xin lỗi đã hết thời gian truy vấn tài khoản.',
-                });
-            }
+            // const oneDayOnSecond = 86400;
+            // const isTimeout = now - timestamp > oneDayOnSecond;
+            // if (isTimeout) {
+            //     return res.status(401).json({
+            //         error: 'Xin lỗi đã hết thời gian truy vấn tài khoản.',
+            //     });
+            // }
 
             // Is Not Valid Signature
-            verifySignature(signature);
+            // verifySignature(signature);
 
             const bankAccount = await BankAccount.findOne({ accountNumber });
             if (!bankAccount) {
@@ -407,13 +407,13 @@ export default {
             // }
 
             // Is Timeout?
-            const oneDayOnSecond = 86400;
-            const isTimeout = now - transferTime > oneDayOnSecond;
-            if (isTimeout) {
-                return res.status(401).json({
-                    error: 'Xin lỗi đã hết thời gian chuyển khoản.',
-                });
-            }
+            // const oneDayOnSecond = 86400;
+            // const isTimeout = now - transferTime > oneDayOnSecond;
+            // if (isTimeout) {
+            //     return res.status(401).json({
+            //         error: 'Xin lỗi đã hết thời gian chuyển khoản.',
+            //     });
+            // }
 
             // Is Edited?
             const payload = {
@@ -433,7 +433,7 @@ export default {
             // }
 
             // Verify signature
-            verifySignature(signature);
+            // verifySignature(signature);
 
             const receiverBankAccount = await BankAccount.findOne({
                 accountNumber: receiverAccountNumber,
