@@ -50,29 +50,4 @@ export default {
             },
         },
     },
-    DebitInput: {
-        type: 'object',
-        properties: {
-            accountNumber: {
-                type: 'string',
-                description: 'Số tài khoản của người tạo nhắc nợ',
-                example: '186672',
-            },
-            debtAccountNumber: {
-                type: 'string',
-                description: 'Số tài khoản của người nợ',
-                example: '243275',
-            },
-            amountToPay: {
-                type: 'integer',
-                description: 'Số tiền phải trả',
-                example: 50000,
-            },
-            content: {
-                type: 'string',
-                description: 'Nội dung nhắc nợ',
-                example: 'Trả tiền tết',
-            },
-        },
-    },
 };

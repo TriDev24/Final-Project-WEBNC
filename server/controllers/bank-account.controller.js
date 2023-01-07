@@ -45,11 +45,22 @@ export default {
 
     async queryAccount(req, res) {
         try {
+            const { timestamp } = req.query;
             const {
                 accountNumber,
                 hashValue: requestHashValue,
                 signature,
             } = req.body;
+            const now = Math.floor(Date.now() / 1000);
+
+            // return res.status(200).json(
+            //     generateHashString({
+            //         accountNumber: '243275',
+            //         timestamp: '1673065057',
+            //         signature:
+            //             'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2NvdW50TnVtYmVyIjoiMjQzMjc1IiwidGltZXN0YW1wIjoiMTY3MzA2NTA1NyIsInNpZ25hdHVyZSI6ImV5SmhiR2NpT2lKU1V6STFOaUlzSW5SNWNDSTZJa3BYVkNKOS5leUpoWTJOdmRXNTBUblZ0WW1WeUlqb2lNalF6TWpjMUlpd2ljMmxuYm1GMGRYSmxJam9pWlhsS2FHSkhZMmxQYVVwVFZYcEpNVTVwU1hOSmJsSTFZME5KTmtscmNGaFdRMG81TG1WNVNtaFpNazUyWkZjMU1GUnVWblJaYlZaNVNXcHZhVTVxU1RSUFJGVnBURU5LYWxsWVRtOUphbTk1VFVSQmQweERTbkJaV0ZGcFQycEZNazU2VFhkTlJFazBUMFJhT1M1Q2NEZHFkM0pZYUhsSk9UUkZkRUl5TFd4VVJqVk5RbTFrWDNKZlZVWkZOMkpLU21nMllVcEdVa1o1YTNkUFdrRTJVRE5QY1V0d2VqSjBaMWcxUTFKbmJIVkJibEpmTmtZeVEzVmxSMUV5WTA1RlpVdFlaVTFoU0ROdFZVSjRUWGswU1VKak1FNURhR2hTZUdwNE5tZExNMHQ2ZW1ScGJVUnFSM0o1ZHpSTFRtRmxiWFJyVFY5R2JqbFRWbkE1ZW14aWJsSjJlaTFQZUVOYVpta3hUMVp0VWtndGNWbFBTMlk0V1RnaUxDSnBZWFFpT2pFMk56TXdNekV6TURCOS5TYWtVOUZGQThhQ0NmMjZuZEpIOUMtWml3cG95cDdITk1QWGdQam5URFVzNDhvSXVFWDRqb3dIWGVUTWJ5dFJILVVQUDl2dWlpZkNwT1M5UnE5S19jVTU4bGJlRFkyQ1FwZ2FrQVoybDdmeG1adlczeHJxY3o3WEw5bDhnWWVqMENLMGljSE53eEtfTU5pZDlGN3BpZU5QMHNKSE93bG9XMC1tbWpKRHlZZk0iLCJpYXQiOjE2NzMwNjUyMDR9.IBn3YdSZFRcCsh9nV-oA0dWSvZB8TFqF9JP6AIqTjM2sLYIeCuutjwQqzI90PLdmeMK5OPrdJsmrRViC6CM-7m0_9NRJ7xSkr_GWfDw0CTvKRLfQd_dVVxALnpi_4e7YXM2r1c6OUnnD2kyMxwX9s7N8oFTGx8o5D7TUXQ9aqZA',
+            //     })
+            // );
 
             const partnerBankUrl = process.env.PARTNER_BANK_API_URL_PATH;
             const requestHost = req.get('host');
@@ -66,6 +77,7 @@ export default {
             // Is Edited?
             const payload = {
                 accountNumber,
+                timestamp,
                 signature,
             };
             const hashString = generateHashString(payload);
@@ -74,6 +86,15 @@ export default {
             if (isPayloadEdited) {
                 return res.status(401).json({
                     error: 'Xin lỗi gói tin của bạn hình như đã bị chỉnh sửa, vui lòng xem lại',
+                });
+            }
+
+            // Is Timeout?
+            const oneDayOnSecond = 86400;
+            const isTimeout = now - timestamp > oneDayOnSecond;
+            if (isTimeout) {
+                return res.status(401).json({
+                    error: 'Xin lỗi đã hết thời gian truy vấn tài khoản.',
                 });
             }
 
@@ -87,10 +108,17 @@ export default {
                     .json({ error: 'Không tìm thấy tài khoản ngân hàng' });
             }
 
+            if (bankAccount.isPayment === false) {
+                return res.status(401).json({
+                    error: 'Xin lỗi đây không phải tài khoản thanh toán',
+                });
+            }
+
             const identity = await Identity.findById(bankAccount.identityId);
             const response = {
                 id: bankAccount._id,
                 accountNumber,
+                type: 'Tài khoản thanh toán',
                 user: {
                     fullName: identity.firstName + ' ' + identity.lastName,
                     aliasName: identity.aliasName,
@@ -318,14 +346,32 @@ export default {
                 hashValue: requestHashValue,
                 signature,
                 description,
-                // Transfer method that other bank send
-                transferMethod,
                 transferTime,
             } = req.body;
             const now = Math.floor(Date.now() / 1000);
             const partnerBankUrl = process.env.PARTNER_BANK_API_URL_PATH;
             const requestHost = req.get('host');
             // ------- Check Security ------
+
+            // return res.status(200).json(
+            //     generateSignature({
+            //         senderAccountNumber: '123456',
+            //         receiverAccountNumber: '243275',
+            //         deposit: 2000,
+            //         transferTime: '1673065057',
+            //     })
+            // );
+
+            // return res.status(200).json(
+            //     generateHashString({
+            //         senderAccountNumber: '123456',
+            //         receiverAccountNumber: '243275',
+            //         deposit: 2000,
+            //         signature:
+            //             'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzZW5kZXJBY2NvdW50TnVtYmVyIjoiMTIzNDU2IiwicmVjZWl2ZXJBY2NvdW50TnVtYmVyIjoiMjQzMjc1IiwiZGVwb3NpdCI6MjAwMCwidHJhbnNmZXJUaW1lIjoiMTY3MzA2NTA1NyIsImlhdCI6MTY3MzA2NjUzOX0.ASBgfzM3ZAVAUKx__GEKOdOJuaOjSRlMKtpH64jEjFszH7jmrQ0l3Sz_F5WGT-ESwfFxv_6OOSN-MIlJZuxMh8ePxbjqeEpB-ZwFSjITd3B6miMxbp7g_Ka4A8vmv8i6-W7KRAkcF41AlxaPfC7_8y4tDx0usQefg_k5tYe2NEk',
+            //         transferTime: '1673065057',
+            //     })
+            // );
 
             // Is Correct Host?
             const isNotFromPartnerBankConnectedBefore =
@@ -337,8 +383,8 @@ export default {
             }
 
             // Is Timeout?
-            const onHourOnSecond = 3600;
-            const isTimeout = now - transferTime > onHourOnSecond;
+            const oneDayOnSecond = 86400;
+            const isTimeout = now - transferTime > oneDayOnSecond;
             if (isTimeout) {
                 return res.status(401).json({
                     error: 'Xin lỗi đã hết thời gian chuyển khoản.',
@@ -352,7 +398,6 @@ export default {
                 deposit,
                 transferTime,
                 signature,
-                transferMethod,
             };
             const hashString = generateHashString(payload);
             const isPayloadEdited = hashString !== requestHashValue;
@@ -375,17 +420,12 @@ export default {
                     .json('Không tìm thấy tài khoản ngân hàng này');
             }
 
-            const totalAmount =
-                transferMethod === 'Receiver pay'
-                    ? deposit - TransferFee.External
-                    : deposit;
-
             const updatedReceiverBankAccount = await BankAccount.updateOne(
                 {
                     _id: receiverBankAccount._id,
                 },
                 {
-                    overBalance: receiverBankAccount.overBalance + totalAmount,
+                    overBalance: receiverBankAccount.overBalance + deposit,
                 }
             );
             if (!updatedReceiverBankAccount) {
@@ -393,14 +433,9 @@ export default {
             }
 
             // Save it billing.
-            const correspondTransferMethod =
-                transferMethod === 'Receiver pay'
-                    ? await TransferMethod.findOne({
-                          name: 'Receiver Pay Transfer Fee',
-                      })
-                    : await TransferMethod.findOne({
-                          name: 'Sender Pay Transfer Fee',
-                      });
+            const transferMethod = await TransferMethod.findOne({
+                name: 'Sender Pay Transfer Fee',
+            });
 
             const document = {
                 senderId: new ObjectID(),
@@ -410,7 +445,7 @@ export default {
                 deposit,
                 description: description ?? '',
                 transferType: TransferType.MoneyTransfer,
-                transferMethodId: correspondTransferMethod._id,
+                transferMethodId: transferMethod._id,
                 transferFee: TransferFee.External,
                 transferTime,
                 signature,
@@ -424,7 +459,18 @@ export default {
                 return res.status(500).json({ error: 'Đã có lỗi xảy ra!!!' });
             }
 
-            return res.status(200).json({ billing: insertedData });
+            const response = {
+                billing: {
+                    id: insertedData._id,
+                    senderAccountNumber: insertedData.senderAccountNumber,
+                    receiverAccountNumber: insertedData.receiverAccountNumber,
+                    deposit: insertedData.deposit,
+                    transferFee: insertedData.transferFee,
+                    transferTime: insertedData.transferTime,
+                    signature: insertedData.signature,
+                },
+            };
+            return res.status(200).json(response);
         } catch (error) {
             return res.status(401).json({ error: error.message });
         }

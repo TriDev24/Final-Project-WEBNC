@@ -1,5 +1,5 @@
 export default {
-    BankAccount: {
+    Receiver: {
         type: 'object',
         properties: {
             _id: {
@@ -9,22 +9,22 @@ export default {
             },
             senderAccountNumber: {
                 type: 'string',
-                description: 'Số tài khoản ngân hàng',
+                description: 'Số tài khoản ngân hàng của người gửi',
                 example: '243275',
             },
             receiverAccountNumber: {
-                type: 'integer',
-                description: 'Số dư tài khoản',
-                example: 50000,
+                type: 'string',
+                description: 'Số tài khoản ngân hàng của người nhận',
+                example: '62885',
             },
             aliasName: {
-                type: 'boolean',
-                description: 'Cờ hiệu đánh dấu tài khoản thanh toán',
-                example: 'true',
+                type: 'string',
+                description: 'Tên gợi nhớ',
+                example: 'Tiến',
             },
         },
     },
-    DebitInput: {
+    ReceiverInput: {
         type: 'object',
         properties: {
             receiverAccountNumber: {
